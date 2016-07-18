@@ -1,0 +1,4 @@
+Copy to ~/.vim/syntax/lingo.vim
+Enable in vim with :set syntax=lingo
+Auto enable on .lingo file open by adding the following line ~/.vimrc
+au BufRead,BufNewFile *.lingo set syntax=lingo

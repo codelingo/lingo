@@ -1,0 +1,8 @@
+lexicons:
+- codelingo/py as p
+- codelingo/golang as go
+tenets:
+- name: first-tenet
+  doc: tenet doc string
+  comment: tenet comment
+  match: CLQL match goes here

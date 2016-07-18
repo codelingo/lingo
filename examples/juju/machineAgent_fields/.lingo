@@ -1,0 +1,12 @@
+# MachineAgent has too many fields
+lexicons:
+  - codelingo/common as _
+  - codelingo/go
+
+tenets:
+    - name: "machineagent-field-count"
+      doc: "too many fields"
+      comment: "MachineAgent should have no more than 8 fields"
+	  match:
+	    <go.type: "agent.MachineAgent"
+	      field: > 8
