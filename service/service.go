@@ -29,6 +29,10 @@ import (
 )
 
 const (
+	// grpcAddr = "localhost:8002"
+	// remote   = "origin"
+
+	remote   = "codelingo"
 	grpcAddr = "codelingo.io:8002"
 )
 
@@ -83,11 +87,11 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 		if err := cmd.Run(); err != nil {
 			return nil, err
 		}
-		req.SHA = string(b.Bytes())
+		req.SHA = strings.TrimSpace(string(b.Bytes()))
 	}
 
 	// sync local and remote before reviewing
-	cmd := exec.Command("git", "push", "codelingo", "HEAD")
+	cmd := exec.Command("git", "push", remote, "HEAD")
 	if err := cmd.Run(); err != nil {
 		return nil, err
 	}
