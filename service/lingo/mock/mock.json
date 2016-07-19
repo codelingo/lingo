@@ -1,0 +1,127 @@
+{
+    "lingo": {
+        "lexicons": [{
+            "name": "codelingo/common",
+            "facts": [{
+                "name": "func",
+                "nodeprops": {
+                    "name": "NewReallyLongNamedFunc",
+                    "length": 10
+                },
+                "nodeedges": {
+                    "fileedge": {
+                        "Filename": "machine.go",
+                        "StartLine": 274,
+                        "EndLine": 301
+                    }
+                }
+            }, {
+                "name": "var",
+                "nodeprops": {
+                    "name": "nameofvar",
+                    "length": 10
+                },
+                "nodeedges": {
+                    "fileedge": {
+                        "Filename": "machine.go",
+                        "StartLine": 274,
+                        "EndLine": 301
+                    }
+                }
+            }]
+        }]
+    },
+    "mock": {
+        "lexicons": [{
+            "name": "codelingo/common",
+            "facts": [{
+                "name": "func",
+                "nodeuuid": 0,
+                "nodeprops": {
+                    "name": "NewReallyLongNamedFunc",
+                    "length": 10
+                },
+                "nodeedges": {
+                    "file-edge": {
+                        "ParentId": -1,
+                        "Filename": "mock.go",
+                        "StartLine": 10,
+                        "EndLine": 20
+                    },
+                    "common-ast-edge": {
+                        "ParentId": -1
+                    }
+                }
+            }, {
+                "name": "var",
+                "nodeuuid": 1,
+                "nodeprops": {
+                    "name": "nameofvar",
+                    "length": 10
+                },
+                "nodeedges": {
+                    "file-edge": {
+                        "ParentId": 0,
+                        "Filename": "mock.go",
+                        "StartLine": 15,
+                        "EndLine":  25
+                    },
+                    "common-ast-edge": {
+                        "ParentId": 0
+                    }
+                }
+            }]
+        }]
+    },
+    "query": {
+        "lexicons": [{
+            "name": "codelingo/common",
+            "facts": [{
+                "name": "func",
+                "nodeprops": {
+                    "name": "NewReallyLongNamedFunc",
+                    "length": 10
+                },
+                "nodeedges": {
+                    "fileedge": {
+                        "Filename": "query.go",
+                        "StartLine": 10,
+                        "EndLine": 20
+                    }
+                }
+            }, {
+                "name": "var",
+                "nodeprops": {
+                    "name": "nameofvar",
+                    "length": 10
+                },
+                "nodeedges": {
+                    "fileedge": {
+                        "Filename": "query.go",
+                        "StartLine": 15,
+                        "EndLine":  25
+                    }
+                }
+            }]
+        }]
+    },
+    "simple": {
+        "lexicons": [{
+            "name": "codelingo/common",
+            "facts": [{
+                "name": "func",
+                "nodeprops": {
+                    "name": "NewReallyLongNamedFunc",
+                    "length": 10
+                },
+                "nodeedges": {
+                    "fileedge": {
+                        "Filename": "simple.go",
+                        "StartLine": 3,
+                        "EndLine": 5
+                    }
+                }
+            }]
+        }]
+    }
+}

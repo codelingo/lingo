@@ -1,0 +1,53 @@
+{
+	"lingo": [{
+		"Comment": "abc comment",
+		"Filename":"main.go",
+		"Start": 3,
+		"End": 10
+	}],
+	"machineAgent_fields": [{
+		"Comment": "MachineAgent should have no more than 8 fields",
+		"Filename":"machine.go",
+		"Start": 274,
+		"End": 301
+	}],
+	"ec2": [{
+		"Comment": "ec2 instance m4.4xlarge is missing",
+		"Filename":"instancetype.go",
+		"Start": 33,
+		"End": 50
+	},{
+		"Comment": "ec2 instance z4.large cannot be found on AWS",
+		"Filename":"instancetype.go",
+		"Start": 72,
+		"End": 79
+	},{
+		"Comment": "c1.medium's data is incorrect. Correct data: Name:c1.medium, Arches:amd64, CpuCores:2, CpuPower:instances.CpuPower(500), Mem:1740, VirtType:&paravirtual",
+		"Filename":"instancetype.go",
+		"Start": 133,
+		"End": 140
+	}],
+	"unitassigner": [{
+		"Comment": "please make these external tests",
+		"Filename":"unitassigner_test.go",
+		"Start": 3,
+		"End": 4
+	}],
+	"vcs": [{
+		"Comment": "The arg list to this func is getting quite long. It should instead take one set of options.",
+		"Filename":"jujuman.py",
+		"Start": 35,
+		"End": 49
+	}],
+	"func": [{
+		"Comment": "Func name should not be foo",
+		"Filename":"example.go",
+		"Start": 7,
+		"End": 7
+	},{
+		"Comment": "Func name should not be foo",
+		"Filename":"example.py",
+		"Start": 4,
+		"End": 6
+	}]
+}

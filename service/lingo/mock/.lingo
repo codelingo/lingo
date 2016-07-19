@@ -1,0 +1,10 @@
+lexicons:
+  - codelingo/common as _
+
+tenets:
+  - name: incorrect
+    doc: "some doc"
+    comment: "this is the comment"
+    match:
+      <func:
+        name: "NewReallyLongNamedFunc"
