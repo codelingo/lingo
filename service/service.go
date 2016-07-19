@@ -28,6 +28,10 @@ import (
 	"github.com/codelingo/lingo/service/server"
 )
 
+const (
+	grpcAddr = "codelingo.io:8002"
+)
+
 type client struct {
 	context.Context
 	log.Logger
@@ -103,7 +107,7 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 // NewClient returns a QueryService that's backed by the provided Endpoints
 func New() (server.CodeLingoService, error) {
 	var (
-		grpcAddrs = flag.String("grpc.addrs", "localhost:8002", "Comma-separated list of addresses for gRPC servers")
+		grpcAddrs = flag.String("grpc.addrs", grpcAddr, "Comma-separated list of addresses for gRPC servers")
 
 		// Three OpenTracing backends (to demonstrate how they can be interchanged):
 		zipkinAddr           = flag.String("zipkin.kafka.addr", "", "Enable Zipkin tracing via a Kafka Collector host:port")
