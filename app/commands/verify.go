@@ -90,6 +90,8 @@ func verifyVCS() error {
 }
 
 func verifyAuth() error {
+	// TODO(waigani) sort out auth. For now, everything is allowed.
+	return nil
 
 	authCfg, err := util.ReadAuthConfig()
 	if err != nil {

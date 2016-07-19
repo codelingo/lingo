@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/fatih/color"
 	"github.com/waigani/diffparser"
 )
@@ -44,7 +45,7 @@ var editor string
 
 // confirm returns true if the issue should be kept or false if it should be
 // dropped.
-func (c IssueConfirmer) Confirm(attempt int, issue *Issue) bool {
+func (c IssueConfirmer) Confirm(attempt int, issue *codelingo.Issue) bool {
 	if c.keepAll {
 		return true
 	}
@@ -119,7 +120,7 @@ func (c IssueConfirmer) Confirm(attempt int, issue *Issue) bool {
 	return true
 }
 
-func (c *IssueConfirmer) FormatPlainText(issue *Issue) string {
+func (c *IssueConfirmer) FormatPlainText(issue *codelingo.Issue) string {
 	m := color.New(color.FgWhite, color.Faint).SprintfFunc()
 	y := color.New(color.FgYellow).SprintfFunc()
 	yf := color.New(color.FgYellow, color.Faint).SprintfFunc()

@@ -14,9 +14,9 @@ func init() {
 		Usage: "review code following tenets in .lingo",
 		Flags: []cli.Flag{
 			cli.BoolFlag{
-			Name:  "all",
-			Usage: "review all files under all directories from pwd down",
-		},
+				Name:  "all",
+				Usage: "review all files under all directories from pwd down",
+			}},
 		Description: `
 
 "$ lingo review" will review any unstaged changes from pwd down.
@@ -27,7 +27,8 @@ func init() {
 `[1:],
 		Action: reviewAction,
 	},
-		vcsRq, dotLingoRq, homeRq, authRq)
+		vcsRq, dotLingoRq, homeRq, authRq,
+	)
 }
 
 func reviewAction(ctx *cli.Context) {
@@ -39,8 +40,9 @@ func reviewAction(ctx *cli.Context) {
 	}
 	issues, err := review.Review(opts)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err.Error())
 		return
+		// errors.ErrorStack(err)
 	}
 
 	fmt.Printf("Done! Found %d issues \n", len(issues))

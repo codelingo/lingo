@@ -25,10 +25,10 @@ func ReadAuthConfig() (*authConfig, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-
-	if err := yaml.Unmarshal(b, authConfig); err != nil {
-		return err
+	cfg := &authConfig{}
+	if err := yaml.Unmarshal(b, cfg); err != nil {
+		return nil, err
 	}
 
-	return authConfig, nil
+	return cfg, nil
 }
