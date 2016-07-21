@@ -1,14 +1,16 @@
 package service
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/codelingo/lingo/app/util/vcs"
+	"github.com/codelingo/lingo/app/util/vcs/backing"
+	"github.com/juju/errors"
 
 	"github.com/lightstep/lightstep-tracer-go"
 	"github.com/opentracing/opentracing-go"
@@ -30,9 +32,6 @@ import (
 
 const (
 	// grpcAddr = "localhost:8002"
-	// remote   = "origin"
-
-	remote   = "codelingo"
 	grpcAddr = "codelingo.io:8002"
 )
 
@@ -73,6 +72,9 @@ func (c client) Query(clql string) (string, error) {
 
 func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 
+	// TODO(waigani) pass this in as opt
+	repo := vcs.New(backing.Git)
+
 	// set defaults
 	if req.Owner == "" {
 		req.Owner = "testuser"
@@ -80,19 +82,17 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 	if req.Repo == "" {
 		req.Repo = "test"
 	}
+
 	if req.SHA == "" {
-		cmd := exec.Command("git", "rev-parse", "HEAD")
-		b := &bytes.Buffer{}
-		cmd.Stdout = b
-		if err := cmd.Run(); err != nil {
-			return nil, err
+
+		sha, err := repo.CurrentCommitId()
+		if err != nil {
+			return nil, errors.Trace(err)
 		}
-		req.SHA = strings.TrimSpace(string(b.Bytes()))
+		req.SHA = sha
 	}
 
-	// sync local and remote before reviewing
-	cmd := exec.Command("git", "push", remote, "HEAD")
-	if err := cmd.Run(); err != nil {
+	if err := repo.Sync(); err != nil {
 		return nil, err
 	}
 

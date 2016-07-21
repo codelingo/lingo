@@ -45,7 +45,7 @@ func (r require) Verify() error {
 	case baseRq:
 		return nil
 	case vcsRq:
-		verifyVCS()
+		return verifyVCS()
 	case dotLingoRq:
 		return verifyDotLingo()
 	case authRq:

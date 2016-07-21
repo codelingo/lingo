@@ -26,6 +26,8 @@ type ReviewRequest struct {
 
 	// a diff patch to apply to the remote branch before reviewing
 	Patch string
+
+	// TODO(waigani) add VCS field here
 }
 
 // ReviewResponse is the business domain type for a Review method response.
