@@ -1,0 +1,105 @@
+// Copyright 2015, Google Inc.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.codelingo.grpc.cl";
+option java_outer_classname = "CodeLingoProto";
+option objc_class_prefix = "CLW";
+
+package codelingo;
+
+// The query service definition.
+service CodeLingo {
+  // Reviews files
+  // TODO(waigani) support streaming
+  // rpc Review (ReviewRequest) returns (stream Issue) {}
+
+  rpc Review (ReviewRequest) returns (ReviewReply) {}
+
+  // Queries source code
+  rpc Query (QueryRequest) returns (QueryReply) {}
+}
+
+// The request message containing the CLQL source code.
+message QueryRequest {
+  string clql = 1;
+}
+
+// The query response.
+message QueryReply {
+  string result = 1;
+}
+
+// The request message containing the files or directories to review.
+message ReviewRequest {
+  string owner = 1;
+  string repo= 2;
+  string sha = 3;
+  repeated string filesAndDirs = 4;
+  bool recursive = 5;
+  repeated string Patches = 6;
+}
+
+message ReviewReply {
+  repeated Issue issues = 1;
+}
+
+// Issue returned from a review.
+message Issue {
+  // The name of the issue.
+    string name         =1; // Name is the the name of the checker that added the issue
+	IssueRange position =2;    // position in source file
+	string comment      =3;        // The rendered comment for this issue.
+	string ctxBefore    =4;      // source lines before the problem line(s)
+	string lineText     =5;    // the source line(s)
+	string ctxAfter     =6;   // source lines after the problem line(s)
+	map<string, string> metrics = 7; // metrics set when the issue was raised.
+	repeated string tags =8; // tags added when the issue was raised.
+	string link         =9; // (optional) the link to the style guide for the problem
+	bool newCode        =10; // When checking a diff, this indicates if the issue was found in existing or new code.
+	string patch        =11; // A diff patch resolving the issue.
+	string err          =12; // Any err encounted while building the issue.
+	bool discard        =13; // TODO(waigani) discard is only used by client and shouldn't be on wire format.
+	string discardReason=14; // TODO(waigani) also should not be on wire format.
+
+}
+
+message IssueRange {
+ Position start =1;
+ Position end =2;
+}
+
+message Position  {
+	string filename =1; // filename, if any
+	int64 Offset     =2;  // offset, starting at 0
+	int64 Line       =3;  // line number, starting at 1
+	int64 Column     =4;  // column number, starting at 1 (byte count)
+}
