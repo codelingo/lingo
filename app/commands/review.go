@@ -27,7 +27,7 @@ func init() {
 `[1:],
 		Action: reviewAction,
 	},
-		vcsRq, dotLingoRq, homeRq, authRq,
+		vcsRq, dotLingoRq, homeRq, authRq, configRq,
 	)
 }
 

@@ -30,7 +30,7 @@ func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, err
 		SHA:          reviewRequest.Sha,
 		FilesAndDirs: reviewRequest.FilesAndDirs,
 		Recursive:    reviewRequest.Recursive,
-		Patch:        reviewRequest.Patch,
+		Patches:      reviewRequest.Patches,
 	}, nil
 }
 

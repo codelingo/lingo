@@ -25,7 +25,7 @@ type ReviewRequest struct {
 	Recursive bool
 
 	// a diff patch to apply to the remote branch before reviewing
-	Patch string
+	Patches []string
 
 	// TODO(waigani) add VCS field here
 }

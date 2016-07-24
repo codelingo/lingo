@@ -12,6 +12,7 @@ import (
 const (
 	DefaultsCfgFile = "defaults.yaml"
 	ServicesCfgFile = "services.yaml"
+	PlatformCfgFile = "platform.yaml"
 )
 
 // Load assumes cfgFilename is relative to $LINGO_HOME. It loads the config

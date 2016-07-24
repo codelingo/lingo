@@ -1,8 +1,8 @@
 package vcs
 
 import (
-	"github.com/codelingo/lingo/app/util/vcs/backing"
-	"github.com/codelingo/lingo/app/util/vcs/git"
+	"github.com/codelingo/lingo/vcs/backing"
+	"github.com/codelingo/lingo/vcs/git"
 )
 
 func New(b backing.VCSBacking) backing.Repo {

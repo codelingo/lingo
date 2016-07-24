@@ -8,8 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codelingo/lingo/app/util/vcs"
-	"github.com/codelingo/lingo/app/util/vcs/backing"
+	"github.com/codelingo/lingo/app/util/common/config"
+	"github.com/codelingo/lingo/vcs"
+	"github.com/codelingo/lingo/vcs/backing"
 	"github.com/juju/errors"
 
 	"github.com/lightstep/lightstep-tracer-go"
@@ -30,10 +31,14 @@ import (
 	"github.com/codelingo/lingo/service/server"
 )
 
-const (
-	// grpcAddr = "localhost:8002"
-	grpcAddr = "codelingo.io:8002"
-)
+func grpcAddress() (string, error) {
+	cfg, err := config.Platform()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return cfg.Addr + ":" + cfg.GrpcPort, nil
+}
 
 type client struct {
 	context.Context
@@ -71,7 +76,6 @@ func (c client) Query(clql string) (string, error) {
 }
 
 func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
-
 	// TODO(waigani) pass this in as opt
 	repo := vcs.New(backing.Git)
 
@@ -96,6 +100,12 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 		return nil, err
 	}
 
+	var err error
+	req.Patches, err = repo.Patches()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	reply, err := c.endpoints["review"](c.Context, req)
 	if err != nil {
 		c.Logger.Log("err", err)
@@ -110,6 +120,12 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 
 // NewClient returns a QueryService that's backed by the provided Endpoints
 func New() (server.CodeLingoService, error) {
+
+	grpcAddr, err := grpcAddress()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	var (
 		grpcAddrs = flag.String("grpc.addrs", grpcAddr, "Comma-separated list of addresses for gRPC servers")
 

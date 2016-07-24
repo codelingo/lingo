@@ -15,11 +15,6 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		return nil, errors.Trace(err)
 	}
 
-	// sync local with remote
-	if err := sync(); err != nil {
-		return nil, errors.Trace(err)
-	}
-
 	issues, err := svc.Review(&server.ReviewRequest{FilesAndDirs: opts.Files})
 	if err != nil {
 		return nil, errors.Annotate(err, "bad request")

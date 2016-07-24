@@ -3,11 +3,13 @@ package commands
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
 )
 
@@ -157,20 +159,26 @@ func verifyLingoHome() error {
 
 func verifyConfig() error {
 
-	return errors.New("no configs set up yet")
+	lHome, err := util.LingoHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
 
-	// lHome, err := util.LingoHome()
-	// if err != nil {
-	// 	return errors.Trace(err)
-	// }
+	configsHome := filepath.Join(lHome, "configs")
+	if _, err := os.Stat(configsHome); os.IsNotExist(err) {
+		err := os.MkdirAll(configsHome, 0775)
+		if err != nil {
+			errors.Annotatef(err, "WARNING: could not create configs directory")
+		}
+	}
 
-	// configsHome := filepath.Join(lHome, "configs")
-	// if _, err := os.Stat(configsHome); os.IsNotExist(err) {
-	// 	err := os.MkdirAll(configsHome, 0775)
-	// 	if err != nil {
-	// 		errors.Annotatef(err, "WARNING: could not create configs directory")
-	// 	}
-	// }
+	platformCfg := filepath.Join(configsHome, config.PlatformCfgFile)
+	if _, err := os.Stat(platformCfg); os.IsNotExist(err) {
+		err := ioutil.WriteFile(platformCfg, []byte(config.PlatformTmpl), 0644)
+		if err != nil {
+			fmt.Printf("WARNING: could not create platform config: %v \n", err)
+		}
+	}
 
 	// servicesCfg := filepath.Join(configsHome, config.ServicesCfgFile)
 	// if _, err := os.Stat(servicesCfg); os.IsNotExist(err) {
@@ -187,4 +195,5 @@ func verifyConfig() error {
 	// 		fmt.Printf("WARNING: could not create services config: %v \n", err)
 	// 	}
 	// }
+	return nil
 }
