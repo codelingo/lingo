@@ -120,7 +120,6 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 
 // NewClient returns a QueryService that's backed by the provided Endpoints
 func New() (server.CodeLingoService, error) {
-
 	grpcAddr, err := grpcAddress()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -135,8 +134,8 @@ func New() (server.CodeLingoService, error) {
 		lightstepAccessToken = flag.String("lightstep.token", "", "Enable LightStep tracing via a LightStep access token")
 	)
 	flag.Parse()
-	if len(os.Args) < 3 {
-		fmt.Fprintf(os.Stderr, "\n%s [flags] method arg1\n\n", filepath.Base(os.Args[0]))
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "\n%s [flags] method\n\n", filepath.Base(os.Args[0]))
 		flag.Usage()
 		os.Exit(1)
 	}

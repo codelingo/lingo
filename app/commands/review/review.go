@@ -17,7 +17,6 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-
 	owner, repo, err := repoOwnerAndNameFromRemote()
 	if err != nil {
 		return nil, errors.Annotate(err, "local vcs error")
