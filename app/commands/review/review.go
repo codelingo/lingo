@@ -1,6 +1,9 @@
 package review
 
 import (
+	"os/exec"
+	"regexp"
+
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 
@@ -15,7 +18,16 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		return nil, errors.Trace(err)
 	}
 
-	issues, err := svc.Review(&server.ReviewRequest{FilesAndDirs: opts.Files})
+	owner, repo, err := repoOwnerAndNameFromRemote()
+	if err != nil {
+		return nil, errors.Annotate(err, "local vcs error")
+	}
+
+	issues, err := svc.Review(&server.ReviewRequest{
+		Owner:        owner,
+		Repo:         repo,
+		FilesAndDirs: opts.Files,
+	})
 	if err != nil {
 		return nil, errors.Annotate(err, "bad request")
 	}
@@ -50,6 +62,24 @@ func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {
 		Start: start,
 		End:   end,
 	}
+}
+
+func repoOwnerAndNameFromRemote() (string, string, error) {
+	cmd := exec.Command("git", "remote", "show", "-n", "codelingo")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", "", errors.Trace(err)
+	}
+
+	r := regexp.MustCompile(`.*[\/:](.*)\/(.*)\.git`)
+	m := r.FindStringSubmatch(string(b))
+	if m[1] == "" {
+		err = errors.New("could not find repository owner from codelingo remote")
+	}
+	if m[2] == "" {
+		err = errors.New("could not find repository name from codelingo remote")
+	}
+	return m[1], m[2], err
 }
 
 // TODO(waigani) simplify representation of Issue.

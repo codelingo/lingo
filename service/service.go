@@ -81,10 +81,10 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 
 	// set defaults
 	if req.Owner == "" {
-		req.Owner = "testuser"
+		return nil, errors.New("repository owner is not set")
 	}
 	if req.Repo == "" {
-		req.Repo = "test"
+		return nil, errors.New("repository name is not set")
 	}
 
 	if req.SHA == "" {

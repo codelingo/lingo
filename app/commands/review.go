@@ -32,6 +32,7 @@ func init() {
 }
 
 func reviewAction(ctx *cli.Context) {
+
 	opts := review.Options{
 		Files:      ctx.Args(),
 		Diff:       ctx.Bool("diff"),
