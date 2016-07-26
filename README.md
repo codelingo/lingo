@@ -2,11 +2,13 @@
 
 ## Install
 
-Either [download](codelingo/lingo/releases) a pre-built binary or, if you have [Golang setup](https://golang.org/doc/install), install from source:
+[Download](codelingo/lingo/releases) a pre-built binary or, if you have [Golang setup](https://golang.org/doc/install), install from source:
 
 ```go
 $ go get github.com/codelingo/lingo
 ```
+
+This will download, build and and place the `lingo` binary on your $PATH
 
 ### Windows
 
@@ -20,11 +22,11 @@ Place the lingo binary on your $PATH.
 
 ## Setup
 
-1. Create an account: [http://codelingo.io:3030/user/sign_up](http://codelingo.io:3030/user/sign_up)
+1. Create a CodeLingo account: [http://codelingo.io:3030/user/sign_up](http://codelingo.io:3030/user/sign_up)
 
-2. Create a remote repo [http://codelingo.io:3030/repo/create](http://codelingo.io:3030/repo/create)
+2. Create a remote repositoy [http://codelingo.io:3030/repo/create](http://codelingo.io:3030/repo/create)
 
-3. Create a new repo as a remote called “codelingo” to an existing local repo:
+3. Add a new or existing local repository as a remote:
 
 ```bash
 touch README.md
@@ -34,6 +36,8 @@ git commit -m "first commit"
 git remote add codelingo http://codelingo.io:3030/<your-username>/<your-repo-name>.git
 Git push -u codelingo master
 ```
+
+Note: it's important that the remote is called “codelingo”, as this is how the lingo client knows which repository to sync with on codelingo.io.
 
 4. Initiate lingo:
 
@@ -45,7 +49,7 @@ This will write a .lingo file in the current directory.
 
 ## Run a Review
 
-Tenets live in .lingo files. The `$ lingo init` command writes a .lingo file with a simple Tenet which finds all functions. Add a file, “test.php”, with the following source:
+The `lingo` tool uses Tenets to review code. Tenets live in .lingo files. The `$ lingo init` command adds a simple Tenet which finds all functions to get you started. To test this Tenet add a file, named “test.php”, with the following source code:
 
 ```PHP
 <?php
@@ -62,7 +66,7 @@ Then run `$ lingo review`. You should see the following output:
 ```bash
 test.php:2
 
-    Please use mysqli / prepared statements only
+    This is a function, but you probably already knew that.
     
 
     ...
@@ -76,7 +80,7 @@ test.php:2
 [o]pen [d]iscard [K]eep: 
 ```
 
-To open the test.php file at that line, type `o` and hit return. It will give you an option (which it will remember) to set your editor, defaulting to vi.
+To open the test.php file at the line of the issue, type `o` and hit return. It will give you an option (which it will remember) to set your editor, defaulting to vi.
 
 ## Write a Tenet
 
@@ -85,7 +89,7 @@ Run `$ vi .lingo` and update .lingo to the following:
 ```yaml
 tenets:
 - name: first-tenet
-  comment: This is a function, but you probably knew that.
+  comment: This is a function, name 'writeMsg', but you probably knew that.
   match: 
     <func:
       name: "writeMsg"
@@ -103,9 +107,9 @@ The "<" symbol returns the node that you're interested in. The review comment is
 
 ## CLQL
 
-CLQL is the query language under the `match:` section of a Tenet. It stands for, you guessed it, CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but the best way to get acquainted with the language is to review the [examples](http://github.com/codelingo/lingo/examples).
+CLQL is the query language under the `match:` section of a Tenet. It stands for CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but a practical to get acquainted with the language is to review the [examples](codelingo/lingo/examples).
 
-Release v0.1.0 is a partial implementation of CLQL. String and regex assertions are supported against the following facts in PHP:
+Release v0.1.0 is a partial implementation of CLQL. String and regex assertions, as demonstrated above, are supported against the following facts in PHP:
 
 ```yaml
 func:
@@ -131,19 +135,17 @@ literal:
 
 ### Types
 
-"string"
-"integer"
-"float"
-"boolean"
-"null"
-"resource"
-"array"
-"object"
-"function"
-"invalid-type"
+"string", "integer", "float", "boolean", "null", "resource", "array", "object", "function", "invalid-type" can be passed to type fact e.g.
 
-Other than the match statement, written in CLQL, the rest of a .lingo file is written in YAML. As such, you can set .lingo files to YAML syntax in your IDE.
+```yaml
+match:
+  literal:
+    type: "string"
+
+```
+
+Other than the match statement, written in CLQL, the rest of a .lingo file is written in YAML. As such, you can set .lingo files to YAML syntax in your IDE to get partial highlighting. Vim has full support for the Lingo syntax, including CLQL. To set it up, [see here](scripts/lingo.vim.readme).
 
 ## Running Examples
 
-All examples under examples/php are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and add set it up as it's own repository and follow the same steps as in the tutorial above.
+All examples under examples/php are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and follow the same steps as in the tutorial above.
