@@ -1,8 +1,8 @@
-# CodeLingo.io : Code Quality that Scales
+# CodeLingo.io - Code Quality that Scales
 
 ## Install
 
-Either (download)[https://github.com/codelingo/lingo/releases] a pre-built binary or, if you have (Golang setup)[$ go get github.com/codelingo/lingo], install from source:
+Either (download)[codelingo/lingo/releases] a pre-built binary or, if you have (Golang setup)[$ go get github.com/codelingo/lingo], install from source:
 
 ```go
 $ go get github.com/codelingo/lingo
