@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/mitchellh/go-homedir"
 
 	"text/template"
 
@@ -85,11 +86,7 @@ func ConfigHome() (string, error) {
 
 // UserHome returns the user's OS home directory.
 func UserHome() (string, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return usr.HomeDir, nil
+	return homedir.Dir()
 }
 
 // LingoBin returns the path to where binary tenets are stored.

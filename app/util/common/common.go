@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"os/user"
 	"path"
 	"path/filepath"
 	"strings"
@@ -19,6 +18,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/codegangsta/cli"
 	"github.com/juju/errors"
+	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/codelingo/lingo/app/util"
 )
@@ -469,7 +469,7 @@ func TenetCfgPathRecusive(cfgPath string) (string, error) {
 		if file == DefaultTenetCfgPath {
 			if dir == "/" {
 				// we've reached the end of the line. Fall back to default:
-				usr, err := user.Current()
+				hDir, err := homedir.Dir()
 				if err != nil {
 					return "", err
 				}
@@ -478,7 +478,7 @@ func TenetCfgPathRecusive(cfgPath string) (string, error) {
 				if err != nil {
 					return "", errors.Trace(err)
 				}
-				defaultTenets := path.Join(usr.HomeDir, lHome, DefaultTenetCfgPath)
+				defaultTenets := path.Join(hDir, lHome, DefaultTenetCfgPath)
 				if _, err := os.Stat(defaultTenets); err != nil {
 					return "", err
 				}
