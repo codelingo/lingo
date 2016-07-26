@@ -1,0 +1,33 @@
+tenets:
+  - name: disallow-funcs-that-use-unsafe-mysql-functions
+    doc: "Old unsafe mysql functions should not be used due to SQL injection"
+    comment: "This functions uses unsafe mysql calls"
+    match:
+      <func:
+        call:
+          name: /^mysql_.*/
+  - name: disallow-unsafe-mysql-functions
+    doc: "Old unsafe mysql functions should not be used due to SQL injection"
+    comment: "Please use mysqli / prepared statements only"
+    match:
+      call:
+        <name: /^mysql_.*/
+  - name: arg-example
+    doc: "Find and argument by name"
+    comment: "This func has an arg named 'a'"
+    match:
+      <arg:
+        variable:
+          name: "a"
+  - name: find-all-literal-strings
+    doc: "Example of finding all literal strings"
+    comment: "This is a literal string"
+    match:
+      <literal:
+        type: "string"
+  - name: string-lit-regex
+    doc: "Example of finding a literal string"
+    comment: "This is a literal string ending in 'i'"
+    match:
+      <literal:
+        value: /.*i$/

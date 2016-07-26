@@ -52,20 +52,29 @@ github-release release \
 
 # Build and push each bin to release
 echo $v | while IFS=',' read -d';' os arch;  do 
-	GOOS=$os GOARCH=$arch go build -o $binpath/lingo -v github.com/codelingo/lingo
+
+    if [ "$os" == "windows" ]; then
+    ext=.exe
+    else
+    ext=""
+    fi
+
+	GOOS=$os GOARCH=$arch go build -o $binpath/lingo$ext -v github.com/codelingo/lingo
 
 	cd bin
 	filename=lingo-$version-$os-$arch
 	if [ "$os" == "windows" ]; then
 		fn="$filename.zip"
-		zip $binpath/$fn lingo
+        rm $binpath/$fn
+		zip $binpath/$fn lingo.exe
+        rm lingo.exe
 	else
 		fn="$filename.tar.gz"
 		tar -cvzf $binpath/$fn lingo
-	fi
-	cd ..
+	    rm lingo
+    fi
+    cd ..
 
-	rm $binpath/lingo
 
 	github-release upload \
     --user codelingo \

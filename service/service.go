@@ -67,7 +67,7 @@ func (c client) Query(clql string) (string, error) {
 	}
 	reply, err := c.endpoints["query"](c.Context, request)
 	if err != nil {
-		c.Logger.Log("err", err)
+		// c.Logger.Log("err", err)
 		return "", err
 	}
 
@@ -108,7 +108,7 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 
 	reply, err := c.endpoints["review"](c.Context, req)
 	if err != nil {
-		c.Logger.Log("err", err)
+		// c.Logger.Log("err", err)
 		return nil, err
 	}
 
