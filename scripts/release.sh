@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Requires go 1.5 or higher
-# Run from root of repo
+# Must be run from root of github.com/codelingo/lingo
 #
 # $ scripts/cross_compile.sh 0.1.0
 
@@ -54,14 +54,16 @@ github-release release \
 echo $v | while IFS=',' read -d';' os arch;  do 
 	GOOS=$os GOARCH=$arch go build -o $binpath/lingo -v github.com/codelingo/lingo
 
+	cd bin
 	filename=lingo-$version-$os-$arch
 	if [ "$os" == "windows" ]; then
 		fn="$filename.zip"
-		zip $binpath/$fn $binpath/lingo
+		zip $binpath/$fn lingo
 	else
 		fn="$filename.tar.gz"
-		tar -cvzf $binpath/$fn $binpath/lingo
+		tar -cvzf $binpath/$fn lingo
 	fi
+	cd ..
 
 	rm $binpath/lingo
 
