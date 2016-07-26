@@ -26,6 +26,8 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		Owner:        owner,
 		Repo:         repo,
 		FilesAndDirs: opts.Files,
+		// TODO(waigani) make this a CLI flag
+		Recursive: true,
 	})
 	if err != nil {
 		return nil, errors.Annotate(err, "bad request")
