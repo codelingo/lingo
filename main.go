@@ -21,6 +21,6 @@ func main() {
 				os.Exit(1)
 			}
 		}
-		panic(errors.ErrorStack(err))
+		// fmt.Println(err.Error())
 	}
 }

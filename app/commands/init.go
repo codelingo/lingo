@@ -57,15 +57,16 @@ func initLingo(c *cli.Context) {
 func writeDotLingo(cfgPath string) error {
 	defaultDotLingo := common.DotLingo{
 		Lexicons: []string{
-			"codelingo/py as p",
-			"codelingo/golang as go",
+			"codelingo/common as _",
 		},
 		Tenets: []common.Tenet{
 			{
-				Name:    "first-tenet",
-				Doc:     "tenet doc string",
-				Comment: "tenet comment",
-				Match:   "CLQL match goes here",
+				Name:    "find-funcs",
+				Doc:     "Example tenet that finds all functions.",
+				Comment: "This is a function, but you probably already knew that.",
+				Match: `
+  <func
+`[1:],
 			},
 		},
 	}

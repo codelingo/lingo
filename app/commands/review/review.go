@@ -3,6 +3,7 @@ package review
 import (
 	"os/exec"
 	"regexp"
+	"strings"
 
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
@@ -19,7 +20,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	}
 	owner, repo, err := repoOwnerAndNameFromRemote()
 	if err != nil {
-		return nil, errors.Annotate(err, "local vcs error")
+		return nil, errors.Annotate(err, "\nlocal vcs error")
 	}
 
 	issues, err := svc.Review(&server.ReviewRequest{
@@ -30,7 +31,12 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		Recursive: true,
 	})
 	if err != nil {
-		return nil, errors.Annotate(err, "bad request")
+
+		if strings.Contains(err.Error(), "ambiguous argument 'HEAD'") {
+			return nil, errors.New("\nThis looks like a new repository. Please make an initial commit and push to codelingo remote before reviewing. This is only required for the initial commit.")
+		}
+
+		return nil, errors.Annotate(err, "\nbad request")
 	}
 
 	var confirmedIssues []*codelingo.Issue
@@ -74,13 +80,13 @@ func repoOwnerAndNameFromRemote() (string, string, error) {
 
 	r := regexp.MustCompile(`.*[\/:](.*)\/(.*)\.git`)
 	m := r.FindStringSubmatch(string(b))
-	if m[1] == "" {
-		err = errors.New("could not find repository owner from codelingo remote")
+	if len(m) < 2 || m[1] == "" {
+		return "", "", errors.New("could not find repository owner, have you set codelingo as a remote?")
 	}
-	if m[2] == "" {
-		err = errors.New("could not find repository name from codelingo remote")
+	if len(m) < 3 || m[2] == "" {
+		return "", "", errors.New("could not find repository name, have you set codelingo as a remote?")
 	}
-	return m[1], m[2], err
+	return m[1], m[2], nil
 }
 
 // TODO(waigani) simplify representation of Issue.
