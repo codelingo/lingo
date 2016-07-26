@@ -148,4 +148,4 @@ Other than the match statement, written in CLQL, the rest of a .lingo file is wr
 
 ## Running Examples
 
-All examples under examples/php are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and follow the same steps as in the tutorial above.
+All examples under [examples/php](examples/php) are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and follow the same steps as in the tutorial above.
