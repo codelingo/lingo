@@ -5,7 +5,7 @@
 #
 # $ scripts/cross_compile.sh 0.1.0
 
-set -e
+set -x
 if [ $# -eq 0 ]
   then
     echo "No arguments supplied, need verion"
@@ -17,7 +17,7 @@ version=$1
 
 repoRoot=$GOPATH/src/github.com/codelingo/lingo
 
-description=$(cat $repoRoot/scripts/next_release_notes.md)
+description=`cat $repoRoot/scripts/next_release_notes.md`
 
 # init array
 compressedFilenames=()
@@ -31,22 +31,27 @@ windows,amd64;\
 linux,amd64;\
 darwin,amd64;"
 
-# Make a tag
-git tag $version && git push --tags
+# following uses https://github.com/aktau/github-release
 
-# Push tag as release to github
-# https://github.com/aktau/github-release
+# first delete tag and release if already made
+github-release delete \
+    --user codelingo \
+    --repo lingo \
+    --tag $version
+git tag -d $version && git push --tags
+
+# Make a tag and push as release to github
+git tag $version && git push --tags
 github-release release \
     --user codelingo \
     --repo lingo \
     --tag $version \
     --name $version \
-    --description $description \
+    --description "$description" \
     --pre-release
 
 # Build and push each bin to release
 echo $v | while IFS=',' read -d';' os arch;  do 
-	echo "HERE"
 	GOOS=$os GOARCH=$arch go build -o $binpath/lingo -v github.com/codelingo/lingo
 
 	filename=lingo-$version-$os-$arch
