@@ -2,7 +2,7 @@
 
 ## Install
 
-Either (download)[codelingo/lingo/releases] a pre-built binary or, if you have (Golang setup)[$ go get github.com/codelingo/lingo], install from source:
+Either [download](codelingo/lingo/releases) a pre-built binary or, if you have [Golang setup](https://golang.org/doc/install), install from source:
 
 ```go
 $ go get github.com/codelingo/lingo
@@ -20,9 +20,9 @@ Place the lingo binary on your $PATH.
 
 ## Setup
 
-1. Create an account: http://codelingo.io:3030/user/sign_up
+1. Create an account: [http://codelingo.io:3030/user/sign_up](http://codelingo.io:3030/user/sign_up)
 
-2. Create a remote repo http://codelingo.io:3030/repo/create
+2. Create a remote repo [http://codelingo.io:3030/repo/create](http://codelingo.io:3030/repo/create)
 
 3. Create a new repo as a remote called “codelingo” to an existing local repo:
 
@@ -103,7 +103,7 @@ The "<" symbol returns the node that you're interested in. The review comment is
 
 ## CLQL
 
-CLQL is the query language under the `match:` section of a Tenet. It stands for, you guessed it, CodeLingo Query Language. The full spec can be found (here)[https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit], but the best way to get acquainted with the language is to review the (examples)[http://github.com/codelingo/lingo/examples].
+CLQL is the query language under the `match:` section of a Tenet. It stands for, you guessed it, CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but the best way to get acquainted with the language is to review the [examples](http://github.com/codelingo/lingo/examples).
 
 Release v0.1.0 is a partial implementation of CLQL. String and regex assertions are supported against the following facts in PHP:
 
