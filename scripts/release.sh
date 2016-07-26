@@ -1,68 +1,72 @@
 #!/bin/bash
 
 # Requires go 1.5 or higher
-# To run:
+# Run from root of repo
 #
-# $ ./cross_compile.sh 0.1.0
+# $ scripts/cross_compile.sh 0.1.0
 
 set -e
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied, need verion"
+    exit
+fi
 
 version=$1
-description=$(cat ./next_release_notes.md)
-binpath=$GOPATH/src/github.com/codelingo/lingo/bin
+
+
+repoRoot=$GOPATH/src/github.com/codelingo/lingo
+
+description=$(cat $repoRoot/scripts/next_release_notes.md)
+
+# init array
+compressedFilenames=()
+
+binpath=$repoRoot/bin
 
 v="
-darwin,amd64;\
-windows,amd64;\
 windows,386;\
 linux,386;\
-linux,amd64;
-"
-# First build all bins
+windows,amd64;\
+linux,amd64;\
+darwin,amd64;"
 
-echo $v | while IFS=',' read -d';' os arch;  do 
-filename=lingo-$version-$os-$arch
+# Make a tag
+git tag $version && git push --tags
 
-GOOS=$os GOARCH=$arch go build -o $binpath/lingo -v github.com/codelingo/lingo
-
-if [ "$os" == "windows" ]; then
-	fn=$binpath/$filename.zip
-	zip $fn $binpath/lingo
-else
-	fn=$binpath/$filename.tar.gz
-	tar -cvzf fn$ $binpath/lingo
-fi
-compressedFilenames+=($fn)
-
-rm $binpath/lingo
-
-done
-
-# Then make a tag
-
-echo "git tag $version && git push --tags"
-
-# Then make a release
+# Push tag as release to github
 # https://github.com/aktau/github-release
-echo "github-release release \
+github-release release \
     --user codelingo \
     --repo lingo \
     --tag $version \
     --name $version \
     --description $description \
-    --pre-release"
+    --pre-release
 
-# Then push each bin for the release
+# Build and push each bin to release
+echo $v | while IFS=',' read -d';' os arch;  do 
+	echo "HERE"
+	GOOS=$os GOARCH=$arch go build -o $binpath/lingo -v github.com/codelingo/lingo
 
-for cFilename in "${compressedFilenames[@]}"
-do:
+	filename=lingo-$version-$os-$arch
+	if [ "$os" == "windows" ]; then
+		fn="$filename.zip"
+		zip $binpath/$fn $binpath/lingo
+	else
+		fn="$filename.tar.gz"
+		tar -cvzf $binpath/$fn $binpath/lingo
+	fi
 
-echo "github-release upload \
+	rm $binpath/lingo
+
+	github-release upload \
     --user codelingo \
     --repo lingo \
     --tag $version \
-    --name $cFilename \
-    --file $binpath/$cFilename"
+    --name $fn \
+    --file $binpath/$fn
 
 done
 
+echo "Done!"
