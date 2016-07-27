@@ -22,22 +22,24 @@ Place the lingo binary on your $PATH.
 
 ## Setup
 
+(Note, these steps will be automated in a future release)
+
 1. Create a CodeLingo account: [http://codelingo.io:3030/user/sign_up](http://codelingo.io:3030/user/sign_up)
 
 2. Create a remote repositoy [http://codelingo.io:3030/repo/create](http://codelingo.io:3030/repo/create)
 
 3. Add a new or existing local repository as a remote:
 
-```bash
-touch README.md
-git init
-git add README.md
-git commit -m "first commit"
-git remote add codelingo http://codelingo.io:3030/<your-username>/<your-repo-name>.git
-Git push -u codelingo master
-```
+  ```bash
+  touch README.md
+  git init
+  git add README.md
+  git commit -m "first commit"
+  git remote add codelingo http://codelingo.io:3030/<your-username>/<your-repo-name>.git
+  Git push -u codelingo master
+  ```
 
-Note: it's important that the remote is called “codelingo”, as this is how the lingo client knows which repository to sync with on codelingo.io.
+  It's important that the remote is called “codelingo”, as this is how the lingo client knows which repository to sync with on codelingo.io.
 
 4. Initiate lingo:
 
