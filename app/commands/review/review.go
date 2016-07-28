@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 
@@ -72,7 +73,18 @@ func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {
 }
 
 func repoOwnerAndNameFromRemote() (string, string, error) {
-	cmd := exec.Command("git", "remote", "show", "-n", "codelingo")
+
+	pCfg, err := config.Platform()
+	if err != nil {
+		return "", "", errors.Trace(err)
+	}
+
+	remoteName, err := pCfg.GitRemoteName()
+	if err != nil {
+		return "", "", errors.Trace(err)
+	}
+
+	cmd := exec.Command("git", "remote", "show", "-n", remoteName)
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", "", errors.Trace(err)
@@ -81,10 +93,10 @@ func repoOwnerAndNameFromRemote() (string, string, error) {
 	r := regexp.MustCompile(`.*[\/:](.*)\/(.*)\.git`)
 	m := r.FindStringSubmatch(string(b))
 	if len(m) < 2 || m[1] == "" {
-		return "", "", errors.New("could not find repository owner, have you set codelingo as a remote?")
+		return "", "", errors.Errorf("could not find repository owner, have you set %s as a remote?", remoteName)
 	}
 	if len(m) < 3 || m[2] == "" {
-		return "", "", errors.New("could not find repository name, have you set codelingo as a remote?")
+		return "", "", errors.Errorf("could not find repository name, have you set %s as a remote?", remoteName)
 	}
 	return m[1], m[2], nil
 }

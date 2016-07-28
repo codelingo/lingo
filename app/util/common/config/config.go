@@ -23,12 +23,14 @@ func Load(cfgFilename string, values interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+
 	data, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
 		return errors.Errorf("problem reading %s: %v", cfgFilename, err)
 	}
 
 	return errors.Annotatef(yaml.Unmarshal(data, values), "problem unmarshalling %s", cfgFilename)
+
 }
 
 // Edit assumes cfgFilename is relative to $LINGO_HOME and opens that

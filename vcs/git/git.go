@@ -6,12 +6,8 @@ import (
 
 	"github.com/juju/errors"
 
+	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/vcs/backing"
-)
-
-const (
-	// remote   = "origin"
-	remote = "codelingo" // TODO(waigani) pass remote into funcs
 )
 
 func New() backing.Repo {
@@ -22,8 +18,18 @@ type Repo struct {
 }
 
 func (r *Repo) Sync() error {
+
+	cfg, err := config.Platform()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	remote, err := cfg.GitRemoteName()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
 	// sync local and remote before reviewing
-	_, err := gitCMD("push", remote, "HEAD")
+	_, err = gitCMD("push", remote, "HEAD")
 	return errors.Trace(err)
 }
 

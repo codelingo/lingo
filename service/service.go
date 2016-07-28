@@ -31,15 +31,6 @@ import (
 	"github.com/codelingo/lingo/service/server"
 )
 
-func grpcAddress() (string, error) {
-	cfg, err := config.Platform()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	return cfg.Addr + ":" + cfg.GrpcPort, nil
-}
-
 type client struct {
 	context.Context
 	log.Logger
@@ -120,7 +111,12 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 
 // NewClient returns a QueryService that's backed by the provided Endpoints
 func New() (server.CodeLingoService, error) {
-	grpcAddr, err := grpcAddress()
+	pCfg, err := config.Platform()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	grpcAddr, err := pCfg.GrpcAddress()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
