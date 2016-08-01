@@ -65,7 +65,7 @@ func writeDotLingo(cfgPath string) error {
 				Doc:     "Example tenet that finds all functions.",
 				Comment: "This is a function, but you probably already knew that.",
 				Match: `
-  <func
+<func
 `[1:],
 			},
 		},

@@ -28,6 +28,8 @@ Place the lingo binary on your $PATH.
 
 2. Create a remote repositoy [http://codelingo.io:3030/repo/create](http://codelingo.io:3030/repo/create)
 
+(Note, for now the repository MUST be public)
+
 3. Add a new or existing local repository as a remote:
 
   ```bash
