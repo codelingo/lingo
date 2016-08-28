@@ -16,9 +16,11 @@ func New() *cli.App {
 	// setCommandHelpTemplate()
 	app := cli.NewApp()
 	app.Name = "lingo"
-	app.Usage = "A DevOps Tool for Software Engineering."
+	app.Usage = "Code Quality That Scales."
 	app.Before = commands.Before
 	app.Commands = commands.All()
+	app.Version = commands.ClientVersion
+	// TODO(waigani) once messaging is implemented, add -q flag to suppress them here.
 	// app.Flags = common.GlobalOptions
 	// app.CommandNotFound = commands.TenetCMD
 	app.EnableBashCompletion = true

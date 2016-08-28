@@ -93,12 +93,28 @@ func repoOwnerAndNameFromRemote() (string, string, error) {
 	r := regexp.MustCompile(`.*[\/:](.*)\/(.*)\.git`)
 	m := r.FindStringSubmatch(string(b))
 	if len(m) < 2 || m[1] == "" {
-		return "", "", errors.Errorf("could not find repository owner, have you set %s as a remote?", remoteName)
+		return "", "", errors.Errorf("could not find repository owner, have you set %s as a git remote?", remoteName)
 	}
 	if len(m) < 3 || m[2] == "" {
-		return "", "", errors.Errorf("could not find repository name, have you set %s as a remote?", remoteName)
+		return "", "", errors.Errorf("could not find repository name, have you set %s as a git remote?", remoteName)
 	}
 	return m[1], m[2], nil
+
+	// TODO(waigani) user may have added remote, but not commited code. In
+	// that case, "git remote show" will give the following output:
+	//
+	// 	fatal: ambiguous argument 'remote': unknown revision or path not in the working tree.
+	// Use '--' to separate paths from revisions, like this:
+	// 'git <command> [<revision>...] -- [<file>...]'
+	//
+	// In this case, we need to tell the user to make an initial commit and
+	// push to the remote. The steps are:
+	//
+	// 1. Create remote repo on codelingo git server
+	// 2. Add remote as git remote
+	// 3. Commit code and push to remote: `git push codelingo_dev master`
+	//
+
 }
 
 // TODO(waigani) simplify representation of Issue.

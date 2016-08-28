@@ -9,6 +9,8 @@ import (
 	"github.com/codegangsta/cli"
 )
 
+const ClientVersion = "0.1.1"
+
 var cmds = map[require][]*cli.Command{}
 
 // returns a map of cmd name to list of requirements

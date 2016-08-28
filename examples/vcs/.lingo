@@ -12,8 +12,8 @@ tenets:
     match:
     <func:
       git.previous: "HEAD^"
+        param:
+          count: P
       param:
-        count: P
-      param:
-      count: > $P
-      count: > 3
+        count: > $P
+        count: > 3

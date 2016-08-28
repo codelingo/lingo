@@ -70,6 +70,8 @@ message ReviewRequest {
 
 message ReviewReply {
   repeated Issue issues = 1;
+  // TODO(waigani) implement messaging from server to client.
+  // string message  = 2; // generic messages sent back to the client.
 }
 
 // Issue returned from a review.

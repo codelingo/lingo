@@ -4,8 +4,12 @@
 
 [Download](https://github.com/codelingo/lingo/releases) a pre-built binary or, if you have [Golang setup](https://golang.org/doc/install), install from source:
 
-```go
+```bash
 $ go get github.com/codelingo/lingo
+
+cd  $GOPATH/src/github.com/go-kit/kit
+git checkout 95fa413
+./update_deps.bash
 ```
 
 This will download, build and and place the `lingo` binary on your $PATH

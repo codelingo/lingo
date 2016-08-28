@@ -37,6 +37,18 @@ indicate dependencies on env or agent config
 concise example vs PMP, pystylecheck etc
 one tenet, different languages
 
+create scripts from queires:
+- scripts:
+	name: "collect todos"
+	bash: `exeIngestTodo $s`
+	match:
+	  comment:
+	    text: /\/\/ TODO\(waigani\).*/ 
+	    text: s
+
+use nlp lexicon to ensure git comments are written in present tense and
+formatted correctly.
+
 
 little bash script to scrape out facts:
 
