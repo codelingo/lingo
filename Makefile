@@ -9,7 +9,8 @@ install:
 	go get github.com/Masterminds/glide
 
 	# then get the latest commit
-	go get -u -t -d github.com/codelingo/lingo
+	git pull
+	go get -t -d github.com/codelingo/lingo
 
 	# update dep versions
 	glide up
