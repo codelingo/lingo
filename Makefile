@@ -5,4 +5,17 @@
 PKG_NAME=$(shell basename `pwd`)
 
 install:
-	go get -t -d github.com/codelingo/lingo
+	# first install glide to manage deps
+	go get github.com/Masterminds/glide
+
+	# then get the latest commit
+	go get -u -t -d github.com/codelingo/lingo
+
+	# update dep versions
+	glide up
+
+	# install deps
+	glide install
+
+	# build and install lingo
+	go install

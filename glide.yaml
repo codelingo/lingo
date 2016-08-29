@@ -1,0 +1,53 @@
+package: github.com/codelingo/lingo
+import:
+- package: github.com/blang/semver
+  version: ^3.3.0
+- package: github.com/codegangsta/cli
+  version: ^1.18.1
+- package: github.com/codelingo/lexicon
+  subpackages:
+  - lib/graph
+  - lib/graph/edge
+- package: github.com/fatih/color
+  version: ^1.0.0
+- package: github.com/fsouza/go-dockerclient
+- package: github.com/go-kit/kit
+  version: 95fa413 #^0.2.0
+  subpackages:
+  - endpoint
+  - loadbalancer
+  - loadbalancer/static
+  - log
+  - transport/grpc
+- package: github.com/opentracing/basictracer-go
+  version: 8d298b35c67ed
+- package: github.com/golang/protobuf
+  subpackages:
+  - proto
+- package: github.com/juju/errors
+- package: github.com/juju/testing
+  subpackages:
+  - checkers
+- package: github.com/lightstep/lightstep-tracer-go
+  version: 42c31c53ad6e1
+- package: github.com/mitchellh/go-homedir
+- package: github.com/opentracing/opentracing-go
+  version: a3b886889ac #^4.0.0
+- package: github.com/openzipkin/zipkin-go-opentracing
+  version: a20910139607957c
+- package: github.com/sourcegraph/appdash
+  version: 26a631f9dd067
+  subpackages:
+  - opentracing
+- package: github.com/waigani/diffparser
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/grpc
+  version: ^1.0.1-GA
+- package: gopkg.in/check.v1
+- package: gopkg.in/yaml.v1
+- package: gopkg.in/yaml.v2
+- package: sourcegraph.com/sourcegraph/appdash
+testImport:
+- package: github.com/waigani/xxx

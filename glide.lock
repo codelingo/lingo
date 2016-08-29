@@ -1,0 +1,264 @@
+hash: 41459a6ac9f5212bc71d9855137d2b0eab4a04fc4d938d45b55f35f8e47eaa48
+updated: 2016-08-29T14:58:00.268619704+12:00
+imports:
+- name: git.apache.org/thrift.git
+  version: e4ba16495e8d8177eb85d6bfcc69089b38753e39
+  subpackages:
+  - lib/go/thrift
+- name: github.com/blang/semver
+  version: 60ec3488bfea7cca02b021d106d9911120d25fe9
+- name: github.com/codegangsta/cli
+  version: a14d7d367bc02b1f57d88de97926727f2d936387
+- name: github.com/codelingo/lexicon
+  version: af2dda8469f5467844eaf9bd37a96e718b37bd67
+  subpackages:
+  - lib/graph
+  - lib/graph/edge
+- name: github.com/davecgh/go-spew
+  version: 6cf5744a041a0022271cefed95ba843f6d87fd51
+  subpackages:
+  - spew
+- name: github.com/docker/docker
+  version: bf0077c138a1cf64a42828014c44f8e2b2001703
+  subpackages:
+  - opts
+  - pkg/archive
+  - pkg/fileutils
+  - pkg/homedir
+  - pkg/idtools
+  - pkg/ioutils
+  - pkg/longpath
+  - pkg/pools
+  - pkg/promise
+  - pkg/stdcopy
+  - pkg/system
+- name: github.com/docker/engine-api
+  version: fa0eea948c32ababd784fc1ad76172d986617e56
+  subpackages:
+  - types/filters
+  - types/mount
+  - types/swarm
+  - types/versions
+- name: github.com/docker/go-units
+  version: 2c1805a1c750c4ea749899f49221e1d5f3e5ce42
+- name: github.com/eapache/go-resiliency
+  version: b86b1ec0dd4209a588dc1285cdd471e73525c0b3
+  subpackages:
+  - breaker
+- name: github.com/eapache/go-xerial-snappy
+  version: bb955e01b9346ac19dc29eb16586c90ded99a98c
+- name: github.com/eapache/queue
+  version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
+- name: github.com/fatih/color
+  version: 87d4004f2ab62d0d255e0a38f1680aa534549fe3
+- name: github.com/fsouza/go-dockerclient
+  version: 2ce05b8e04b7475b63ae21c1aeaf72b8a5b05eb5
+- name: github.com/gabriel-samfira/sys
+  version: 9ddc60d56b511544223adecea68da1e4f2153beb
+  subpackages:
+  - windows
+  - windows/registry
+  - windows/svc
+  - windows/svc/mgr
+- name: github.com/go-kit/kit
+  version: 95fa4134d6fab121383dc561f698a8990ea78332
+  subpackages:
+  - endpoint
+  - loadbalancer
+  - loadbalancer/fixed
+  - loadbalancer/static
+  - log
+  - transport/grpc
+- name: github.com/go-logfmt/logfmt
+  version: d4327190ff838312623b09bfeb50d7c93c8d9c1d
+- name: github.com/go-stack/stack
+  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+- name: github.com/gogo/protobuf
+  version: 966a6f4b3274f2692aa2f30df2ea5c7172c832ca
+  subpackages:
+  - io
+  - proto
+- name: github.com/golang/protobuf
+  version: 888eb0692c857ec880338addf316bd662d5e630e
+  subpackages:
+  - proto
+- name: github.com/golang/snappy
+  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+- name: github.com/hashicorp/go-cleanhttp
+  version: ad28ea4487f05916463e2423a55166280e8254b5
+- name: github.com/juju/ansiterm
+  version: c4ce98b1cd3195b2d6a3069a2445bee608de04a2
+  subpackages:
+  - tabwriter
+- name: github.com/juju/errors
+  version: 6f54ff6318409d31ff16261533ce2c8381a4fd5d
+- name: github.com/juju/loggo
+  version: 3b7ece48644d35850f4ced4c2cbc2cf8413f58e0
+- name: github.com/juju/testing
+  version: d325c22badd4ba3a5fde01d479b188c7a06df755
+  subpackages:
+  - checkers
+- name: github.com/juju/utils
+  version: bdb77b07e7e3f77463d10d2b554cd1b7a78009a2
+  subpackages:
+  - arch
+  - clock
+  - exec
+  - featureflag
+  - filepath
+  - os
+  - packaging
+  - packaging/commands
+  - packaging/config
+  - packaging/manager
+  - proxy
+  - series
+  - set
+  - shell
+  - symlink
+- name: github.com/juju/version
+  version: 4ae6172c00626779a5a462c3e3d22fc0e889431a
+- name: github.com/klauspost/crc32
+  version: 19b0b332c9e4516a6370a0456e6182c3b5036720
+- name: github.com/kr/logfmt
+  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
+- name: github.com/lightstep/lightstep-tracer-go
+  version: 42c31c53ad6e190563d3a733155a43f10f0691f8
+  subpackages:
+  - lightstep_thrift
+  - thrift_0_9_2/lib/go/thrift
+- name: github.com/lunixbochs/vtclean
+  version: 4fbf7632a2c6d3fbdb9931439bdbbeded02cbe36
+- name: github.com/mattn/go-colorable
+  version: ed8eb9e318d7a84ce5915b495b7d35e0cfe7b5a8
+- name: github.com/mattn/go-isatty
+  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+- name: github.com/mitchellh/go-homedir
+  version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
+- name: github.com/opencontainers/runc
+  version: 189a2ab2f7acc59043e457cea25b58f631443f08
+  subpackages:
+  - libcontainer/system
+  - libcontainer/user
+- name: github.com/opentracing/basictracer-go
+  version: 8d298b35c67ed83c7565d36bd2928b7be8c06ba8
+  subpackages:
+  - wire
+- name: github.com/opentracing/opentracing-go
+  version: a3b886889ac213bb046a3214181207ee865f8f27
+  subpackages:
+  - ext
+- name: github.com/openzipkin/zipkin-go-opentracing
+  version: a20910139607957cf3a4c0903421e637feebb621
+  subpackages:
+  - _thrift/gen-go/scribe
+  - _thrift/gen-go/zipkincore
+  - flag
+  - wire
+- name: github.com/Shopify/sarama
+  version: 94895118af045d13c7e576477276a53afccdd6b1
+- name: github.com/Sirupsen/logrus
+  version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
+- name: github.com/sourcegraph/appdash
+  version: 26a631f9dd067865f87a885179204f4499a33de3
+  subpackages:
+  - opentracing
+- name: github.com/waigani/diffparser
+  version: 42ae6ebdde8d5414cb002ac435c1d6be3f926c32
+- name: golang.org/x/crypto
+  version: 351dc6a5bf92a5f2ae22fadeee08eb6a45aa2d93
+  subpackages:
+  - curve25519
+  - nacl/box
+  - nacl/secretbox
+  - pbkdf2
+  - poly1305
+  - salsa20/salsa
+- name: golang.org/x/net
+  version: 6250b412798208e6c90b03b7c4f226de5aa299e2
+  subpackages:
+  - context
+  - context/ctxhttp
+  - http2
+  - http2/hpack
+  - internal/timeseries
+  - lex/httplex
+  - trace
+- name: golang.org/x/sys
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  subpackages:
+  - unix
+- name: google.golang.org/grpc
+  version: 0032a855ba5c8a3c8e0d71c2deef354b70af1584
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - transport
+- name: gopkg.in/check.v1
+  version: 4f90aeace3a26ad7021961c297b22c42160c7b25
+- name: gopkg.in/mgo.v2
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  subpackages:
+  - bson
+  - internal/json
+  - internal/sasl
+  - internal/scram
+- name: gopkg.in/yaml.v1
+  version: 9f9df34309c04878acc86042b16630b0f696e1de
+- name: gopkg.in/yaml.v2
+  version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
+- name: sourcegraph.com/sourcegraph/appdash
+  version: ca429ff5af815db4185bbc0ab3984a483eb37ee6
+  subpackages:
+  - internal/wire
+testImports:
+- name: github.com/coreos/go-systemd
+  version: 43e4800a6165b4e02bb2a36673c54b230d6f7b26
+  subpackages:
+  - dbus
+  - unit
+- name: github.com/godbus/dbus
+  version: 58b0385796c5b97c6934388174215143cbd111bf
+- name: github.com/juju/juju
+  version: 11682c54646fbe625120c0368b41b3349f04df77
+  subpackages:
+  - agent/tools
+  - cert
+  - controller
+  - feature
+  - juju/osenv
+  - juju/paths
+  - mongo
+  - network
+  - service
+  - service/common
+  - service/systemd
+  - service/upstart
+  - service/windows
+  - tools
+- name: github.com/juju/replicaset
+  version: fb7294cf57a1e2f08a57691f1246d129a87ab7e8
+- name: github.com/juju/schema
+  version: 29dd021fc4b6a9358065c5a06fbdf66a50a87a95
+- name: github.com/rogpeppe/fastuuid
+  version: 6724a57986aff9bff1a1770e9347036def7c89f6
+- name: github.com/waigani/xxx
+  version: 996d259109d1481f6cb397c495801602216175e2
+- name: gopkg.in/errgo.v1
+  version: 66cb46252b94c1f3d65646f54ee8043ab38d766c
+- name: gopkg.in/juju/names.v2
+  version: fa4c1959bef64b8f18569dc83a85b25d15204503
+- name: gopkg.in/macaroon-bakery.v1
+  version: 469b44e6f1f9479e115c8ae879ef80695be624d5
+  subpackages:
+  - bakery
+  - bakery/checkers
+- name: gopkg.in/macaroon.v1
+  version: d8fd13e6951f2ce46f0964a58149cf2f103cac9a
+- name: gopkg.in/tomb.v1
+  version: dd632973f1e7218eb1089048e0798ec9ae7dceb8

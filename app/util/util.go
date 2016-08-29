@@ -3,12 +3,15 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/codegangsta/cli"
 	"github.com/mitchellh/go-homedir"
 
 	"text/template"
@@ -20,7 +23,8 @@ import (
 // TODO(anyone): Change this back to '.lingo' after making config loader check if
 //               .lingo is file (not dir) before reading.
 const (
-	defaultHome = ".lingo_home"
+	defaultHome         = ".codelingo"
+	DefaultTenetCfgPath = ".lingo"
 )
 
 // OpenFileCmd launches the specified editor at the given filename and line
@@ -46,6 +50,14 @@ func OpenFileCmd(editor, filename string, line int64) (*exec.Cmd, error) {
 	cmd.Stderr = os.Stderr
 
 	return cmd, nil
+}
+
+func OSErrf(format string, a ...interface{}) {
+	format = fmt.Sprintf("error: %s\n", format)
+	errStr := fmt.Sprintf(format, a...)
+	log.Print(errStr)
+	Stderr.Write([]byte(errStr))
+	Exiter(1)
 }
 
 // MustLingoHome returns the path to the user's lingo config directory or
@@ -234,3 +246,46 @@ sha=` + "`git merge-base --fork-point HEAD $base`" + `
 
 git reset $sha
 `[1:]
+
+func MaxArgs(c *cli.Context, max int) error {
+	if l := len(c.Args()); l > max {
+		return errors.Errorf("expected up to %d argument(s), got %d", max, l)
+	}
+	return nil
+}
+
+// // stderr is a var for mocking in tests
+var Stderr io.Writer = os.Stderr
+
+// exiter is a var for mocking in tests
+var Exiter = func(code int) {
+	os.Exit(code)
+}
+
+// DesiredTenetCfgPath returns the tenet config path found in 1. local flag
+// or 2. global flag. It falls back to returning DefaultTenetCfgPath
+func DesiredTenetCfgPath(c *cli.Context) string {
+	flgName := TenetCfgFlg.Long
+	var cfgName string
+	// 1. grab the config name from local flag
+	if cfgName = c.String(flgName); cfgName != "" {
+		return cfgName
+	}
+	if cfgName = c.GlobalString(flgName); cfgName != "" {
+		return cfgName
+	}
+	// TODO(waigani) shouldn't need this - should fallback to default in flags.
+	return DefaultTenetCfgPath
+}
+
+type DotLingo struct {
+	Lexicons []string `yaml:"lexicons"`
+	Tenets   []Tenet
+}
+
+type Tenet struct {
+	Name    string
+	Doc     string
+	Comment string
+	Match   string
+}

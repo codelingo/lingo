@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/util/common"
+	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
 )
 
@@ -32,34 +32,34 @@ var intro = `
 // TODO(waigani) set lingo-home flag and test init creates correct home dir.
 
 func initLingo(c *cli.Context) {
-	if err := common.MaxArgs(c, 1); err != nil {
-		common.OSErrf(err.Error())
+	if err := util.MaxArgs(c, 1); err != nil {
+		util.OSErrf(err.Error())
 		return
 	}
 
 	cfgPath, err := getCfgPath(c)
 	if err != nil {
-		common.OSErrf(err.Error())
+		util.OSErrf(err.Error())
 		return
 	}
 	if _, err := os.Stat(cfgPath); err == nil {
-		common.OSErrf("Already initialised. Using %q", cfgPath)
+		util.OSErrf("Already initialised. Using %q", cfgPath)
 		return
 	}
 
 	if err := writeDotLingo(cfgPath); err != nil {
-		common.OSErrf(err.Error())
+		util.OSErrf(err.Error())
 		return
 	}
 	fmt.Printf("Successfully initialised. Lingo config file written to %q\n", cfgPath)
 }
 
 func writeDotLingo(cfgPath string) error {
-	defaultDotLingo := common.DotLingo{
+	defaultDotLingo := util.DotLingo{
 		Lexicons: []string{
 			"codelingo/common as _",
 		},
-		Tenets: []common.Tenet{
+		Tenets: []util.Tenet{
 			{
 				Name:    "find-funcs",
 				Doc:     "Example tenet that finds all functions.",
@@ -87,7 +87,7 @@ func writeDotLingo(cfgPath string) error {
 func getCfgPath(c *cli.Context) (string, error) {
 	// Create a new tenet config file at either the provided directory or
 	// a location from flags or environment, or the current directory
-	cfgPath, _ := filepath.Abs(common.DesiredTenetCfgPath(c))
+	cfgPath, _ := filepath.Abs(util.DesiredTenetCfgPath(c))
 	if len(c.Args()) > 0 {
 		cfgPath, _ = filepath.Abs(c.Args()[0])
 
@@ -99,7 +99,7 @@ func getCfgPath(c *cli.Context) (string, error) {
 		}
 
 		// Use default config filename
-		cfgPath = filepath.Join(cfgPath, common.DefaultTenetCfgPath)
+		cfgPath = filepath.Join(cfgPath, util.DefaultTenetCfgPath)
 	}
 	return cfgPath, nil
 }

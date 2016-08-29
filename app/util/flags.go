@@ -1,9 +1,6 @@
-package common
+package util
 
-import (
-	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/util"
-)
+import "github.com/codegangsta/cli"
 
 type flagName struct {
 	Long  string
@@ -91,18 +88,11 @@ var GlobalOptions = []cli.Flag{
 
 	cli.StringFlag{
 		Name:   LingoHomeFlg.String(),
-		Value:  util.MustLingoHome(),
+		Value:  MustLingoHome(),
 		Usage:  "a directory of files needed for Lingo to operate e.g. logs and binary tenets are stored here",
 		EnvVar: "LINGO_HOME",
 	},
 
-	// TODO(waigani) implement or drop
-	cli.StringFlag{
-		Name:   TenetCfgFlg.String(),
-		Value:  DefaultTenetCfgPath,
-		Usage:  "path to a .lingo to use. Defaults to " + DefaultTenetCfgPath + " in current directory",
-		EnvVar: "LINGO_TENET_CONFIG_NAME",
-	},
 	// cli.StringFlag{
 	// 	Name:   outputTemplateFlg.String(),
 	// 	Value:  "",

@@ -24,6 +24,14 @@ You must run lingo from Git Bash or similar environment (if not git bash, then a
 
 Place the lingo binary on your $PATH.
 
+### Build from source
+
+```bash
+$ cd $GOPATH/src/github.com/codelingo/lingo
+$ make install
+```
+https://github.com/Masterminds/glide#install
+
 ## Setup
 
 (Note, these steps will be automated in a future release)
