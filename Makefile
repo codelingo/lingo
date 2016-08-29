@@ -10,7 +10,6 @@ install:
 
 	# then get the latest commit
 	git pull
-	go get -t -d github.com/codelingo/lingo
 
 	# update dep versions
 	glide up
@@ -20,3 +19,8 @@ install:
 
 	# build and install lingo
 	go install
+
+
+# waigani xxx
+# git hg bazar
+# hg launchpad

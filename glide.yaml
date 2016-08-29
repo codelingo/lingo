@@ -4,10 +4,6 @@ import:
   version: ^3.3.0
 - package: github.com/codegangsta/cli
   version: ^1.18.1
-- package: github.com/codelingo/lexicon
-  subpackages:
-  - lib/graph
-  - lib/graph/edge
 - package: github.com/fatih/color
   version: ^1.0.0
 - package: github.com/fsouza/go-dockerclient
