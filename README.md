@@ -5,11 +5,9 @@
 [Download](https://github.com/codelingo/lingo/releases) a pre-built binary or, if you have [Golang setup](https://golang.org/doc/install), install from source:
 
 ```bash
-$ go get github.com/codelingo/lingo
-
-cd  $GOPATH/src/github.com/go-kit/kit
-git checkout 95fa413
-./update_deps.bash
+$ git clone github.com/codelingo/lingo $GOPATH/src/github.com/codelingo/lingo
+$ cd $GOPATH/src/github.com/codelingo/lingo
+$ make install
 ```
 
 This will download, build and and place the `lingo` binary on your $PATH
@@ -23,14 +21,6 @@ You must run lingo from Git Bash or similar environment (if not git bash, then a
 ### Linux / Unix
 
 Place the lingo binary on your $PATH.
-
-### Build from source
-
-```bash
-$ cd $GOPATH/src/github.com/codelingo/lingo
-$ make install
-```
-https://github.com/Masterminds/glide#install
 
 ## Setup
 
