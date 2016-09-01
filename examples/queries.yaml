@@ -1,0 +1,213 @@
+# Examples:
+
+# - no errors.Trace, exception example
+# - check that a yaml config file is updated when some other code is updated
+# - unique func names across project
+# - javascript frontend updated when backend is changed
+# - read only mod with sql lit doing a write
+
+# hash of AST node for semantic equiv - looks at just the structure of the tree.
+
+lexicons:
+   - codelingo/common as _
+
+tenets:
+   - name: sometenet
+     level: comment
+     doc: "this explains the tenet"
+     comment: 
+      - "func name $p should be unique"
+      - "second com"
+      - "third com"
+     clql: 0.1.0
+     match:
+      file:
+        path: x
+        func:
+          name: p
+      file:
+        !name: $x
+        <func:
+          name: $p
+
+----
+
+lexicons:
+   - codelingo/common as _
+   - codelingo/git
+
+tenets:
+   - name: sometenet
+     level: comment
+     doc: "this explains the tenet"
+     comment: 
+      - "func name $p should be unique"
+      - "second com"
+      - "third com"
+     match:
+      file:
+        git.hunk:
+           git.newSRC: n
+        git.history:
+          <git.hunk:
+            git.newSRC: $n
+
+      file:
+        l <line:
+          type: "code"
+
+        path: x
+        func: p
+      file:
+        !name: $x
+        <func:
+          name: $p
+      same-func: $p
+
+
+facts:
+    - name: same-func
+      match:
+        func:
+          name: $p.name
+          line:
+            count: $p.line.count
+
+----
+
+# This is a scratch pad for CLQL and Lingo syntax
+
+# reserved words:
+# count
+
+match:
+  func:
+    param:
+      count: > 10
+
+# ! (not)
+
+match:
+  func:
+    !name: "blah"
+    !var: exists
+
+# and
+
+match:
+  func:
+    and:
+      name: "blah"
+      var:
+        name: "bob"
+
+# || (or)
+
+match:
+  func:
+    or:
+      name: "blah"
+      and:
+        var:
+          name: "bob"
+        var:
+          name: "sam"
+
+
+# xor
+
+match:
+  func:
+    xor:
+      name: "blah"
+      and:
+        var:
+          name: "bob"
+        var:
+          name: "sam"
+
+match:
+  func:
+    xor:
+      go.call: "open"
+      go.call: "close"
+
+# TODO(waigani)  thinking this out ...
+facts:
+    - name: doc-comment
+      match:
+        asdf: @1
+          asdf:
+
+---
+
+  # each fact has a default attribute for string and regex comparisons
+  var:
+    name: "allInstanceTypes"
+
+  # is the same as
+  var: "allInstanceTypes"
+
+---
+# tenet dependency. Given two tenets, A and B, how can we express the following:
+
+# TODO(waigani) support scope def
+# if A, then B (that is, tenet B will be skipped if tenet A is false)
+Tenents:
+  - name: A
+    match:
+      blah
+
+  - name: B
+    if: A && C
+
+    match:
+      blah
+
+# if A, then not B (that is, tenet B will be skipped if tenet A is true)
+
+Tenents:
+  - name: A
+    match:
+      blah
+
+  - name: B
+    if: (!missing-ec2-type || extra-ec2-type) && incorrect-ec2-data
+    match:
+      blah
+# other logical relationships?
+
+
+
+---
+# following are not complete
+
+# an Open that doesn't return something to be Closed
+lexicons:
+  - codelingo/common as _
+  - codelingo/golang as go
+
+match:
+    return:
+      go.satisfies: "Opener"
+      !go.satisfies: "io.Closer" # "package.InterfaceName"
+
+---
+
+# a PeriodicWorker callback that returns ErrKilled *not* in response to a closed abort chan
+lexicons:
+  - codelingo/common as _
+  - codelingo/golang as go
+
+tenets:
+    - import: http://github.com/codelingo/unused-args/sometenet
+      comment: "blah"
+
+match:
+  go.type: "worker.PeriodicWorker"
+    return:
+      go.type: "tomb.ErrKilled"
+
+
+# various inputs not validated
+# (gaaah everything is callbacks to callbacks to callbacks -- see my essay at http://reviews.vapour.ws/r/4771/#comment26311 -- not sure if it's easy to extract triggers?)

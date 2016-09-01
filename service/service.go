@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kit/kit/sd"
+
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/vcs"
 	"github.com/codelingo/lingo/vcs/backing"
@@ -23,9 +25,8 @@ import (
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/loadbalancer"
-	"github.com/go-kit/kit/loadbalancer/static"
 	"github.com/go-kit/kit/log"
+	loadbalancer "github.com/go-kit/kit/sd/lb"
 	// kitot "github.com/go-kit/kit/tracing/opentracing"
 
 	"github.com/codelingo/lingo/service/server"
@@ -194,9 +195,26 @@ func New() (server.CodeLingoService, error) {
 	}, nil
 }
 
-func buildEndpoint(tracer opentracing.Tracer, operationName string, instances []string, factory loadbalancer.Factory, seed int64, logger log.Logger) endpoint.Endpoint {
-	publisher := static.NewPublisher(instances, factory, logger)
-	random := loadbalancer.NewRandom(publisher, seed)
+// TODO(waigani) this needs to be refactored. It was using the original go-kit
+// pattern - which then changed, a lot. Below is a quick fix to get the client
+// working, but we need to rewrite grpc client/server to use the new go-kit
+// patterns.
+func buildEndpoint(tracer opentracing.Tracer, operationName string, instances []string, factory sd.Factory, seed int64, logger log.Logger) endpoint.Endpoint {
+	// publisher := static.NewPublisher(instances, factory, logger)
+
+	var endpoints []endpoint.Endpoint
+	for _, inst := range instances {
+		ep, closer, err := factory(inst)
+		if err != nil {
+			logger.Log(err)
+		}
+		// TODO(waigani) when do we close?
+		_ = closer
+		endpoints = append(endpoints, ep)
+	}
+
+	subscriber := sd.FixedSubscriber(endpoints)
+	random := loadbalancer.NewRandom(subscriber, seed)
 	endpoint := loadbalancer.Retry(10, 10*time.Second, random)
 	return endpoint
 	// return kitot.TraceClient(tracer, operationName)(endpoint)

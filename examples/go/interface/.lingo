@@ -1,0 +1,9 @@
+# find all funcs that return an interface
+lexicons:
+  - codelingo/common as _
+  - codelingo/golang as go
+
+match:
+  <func:
+    go.return:
+      basetype: "interface"

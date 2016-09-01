@@ -1,0 +1,77 @@
+#find all instances of packages which are only imported once in the project
+lexicons:
+  - codelingo/common as _
+  - codelingo/set as s
+  - codelingo/semantic as sem
+  - codelingo/cplusplus as cpp
+
+tenets:
+	- name: unusual-packages
+	  doc: "Packages should be imported more than once in the project"
+	  comment: "package $n is unusual in your project. Do you actually need it?"
+	  match:
+		import:
+			name: n
+		<import:
+			name: $n
+			count: == 1
+
+	- name: no-friend-classes
+	  doc: "Friend classes are forbidden"
+	  comment: "$f is a friend class, which is bad programming practice, please avoid them."
+	  match:
+		class:
+			cpp.friend-class:
+				<name: f
+
+
+	- name: private-var-pass-by-ref
+	  doc: "Pointers to protected internal memory must not be leaked by public functions"
+	  comment:
+		  - "$v is a protected member varible. Please do not pass by reference out of public functions!"
+		  - "$v is also protected. Do not ref pass private vars out of public functions "
+		  - "$v: Priv var returned by ref again!"
+	  match:
+		class: c
+			var[1]:
+				access: private
+				name: v
+		func:
+			access: public
+			return:
+				byref: $v
+
+	- name: func-over-used-parameters 
+	  doc: "Groups of common parameters amoung functions should be placed into a data structure"
+	  comment: "Consider grouping the following common parameters in a dataset: \n {{range c := $C}} {{c}}, {{end}}"
+	  match:
+		func:
+			name: x
+			args: a
+		<func:
+			!name: $x
+			args: b
+		s.venn:
+			set: $a
+			set: $b
+			intersect: > 2
+			intersect: $C
+
+	- name: semantically-identical-revised-code
+	  doc: "Fresh commits must not inadvently revert to old code"
+	  comment:
+		text:
+		 - "The following code originally appeared in $h"
+		 - "Unintentional code reversion to $h"
+	  match:
+		file:
+			path: p
+			sem.merkle: 
+				hash: h
+				chunk: c
+		git.history:
+			file:
+				path: $p
+				merkle:
+					hash: $h
+

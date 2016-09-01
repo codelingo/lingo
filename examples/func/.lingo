@@ -1,0 +1,11 @@
+# find all funcs named "foo"
+lexicons:
+  - codelingo/common as _
+
+tenets:
+	- name: foo-func
+	  doc: "No funcs called 'foo'."
+	  comment: "Func name should not be foo"
+	  match:
+	    <func:
+	      name: "foo"

@@ -1,0 +1,164 @@
+#find all instances of packages which are only imported once in the project
+lexicons:
+  - codelingo/common as _
+
+tenets:
+	- name: unusual-packages
+	  doc: "Packages should be imported more than once in the project"
+	  comment: "This package is unusual in your project. Do you actually need it?"
+	  match:
+		import:
+			name: n
+		<import:
+			name: $n
+			count: == 1
+
+	- name: non-unique-function-name
+	  doc: "Function names must be unique across the project"
+	  comment: "This function name is not unique across your project"
+	  match:
+		func:
+			name: n
+		<func:
+			name: $n
+			count: > 1
+
+	- name: unused-args
+	  doc: "Functions must not have unused arguments"
+	  comment: 
+		text: "This function has unused arguments: "
+		group_concat:
+			set: $x
+			limit: 3
+	  match:
+		<func: 
+			args: x
+			expr:
+				var: y
+		!set-compare:
+			sub: $x
+			super: $y
+		
+	- name: no-friend-classes
+	  doc: "Friend classes are forbidden"
+	  comment:
+		text: "Friend classes are bad programming practice, please avoid them: "
+		group_concat:
+			set: $f
+			limit: 3
+	  match:
+		class:
+			cpp.friend-class:
+				<name: f
+	
+
+	- name: private-var-pass-by-ref
+	  doc: "Pointers to protected internal memory must not be leaked by public functions"
+	  comment:
+		text:
+		  - "Please do not pass protected member varaibles by reference out of public functions! "
+		  - "Do not ref pass private vars out of public functions "
+		  - "Priv var returned by ref again!"
+		group_concat:
+			set: $v
+			limit: 3
+	  match:
+		class: c
+			var[1]:
+				access: private
+				name: v
+		func:
+			access: public
+			return:
+				byref: $v
+		
+
+	- name: func-no-comments
+	  doc: "Functions except main() must have comment blocks"
+	  comment:
+		text: "Please add a comment block to the head of "
+		group_concat:
+			set: $n
+			limit: 3
+	 	exhaust: "Missing function comments."
+	  match:
+		func:
+			!comment
+			name: n
+		
+	- name: func-over-used-parameters 
+	  doc: "Groups of common parameters amoung functions should be placed into a data structure"
+	  comment:
+		text: "These parameters appear many times in various functions. Consider grouping them in a dataset: "
+		group_concat:
+			set: $c
+			limit: 3
+	  match:
+		func:
+			name: x
+			args: a
+		<func:
+			!name: $x
+			args: b
+		set-intersect: c
+			operand: $a
+			operand: $b
+			count: > 2
+				
+
+	- name: find-base-class-instantiations
+	  doc: "Base class instantiation is forbidden. Use factory or specific subclass!"
+	  comment:
+		text:
+		  - "The following base classes are being directly instantiated: "
+		  - "Base classes directly instantiated: "
+		  - "Instantiation of base classes (again): "
+		group_concat:
+			set: $c
+			limit: 3
+		text:
+		  - " Please use the appropriate factory or subclass."
+		  - " Use a factory."
+		  - ""
+	  match:
+		new:
+			class: c
+		class: $c
+			!super	
+		
+
+	- name: semantically-identical-revised-code
+	  doc: "Fresh commits must not inadvently revert to old code"
+	  comment:
+		text:
+		 - "The following code originally appeared in"
+		 - "Unintentional code reversion to "
+		group_concat:
+			set: $c
+			limit: 3
+	  match:
+		file:
+			path: p
+			merkle: 
+				hash: h
+				chunk: c
+		git.history:
+			file:
+				path: $p
+				merkle:
+					hash: $h
+
+	- name: long-func-names
+	  doc: "Function names shall be no longer than 10 characters"
+	  comment:
+		text: "The function "
+		text: $x
+		text: " is longer than 10 characters"
+	  match:
+		func:
+			name:
+				like: /^somename$/
+				string: x
+				length: 
+					having: > 10
+				

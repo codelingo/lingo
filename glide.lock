@@ -1,5 +1,5 @@
-hash: 51db6b78283c011fe7cea03110f1a41295ce46628ea57d4268bc56fffedaa7da
-updated: 2016-08-30T09:58:01.832836132+12:00
+hash: c56617351c925eee0542886f63ce2e430240d16dea1c76e157f862a2b653e82a
+updated: 2016-09-01T22:51:38.575222836+12:00
 imports:
 - name: git.apache.org/thrift.git
   version: e4ba16495e8d8177eb85d6bfcc69089b38753e39
@@ -56,13 +56,14 @@ imports:
   - windows/svc
   - windows/svc/mgr
 - name: github.com/go-kit/kit
-  version: 95fa4134d6fab121383dc561f698a8990ea78332
+  version: 483f2cd7ba885520c7dbc6e50199140925f7b68d
   subpackages:
   - endpoint
   - loadbalancer
-  - loadbalancer/fixed
   - loadbalancer/static
   - log
+  - sd
+  - sd/lb
   - transport/grpc
 - name: github.com/go-logfmt/logfmt
   version: d4327190ff838312623b09bfeb50d7c93c8d9c1d

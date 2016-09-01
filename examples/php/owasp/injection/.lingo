@@ -1,0 +1,74 @@
+lexicons:
+  - codelingo/common as _
+  - codelingo/php
+
+tenets:
+  - name: disallow-unsafe-mysql-functions
+    doc: "Old unsafe mysql functions should not be used due to SQL injection"
+    comment: "Please use mysqli / prepared statements only"
+    match:
+      php.file: #filter to select only project files which contain valid php
+        callexpr:
+          name: /^mysql_.*$/
+
+  - name: disallow-string-concat-prepared-stmt
+    doc: "Prepared statements must not use string concatenation unless absolutely necessary"
+    comment: "This SQL query uses string concatenation or retrives SQL from a variable which may be vulnerable to injection, please review"
+    match:
+      php.file:
+           match:
+     php.file:
+         callexpr:
+           param: p[0] # only capture first param. If callexpr has no params, this line returns false and query exits
+           or:
+             and:
+               class: "mysqli"
+               name: "query"
+             name: "mysqli_query"
+             and:
+               class: "mysqli"
+               name: "prepare"
+             name: "mysqli_prepare"
+
+           $p[0]: # match only if first param was set in one of the or branches above
+             type: "stringliteral" # match only if first param isn't a string literal (that is: if the first argment to query or prepare is something other than a string literal)
+
+   - name: disallow-ddl-in-queries
+     doc: "Mysql queries executed from PHP must not contain DDL (truncate, drop, alter, create, etc.)"
+     comment: "This SQL statement is actually DDL which is forbidden from being called in PHP by this tenet"
+     php.file:
+        callexpr:
+         param: p[0] # only capture first param. If callexpr has no params, this line returns false and query exits
+         or: # queries can be executed under mysqli through either _query or _prepare or through the same using a mysqli object
+           and:
+             class: "mysqli"
+             name: "query"
+           name: "mysqli_query"
+           and:
+             class: "mysqli"
+             name: "prepare"
+           name: "mysqli_prepare"
+        $p[0]:
+          type: "stringliteral"
+          !string: /^SELECT|INSERT|UPDATE|DELETE/i
+
+#this is the same as the last tenet except here we use language in language support, which will actually parse the SQL inside the php call and then allow us access to the SQL as an abstract syntax tree. This is a more complete solution than the above because it will catch all the edge cases like SELECT 1; DROP TABLE blah;
+   - name: disallow-ddl-in-queries-using-lil-support
+     doc: "Mysql queries executed from PHP must not contain DDL (truncate, drop, alter, create, etc.)"
+     comment: "This SQL statement is actually DDL which is forbidden from being called in PHP by this tenet"
+     match:
+       php.file:
+        callexpr:
+         param: p[0] # only capture first param. If callexpr has no params, this line returns false and query exits
+         or: # queries can be executed under mysqli through either _query or _prepare or through the same using a mysqli object
+           and:
+             class: "mysqli"
+             name: "query"
+           name: "mysqli_query"
+           and:
+             class: "mysqli"
+             name: "prepare"
+           name: "mysqli_prepare"
+        $p[0]:
+           sql.statement:
+             !sql.ddl_statement

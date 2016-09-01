@@ -54,7 +54,12 @@ func (c cfgInfo) walk(keyPath []string) (string, error) {
 		if c.info[keyPath[0]] == nil {
 			return "", errors.Errorf("config %q not found", strings.Join(keyPath, "."))
 		}
-		c.info = c.info[keyPath[0]].(map[interface{}]interface{})
+
+		var ok bool
+		c.info, ok = c.info[keyPath[0]].(map[interface{}]interface{})
+		if !ok {
+			return "", errors.Errorf("malformed config file. Expected map[interface{}]interface{}, got %T", c.info[keyPath[0]])
+		}
 		return c.walk(keyPath[1:])
 	}
 
