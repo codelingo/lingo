@@ -2,8 +2,8 @@
 
 # Requires go 1.5 or higher
 # Must be run from root of github.com/codelingo/lingo
-#
-# $ scripts/cross_compile.sh 0.1.0
+# To run:
+# $ scripts/release.sh 0.1.0
 
 set -x
 if [ $# -eq 0 ]
