@@ -54,6 +54,8 @@ formatted correctly.
 
 - When updating a dependency, make sure glide.yaml / godeps version is updated.
 
+- update changelog with each commit
+
 little bash script to scrape out facts:
 
 cat `find . | grep '\.lingo'` | tr '\t' ' ' | sed 's/ -//g' | grep -oE '^ *[a-z0-9\._\-]+:' | grep -oE '[a-z0-9\._\-]+:' | sort | uniq
