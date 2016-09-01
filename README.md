@@ -10,7 +10,7 @@ $ cd $GOPATH/src/github.com/codelingo/lingo
 $ make install
 ```
 
-This will download, build and and place the `lingo` binary on your $PATH
+This will download, build and place the `lingo` binary on your $PATH
 
 ### Windows
 
