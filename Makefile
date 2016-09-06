@@ -11,9 +11,6 @@ install:
 	# then get the latest commit
 	git pull
 
-	# update dep versions
-	glide up
-
 	# install deps
 	glide install
 
