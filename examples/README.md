@@ -54,7 +54,7 @@ formatted correctly.
 
 - When updating a dependency, make sure glide.yaml / godeps version is updated.
 
-- update changelog with each commit
+- update changelog with each significant commit
 
 little bash script to scrape out facts:
 

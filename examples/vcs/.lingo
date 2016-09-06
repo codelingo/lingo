@@ -1,21 +1,19 @@
 # find func who's got extra params from last pr
 
 lexicons:
-  - codelingo/common as _
   - codelingo/git
+  - codelingo/aws
 
 tenets:
   - name: growing-args
-    import: codelingo/java
     doc: "funcs should not take more than three args"
     comment: "The arg list to this func is getting quite long. It should instead take a dataset."
     match:
     <func:
       git.commit: "HEAD^"
         param:
-          count: P
+          count: p
       param:
-        count: > $P
-        count: > 3
+        count: > $p
 
 
