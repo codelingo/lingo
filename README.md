@@ -40,7 +40,7 @@ Place the lingo binary on your $PATH.
   git add README.md
   git commit -m "first commit"
   git remote add codelingo http://codelingo.io:3030/<your-username>/<your-repo-name>.git
-  Git push -u codelingo master
+  git push -u codelingo master
   ```
 
   It's important that the remote is called “codelingo”, as this is how the lingo client knows which repository to sync with on codelingo.io.
@@ -113,42 +113,11 @@ The "<" symbol returns the node that you're interested in. The review comment is
 
 ## CLQL
 
-CLQL is the query language under the `match:` section of a Tenet. It stands for CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but a practical to get acquainted with the language is to review the [examples](codelingo/lingo/examples).
+CLQL is the query language under the `match:` section of a Tenet. It stands for CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but a practical to get acquainted with the language is to review the [examples](examples).
 
-Release v0.1.0 is a partial implementation of CLQL. String and regex assertions, as demonstrated above, are supported against the following facts in PHP:
+Release v0.1.1 has a partial implementation of CLQL. String and regex assertions, as demonstrated above, are supported against found facts. This list of avaialable facts are currently language specific and can be found in the relevant doc page in the manual:
 
-```yaml
-func:
-  name:
-
-call:
-  name:
-
-arg:
-  name:
-  type:
-
-class:
-  name:
-
-var:
-  name:
-
-literal:
- value:
- type:
-```
-
-### Types
-
-"string", "integer", "float", "boolean", "null", "resource", "array", "object", "function", "invalid-type" can be passed to type fact e.g.
-
-```yaml
-match:
-  literal:
-    type: "string"
-
-```
+* [PHP](doc/PHP.md)
 
 Other than the match statement, written in CLQL, the rest of a .lingo file is written in YAML. As such, you can set .lingo files to YAML syntax in your IDE to get partial highlighting. Vim has full support for the Lingo syntax, including CLQL. To set it up, [see here](scripts/lingo.vim.readme).
 
