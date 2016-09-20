@@ -60,12 +60,16 @@ message QueryReply {
 
 // The request message containing the files or directories to review.
 message ReviewRequest {
-  string owner = 1;
-  string repo= 2;
-  string sha = 3;
-  repeated string filesAndDirs = 4;
-  bool recursive = 5;
-  repeated string Patches = 6;
+  string host = 1;
+  string owner = 2;
+  string repo= 3;
+  string sha = 4;
+  repeated string filesAndDirs = 5;
+  bool recursive = 6;
+  repeated string Patches = 7;
+  bool isPullRequest = 8;
+  int64 pullRequestID = 9;
+
 }
 
 message ReviewReply {

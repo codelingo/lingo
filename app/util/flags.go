@@ -72,6 +72,10 @@ var (
 		"driver",
 		"i",
 	}
+	LingoFile = flagName{
+		"lingo-file",
+		"lf",
+	}
 )
 
 func (f *flagName) String() string {

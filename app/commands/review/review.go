@@ -15,22 +15,51 @@ import (
 
 func Review(opts Options) ([]*codelingo.Issue, error) {
 
+	// build the review request either from a pull request URL or the current repository
+	var reviewReq *server.ReviewRequest
+
+	// Build request from pull-request url
+	if opts.PullRequest != "" {
+		// TODO(waigani) support other hosts, e.g. bitbucket
+		prOpts, err := parseGithubPR(opts.PullRequest)
+		if err == nil {
+			return nil, errors.Trace(err)
+		}
+
+		reviewReq = &server.ReviewRequest{
+			Host:          prOpts.Host,
+			Owner:         prOpts.RepoOwner,
+			Repo:          prOpts.RepoName,
+			IsPullRequest: true,
+			PullRequestID: prOpts.PRID,
+			// TODO(waigani) make this a CLI flag
+			Recursive: false,
+		}
+
+		// Otherwise, build review request from current repository
+	} else {
+		owner, repo, err := repoOwnerAndNameFromRemote()
+		if err != nil {
+			return nil, errors.Annotate(err, "\nlocal vcs error")
+		}
+
+		reviewReq = &server.ReviewRequest{
+			Host:         "local",
+			Owner:        owner,
+			Repo:         repo,
+			FilesAndDirs: opts.FilesAndDirs,
+			// TODO(waigani) make this a CLI flag
+			Recursive: true,
+		}
+
+	}
+
 	svc, err := service.New()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	owner, repo, err := repoOwnerAndNameFromRemote()
-	if err != nil {
-		return nil, errors.Annotate(err, "\nlocal vcs error")
-	}
 
-	issues, err := svc.Review(&server.ReviewRequest{
-		Owner:        owner,
-		Repo:         repo,
-		FilesAndDirs: opts.Files,
-		// TODO(waigani) make this a CLI flag
-		Recursive: true,
-	})
+	issues, err := svc.Review(reviewReq)
 	if err != nil {
 
 		if strings.Contains(err.Error(), "ambiguous argument 'HEAD'") {
@@ -158,8 +187,11 @@ func repoOwnerAndNameFromRemote() (string, string, error) {
 // }
 
 type Options struct {
-	Files      []string // ctx.Args()
-	Diff       bool     // ctx.Bool("diff")
-	SaveToFile string   // ctx.String("save")
-	KeepAll    bool     // ctx.Bool("keep-all")
+	// TODO(waigani) validate PullRequest
+	PullRequest  string
+	FilesAndDirs []string
+	Diff         bool   // ctx.Bool("diff") TODO(waigani) this should be a sub-command which proxies to git diff
+	SaveToFile   string // ctx.String("save")
+	KeepAll      bool   // ctx.Bool("keep-all")
+	// TODO(waigani) add streaming json output
 }

@@ -12,6 +12,8 @@ type QueryResponse struct {
 
 // ReviewRequest is the business domain type for a Review method request.
 type ReviewRequest struct {
+	// The repository host. Examples: "local", "github"
+	Host string
 	// name of the git user or org that owns the repo
 	Owner string `json:"repoowner`
 	// name of the repo
@@ -19,6 +21,7 @@ type ReviewRequest struct {
 	// sha of the commit to review
 	SHA string `json:"sha"`
 	// list of files and directories to limit the review to
+	// TODO(waigani) support byte-offsets with files:  main.go:2343,4321;3421,3432;
 	FilesAndDirs []string `json:"fileordirs"`
 
 	// if true, all decendant files under dirs in FilesAndDirs will be reviewed.
@@ -27,6 +30,9 @@ type ReviewRequest struct {
 	// a diff patch to apply to the remote branch before reviewing
 	Patches []string
 
+	IsPullRequest bool
+
+	PullRequestID int
 	// TODO(waigani) add VCS field here
 }
 

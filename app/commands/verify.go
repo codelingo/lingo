@@ -76,6 +76,8 @@ func (r require) HelpMsg() string {
 	return fmt.Sprintf("unknown require type %d", r)
 }
 
+// TODO(waigani) allow outside repo if we're making a remote pr review. Get
+// the repo owner/name from the PR URL.
 func verifyVCS() error {
 	cmd := exec.Command("git", "status")
 

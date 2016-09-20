@@ -11,31 +11,39 @@ import (
 
 const ClientVersion = "0.1.1"
 
-var cmds = map[require][]*cli.Command{}
+type lingoCMD struct {
+	isSubCMD bool
+	cmd      *cli.Command
+}
+
+var cmds = map[require][]*lingoCMD{}
 
 // returns a map of cmd name to list of requirements
-func cmdRequirements(c map[require][]*cli.Command) map[string][]require {
+func cmdRequirements(c map[require][]*lingoCMD) map[string][]require {
 	req := map[string][]require{}
 
 	for r, cmdList := range c {
-		for _, cmd := range cmdList {
-			req[cmd.Name] = append(req[cmd.Name], r)
+		for _, lCMD := range cmdList {
+			req[lCMD.cmd.Name] = append(req[lCMD.cmd.Name], r)
 		}
 	}
 	return req
 }
 
-func register(cmd *cli.Command, req ...require) {
-	cmds[baseRq] = append(cmds[baseRq], cmd)
+func register(cmd *cli.Command, isSubcommand bool, req ...require) {
+	lCMD := &lingoCMD{isSubcommand, cmd}
+	cmds[baseRq] = append(cmds[baseRq], lCMD)
 	for _, r := range req {
-		cmds[r] = append(cmds[r], cmd)
+		cmds[r] = append(cmds[r], lCMD)
 	}
 }
 
 func All() []cli.Command {
 	var all []cli.Command
-	for _, cmd := range cmds[baseRq] {
-		all = append(all, *cmd)
+	for _, lCMD := range cmds[baseRq] {
+		if !lCMD.isSubCMD {
+			all = append(all, *lCMD.cmd)
+		}
 	}
 	return all
 }

@@ -29,6 +29,20 @@ func (p *platformConfig) GitRemoteName() (string, error) {
 	return p.Get("gitserver.remote.name")
 }
 
+func (p *platformConfig) GitServerAddr() (string, error) {
+
+	addr, err := p.Get("gitserver.remote.addr")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	port, err := p.Get("gitserver.remote.port")
+	if err != nil || port == "" {
+		return addr, nil
+	}
+	return addr + ":" + port, nil
+}
+
 func (p *platformConfig) GrpcAddress() (string, error) {
 
 	addr, err := p.Get("addr")
@@ -65,4 +79,6 @@ test:
   gitserver:
     remote:
       name: "codelingo_dev"
+      addr: "http://localhost"
+      port: "3000"
 `[1:]

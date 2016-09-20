@@ -26,6 +26,7 @@ func init() {
 		},
 		Action: updateAction,
 	},
+		false,
 		homeRq,
 	)
 }
