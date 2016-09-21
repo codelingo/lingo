@@ -25,13 +25,15 @@ func decodeQueryResponse(ctx context.Context, response interface{}) (interface{}
 func encodeReviewRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(*server.ReviewRequest)
 	return &codelingo.ReviewRequest{
-		Host:         req.Host,
-		Owner:        req.Owner,
-		Repo:         req.Repo,
-		Sha:          req.SHA,
-		FilesAndDirs: req.FilesAndDirs,
-		Recursive:    req.Recursive,
-		Patches:      req.Patches,
+		Host:          req.Host,
+		Owner:         req.Owner,
+		Repo:          req.Repo,
+		Sha:           req.SHA,
+		FilesAndDirs:  req.FilesAndDirs,
+		Recursive:     req.Recursive,
+		Patches:       req.Patches,
+		IsPullRequest: req.IsPullRequest,
+		PullRequestID: int64(req.PullRequestID),
 	}, nil
 }
 

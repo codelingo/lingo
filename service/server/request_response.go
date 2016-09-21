@@ -12,7 +12,7 @@ type QueryResponse struct {
 
 // ReviewRequest is the business domain type for a Review method request.
 type ReviewRequest struct {
-	// The repository host. Examples: "local", "github"
+	// The repository host. Examples: "local", "github_com"
 	Host string
 	// name of the git user or org that owns the repo
 	Owner string `json:"repoowner`

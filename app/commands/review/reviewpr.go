@@ -35,9 +35,10 @@ func parseGithubPR(urlStr string) (*PROpts, error) {
 		return nil, errors.Trace(err)
 	}
 
+	host := strings.Replace(result.Host, ".", "_", -1)
 	return &PROpts{
 		RepoOpts: RepoOpts{
-			Host:      result.Host,
+			Host:      host,
 			RepoOwner: parts[0],
 			RepoName:  parts[1],
 		},

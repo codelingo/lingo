@@ -58,6 +58,13 @@ formatted correctly.
 
 * finding who has done most work in area of codebase a direct them to handle the technical debt in that area.
 
+- string search inside node e.g. 
+
+func:
+  line:
+	content: /"github\.com.*/
+
+
 little bash script to scrape out facts:
 
 cat `find . | grep '\.lingo'` | tr '\t' ' ' | sed 's/ -//g' | grep -oE '^ *[a-z0-9\._\-]+:' | grep -oE '[a-z0-9\._\-]+:' | sort | uniq
