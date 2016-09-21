@@ -13,12 +13,10 @@ import (
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
 
-	"github.com/lightstep/lightstep-tracer-go"
 	"github.com/opentracing/opentracing-go"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
-	appdashot "github.com/sourcegraph/appdash/opentracing"
+	// zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	// appdashot "github.com/sourcegraph/appdash/opentracing"
 	"golang.org/x/net/context"
-	"sourcegraph.com/sourcegraph/appdash"
 
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
@@ -105,9 +103,9 @@ func New() (server.CodeLingoService, error) {
 		grpcAddrs = flag.String("grpc.addrs", grpcAddr, "Comma-separated list of addresses for gRPC servers")
 
 		// Three OpenTracing backends (to demonstrate how they can be interchanged):
-		zipkinAddr           = flag.String("zipkin.kafka.addr", "", "Enable Zipkin tracing via a Kafka Collector host:port")
-		appdashAddr          = flag.String("appdash.addr", "", "Enable Appdash tracing via an Appdash server host:port")
-		lightstepAccessToken = flag.String("lightstep.token", "", "Enable LightStep tracing via a LightStep access token")
+		//	zipkinAddr           = flag.String("zipkin.kafka.addr", "", "Enable Zipkin tracing via a Kafka Collector host:port")
+		// appdashAddr          = flag.String("appdash.addr", "", "Enable Appdash tracing via an Appdash server host:port")
+		// lightstepAccessToken = flag.String("lightstep.token", "", "Enable LightStep tracing via a LightStep access token")
 	)
 	flag.Parse()
 	if len(os.Args) < 2 {
@@ -126,38 +124,38 @@ func New() (server.CodeLingoService, error) {
 
 	// Set up OpenTracing
 	var tracer opentracing.Tracer
-	{
-		switch {
-		case *appdashAddr != "" && *lightstepAccessToken == "" && *zipkinAddr == "":
-			tracer = appdashot.NewTracer(appdash.NewRemoteCollector(*appdashAddr))
-		case *appdashAddr == "" && *lightstepAccessToken != "" && *zipkinAddr == "":
-			tracer = lightstep.NewTracer(lightstep.Options{
-				AccessToken: *lightstepAccessToken,
-			})
-			defer lightstep.FlushLightStepTracer(tracer)
-		case *appdashAddr == "" && *lightstepAccessToken == "" && *zipkinAddr != "":
-			collector, err := zipkin.NewKafkaCollector(
-				strings.Split(*zipkinAddr, ","),
-				zipkin.KafkaLogger(tracingLogger),
-			)
-			if err != nil {
-				tracingLogger.Log("err", "unable to create kafka collector", "fatal", err)
-				os.Exit(1)
-			}
-			tracer, err = zipkin.NewTracer(
-				zipkin.NewRecorder(collector, false, "localhost:8000", "querysvc-client"),
-			)
-			if err != nil {
-				tracingLogger.Log("err", "unable to create zipkin tracer", "fatal", err)
-				os.Exit(1)
-			}
-		case *appdashAddr == "" && *lightstepAccessToken == "" && *zipkinAddr == "":
-			tracer = opentracing.GlobalTracer() // no-op
-		default:
-			tracingLogger.Log("fatal", "specify a single -appdash.addr, -lightstep.access.token or -zipkin.kafka.addr")
-			os.Exit(1)
-		}
-	}
+	// {
+	// 	switch {
+	// 	case *appdashAddr != "" && *lightstepAccessToken == "" && *zipkinAddr == "":
+	// 		tracer = appdashot.NewTracer(appdash.NewRemoteCollector(*appdashAddr))
+	// 	case *appdashAddr == "" && *lightstepAccessToken != "" && *zipkinAddr == "":
+	// 		tracer = lightstep.NewTracer(lightstep.Options{
+	// 			AccessToken: *lightstepAccessToken,
+	// 		})
+	// 		defer lightstep.FlushLightStepTracer(tracer)
+	// 	case *appdashAddr == "" && *lightstepAccessToken == "" && *zipkinAddr != "":
+	// 		collector, err := zipkin.NewKafkaCollector(
+	// 			strings.Split(*zipkinAddr, ","),
+	// 			zipkin.KafkaLogger(tracingLogger),
+	// 		)
+	// 		if err != nil {
+	// 			tracingLogger.Log("err", "unable to create kafka collector", "fatal", err)
+	// 			os.Exit(1)
+	// 		}
+	// 		tracer, err = zipkin.NewTracer(
+	// 			zipkin.NewRecorder(collector, false, "localhost:8000", "querysvc-client"),
+	// 		)
+	// 		if err != nil {
+	// 			tracingLogger.Log("err", "unable to create zipkin tracer", "fatal", err)
+	// 			os.Exit(1)
+	// 		}
+	// 	case *appdashAddr == "" && *lightstepAccessToken == "" && *zipkinAddr == "":
+	// 		tracer = opentracing.GlobalTracer() // no-op
+	// 	default:
+	// 		tracingLogger.Log("fatal", "specify a single -appdash.addr, -lightstep.access.token or -zipkin.kafka.addr")
+	// 		os.Exit(1)
+	// 	}
+	// }
 
 	instances := strings.Split(*grpcAddrs, ",")
 	queryFactory := grpcclient.MakeQueryEndpointFactory(tracer, tracingLogger)
