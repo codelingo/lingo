@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/codelingo/lingo/app/util"
+	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
 
@@ -55,7 +56,7 @@ func reviewPullRequestAction(ctx *cli.Context) {
 
 	issues, err := review.Review(opts)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(errors.ErrorStack(err))
 		return
 		// errors.ErrorStack(err)
 	}

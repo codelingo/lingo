@@ -25,6 +25,7 @@ func EncodeQueryResponse(ctx context.Context, resp interface{}) (interface{}, er
 func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	reviewRequest := req.(*codelingo.ReviewRequest)
 	return &server.ReviewRequest{
+		Host:         reviewRequest.Host,
 		Owner:        reviewRequest.Owner,
 		Repo:         reviewRequest.Repo,
 		SHA:          reviewRequest.Sha,

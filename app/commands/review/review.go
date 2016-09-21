@@ -8,6 +8,8 @@ import (
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
+	"github.com/codelingo/lingo/vcs"
+	"github.com/codelingo/lingo/vcs/backing"
 
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
@@ -22,7 +24,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if opts.PullRequest != "" {
 		// TODO(waigani) support other hosts, e.g. bitbucket
 		prOpts, err := parseGithubPR(opts.PullRequest)
-		if err == nil {
+		if err != nil {
 			return nil, errors.Trace(err)
 		}
 
@@ -35,23 +37,40 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 			// TODO(waigani) make this a CLI flag
 			Recursive: false,
 		}
-
 		// Otherwise, build review request from current repository
 	} else {
-		owner, repo, err := repoOwnerAndNameFromRemote()
+		owner, repoName, err := repoOwnerAndNameFromRemote()
 		if err != nil {
 			return nil, errors.Annotate(err, "\nlocal vcs error")
+		}
+
+		// TODO(waigani) pass this in as opt
+		repo := vcs.New(backing.Git)
+
+		sha, err := repo.CurrentCommitId()
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		if err := repo.Sync(); err != nil {
+			return nil, err
+		}
+
+		patches, err := repo.Patches()
+		if err != nil {
+			return nil, errors.Trace(err)
 		}
 
 		reviewReq = &server.ReviewRequest{
 			Host:         "local",
 			Owner:        owner,
-			Repo:         repo,
+			Repo:         repoName,
 			FilesAndDirs: opts.FilesAndDirs,
+			SHA:          sha,
+			Patches:      patches,
 			// TODO(waigani) make this a CLI flag
 			Recursive: true,
 		}
-
 	}
 
 	svc, err := service.New()

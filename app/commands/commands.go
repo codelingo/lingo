@@ -58,8 +58,21 @@ func Before(c *cli.Context) error {
 	if args.Present() {
 		currentCMDName = args.First()
 		flags = args.Tail()
-	}
 
+		// TODO(waigani) This is a manual hack to validate subcommands. Why is
+		// c.Command.Name empty?
+		subCMDs := map[string][]string{
+			"review": []string{"pull-request", "pr"},
+		}
+		if subs, ok := subCMDs[args.First()]; ok {
+			for _, subCMD := range subs {
+				if c.Args().Get(1) == subCMD {
+					currentCMDName = subCMD
+					break
+				}
+			}
+		}
+	}
 	// No requirements should be needed to show help
 	if isHelpAlias(flags) {
 		return nil

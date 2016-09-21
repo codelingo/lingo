@@ -11,8 +11,6 @@ import (
 	"github.com/go-kit/kit/sd"
 
 	"github.com/codelingo/lingo/app/util/common/config"
-	"github.com/codelingo/lingo/vcs"
-	"github.com/codelingo/lingo/vcs/backing"
 	"github.com/juju/errors"
 
 	"github.com/lightstep/lightstep-tracer-go"
@@ -68,34 +66,15 @@ func (c client) Query(clql string) (string, error) {
 }
 
 func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
-	// TODO(waigani) pass this in as opt
-	repo := vcs.New(backing.Git)
-
 	// set defaults
+	if req.Host == "" {
+		return nil, errors.New("repository host is not set")
+	}
 	if req.Owner == "" {
 		return nil, errors.New("repository owner is not set")
 	}
 	if req.Repo == "" {
 		return nil, errors.New("repository name is not set")
-	}
-
-	if req.SHA == "" {
-
-		sha, err := repo.CurrentCommitId()
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		req.SHA = sha
-	}
-
-	if err := repo.Sync(); err != nil {
-		return nil, err
-	}
-
-	var err error
-	req.Patches, err = repo.Patches()
-	if err != nil {
-		return nil, errors.Trace(err)
 	}
 
 	reply, err := c.endpoints["review"](c.Context, req)

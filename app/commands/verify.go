@@ -110,7 +110,6 @@ func verifyAuth() error {
 }
 
 func verifyDotLingo() error {
-
 	_, err := os.Stat(".lingo")
 	return err
 
