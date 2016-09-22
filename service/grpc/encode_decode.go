@@ -34,6 +34,7 @@ func encodeReviewRequest(ctx context.Context, request interface{}) (interface{},
 		Patches:       req.Patches,
 		IsPullRequest: req.IsPullRequest,
 		PullRequestID: int64(req.PullRequestID),
+		Vcs:           req.Vcs,
 	}, nil
 }
 

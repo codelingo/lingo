@@ -33,6 +33,7 @@ func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, err
 		Recursive:     reviewRequest.Recursive,
 		Patches:       reviewRequest.Patches,
 		IsPullRequest: reviewRequest.IsPullRequest,
+		Vcs:           reviewRequest.Vcs,
 		PullRequestID: int(reviewRequest.PullRequestID),
 	}, nil
 }

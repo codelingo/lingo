@@ -70,7 +70,6 @@ message ReviewRequest {
   bool isPullRequest = 8;
   int64 pullRequestID = 9;
   string vcs = 10;
-
 }
 
 message ReviewReply {

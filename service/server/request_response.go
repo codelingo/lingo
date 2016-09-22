@@ -34,6 +34,7 @@ type ReviewRequest struct {
 
 	PullRequestID int
 	// TODO(waigani) add VCS field here
+	Vcs string
 }
 
 // ReviewResponse is the business domain type for a Review method response.
