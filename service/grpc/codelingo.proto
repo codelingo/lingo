@@ -69,6 +69,7 @@ message ReviewRequest {
   repeated string Patches = 7;
   bool isPullRequest = 8;
   int64 pullRequestID = 9;
+  string vcs = 10;
 
 }
 

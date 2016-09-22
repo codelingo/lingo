@@ -212,5 +212,6 @@ type Options struct {
 	Diff         bool   // ctx.Bool("diff") TODO(waigani) this should be a sub-command which proxies to git diff
 	SaveToFile   string // ctx.String("save")
 	KeepAll      bool   // ctx.Bool("keep-all")
+	// TODO(waigani) add KeepAllWithTag. Use this for CLAIR autoreviews
 	// TODO(waigani) add streaming json output
 }
