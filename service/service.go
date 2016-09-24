@@ -1,7 +1,6 @@
 package service
 
 import (
-	"flag"
 	"os"
 	"strings"
 	"time"
@@ -98,14 +97,14 @@ func New() (server.CodeLingoService, error) {
 	}
 
 	var (
-		grpcAddrs = flag.String("grpc.addrs", grpcAddr, "Comma-separated list of addresses for gRPC servers")
+		grpcAddrs = grpcAddr //flag.String("grpc.addrs", grpcAddr, "Comma-separated list of addresses for gRPC servers")
 
 		// Three OpenTracing backends (to demonstrate how they can be interchanged):
 		//	zipkinAddr           = flag.String("zipkin.kafka.addr", "", "Enable Zipkin tracing via a Kafka Collector host:port")
 		// appdashAddr          = flag.String("appdash.addr", "", "Enable Appdash tracing via an Appdash server host:port")
 		// lightstepAccessToken = flag.String("lightstep.token", "", "Enable LightStep tracing via a LightStep access token")
 	)
-	flag.Parse()
+	// flag.Parse()
 	// if len(os.Args) < 2 {
 	// 	fmt.Fprintf(os.Stderr, "\n%s [flags] method\n\n", filepath.Base(os.Args[0]))
 	// 	flag.Usage()
