@@ -34,6 +34,7 @@ func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, err
 		Patches:       reviewRequest.Patches,
 		IsPullRequest: reviewRequest.IsPullRequest,
 		Vcs:           reviewRequest.Vcs,
+		Dotlingo:      reviewRequest.Dotlingo,
 		PullRequestID: int(reviewRequest.PullRequestID),
 	}, nil
 }

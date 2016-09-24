@@ -70,6 +70,7 @@ message ReviewRequest {
   bool isPullRequest = 8;
   int64 pullRequestID = 9;
   string vcs = 10;
+  string dotlingo = 11;
 }
 
 message ReviewReply {
@@ -95,7 +96,6 @@ message Issue {
 	string err          =12; // Any err encounted while building the issue.
 	bool discard        =13; // TODO(waigani) discard is only used by client and shouldn't be on wire format.
 	string discardReason=14; // TODO(waigani) also should not be on wire format.
-
 }
 
 message IssueRange {
