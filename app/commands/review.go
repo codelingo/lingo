@@ -2,6 +2,9 @@ package commands
 
 import (
 	"fmt"
+	"io/ioutil"
+
+	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
 
@@ -18,7 +21,7 @@ func init() {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  util.LingoFile.String(),
-				Usage: "A list of .lingo files to preform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
+				Usage: "A .lingo file to preform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
 			},
 			// cli.BoolFlag{
 			// 	Name:  "all",
@@ -41,11 +44,18 @@ func init() {
 
 func reviewAction(ctx *cli.Context) {
 
+	dotlingo, err := readDotLingo(ctx)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
 	opts := review.Options{
 		FilesAndDirs: ctx.Args(),
 		Diff:         ctx.Bool("diff"),
 		SaveToFile:   ctx.String("save"),
 		KeepAll:      ctx.Bool("keep-all"),
+		DotLingo:     dotlingo,
 	}
 
 	issues, err := review.Review(opts)
@@ -56,4 +66,17 @@ func reviewAction(ctx *cli.Context) {
 	}
 
 	fmt.Printf("Done! Found %d issues \n", len(issues))
+}
+
+func readDotLingo(ctx *cli.Context) (string, error) {
+	var dotlingo []byte
+
+	if filename := ctx.String(util.LingoFile.Long); filename != "" {
+		var err error
+		dotlingo, err = ioutil.ReadFile(filename)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+	}
+	return string(dotlingo), nil
 }

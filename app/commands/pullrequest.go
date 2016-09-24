@@ -20,6 +20,8 @@ var pullRequestCmd = &cli.Command{
 			Name:  util.LingoFile.String(),
 			Usage: "A list of .lingo files to preform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
 		},
+		// TODO(waigani) as this is a review sub-command, it should be able to use the
+		// lingo-file flag from review.
 		// cli.BoolFlag{
 		// 	Name:  "all",
 		// 	Usage: "review all files under all directories from pwd down",
@@ -48,10 +50,17 @@ func reviewPullRequestAction(ctx *cli.Context) {
 		return
 	}
 
+	dotlingo, err := readDotLingo(ctx)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
 	opts := review.Options{
 		PullRequest: ctx.Args()[0],
 		SaveToFile:  ctx.String("save"),
 		KeepAll:     ctx.Bool("keep-all"),
+		DotLingo:    dotlingo,
 	}
 
 	issues, err := review.Review(opts)

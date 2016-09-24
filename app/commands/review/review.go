@@ -73,6 +73,8 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 	}
 
+	reviewReq.Dotlingo = opts.DotLingo
+
 	svc, err := service.New()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -212,6 +214,7 @@ type Options struct {
 	Diff         bool   // ctx.Bool("diff") TODO(waigani) this should be a sub-command which proxies to git diff
 	SaveToFile   string // ctx.String("save")
 	KeepAll      bool   // ctx.Bool("keep-all")
+	DotLingo     string // ctx.Bool("lingo-file")
 	// TODO(waigani) add KeepAllWithTag. Use this for CLAIR autoreviews
 	// TODO(waigani) add streaming json output
 }
