@@ -154,7 +154,7 @@ func New() (server.CodeLingoService, error) {
 	// 	}
 	// }
 
-	instances := strings.Split(*grpcAddrs, ",")
+	instances := strings.Split(grpcAddrs, ",")
 	queryFactory := grpcclient.MakeQueryEndpointFactory(tracer, tracingLogger)
 	reviewFactory := grpcclient.MakeReviewEndpointFactory(tracer, tracingLogger)
 
