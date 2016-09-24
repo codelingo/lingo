@@ -82,7 +82,6 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 	issues, err := svc.Review(reviewReq)
 	if err != nil {
-
 		if strings.Contains(err.Error(), "ambiguous argument 'HEAD'") {
 			return nil, errors.New("\nThis looks like a new repository. Please make an initial commit and push to codelingo remote before reviewing. This is only required for the initial commit.")
 		}

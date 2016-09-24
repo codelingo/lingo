@@ -2,9 +2,7 @@ package service
 
 import (
 	"flag"
-	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -108,11 +106,11 @@ func New() (server.CodeLingoService, error) {
 		// lightstepAccessToken = flag.String("lightstep.token", "", "Enable LightStep tracing via a LightStep access token")
 	)
 	flag.Parse()
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "\n%s [flags] method\n\n", filepath.Base(os.Args[0]))
-		flag.Usage()
-		os.Exit(1)
-	}
+	// if len(os.Args) < 2 {
+	// 	fmt.Fprintf(os.Stderr, "\n%s [flags] method\n\n", filepath.Base(os.Args[0]))
+	// 	flag.Usage()
+	// 	os.Exit(1)
+	// }
 
 	randomSeed := time.Now().UnixNano()
 
