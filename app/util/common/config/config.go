@@ -18,7 +18,6 @@ const (
 // Load assumes cfgFilename is relative to $LINGO_HOME. It loads the config
 // data into values.
 func Load(cfgFilename string, values interface{}) error {
-
 	cfgPath, err := fullCfgPath(cfgFilename)
 	if err != nil {
 		return errors.Trace(err)
