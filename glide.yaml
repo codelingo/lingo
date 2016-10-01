@@ -8,11 +8,9 @@ import:
   version: ^1.0.0
 - package: github.com/fsouza/go-dockerclient
 - package: github.com/go-kit/kit
-  version: 483f2cd7ba88 #^0.2.0
+  version: fe6fe28ba0d54b39f27e79cddba4911b7e4fffc7 #483f2cd7ba88 #^0.2.0
   subpackages:
   - endpoint
-  - loadbalancer
-  - loadbalancer/static
   - log
   - transport/grpc
 - package: github.com/opentracing/basictracer-go
