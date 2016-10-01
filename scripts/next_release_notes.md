@@ -1,7 +1,9 @@
-This release changes the path of $HOME/.lingo_home to ~/.codelingo. It also introduces a new config format, which is written to $HOME/.codelingo/config/platform.yaml
+This release adds a review subcommand, pull-request, for reviewing remote pull requests on github. It can be tested with the following:
 
-$HOME/.lingo_home will need to be manually removed after this update.
+```bash
+$ lingo review pull-request https://github.com/waigani/codelingo_demo/pull/6
+```
 
-The tool can now be built from tip with `make install`.
+ A --lingo-file flag was added which allows .lingo files to be passed in on the command line instead of reading .lingo files from the target repository.
 
-The CodeLingo platform has been updated to provide complete support for PHP semantics. Documentation on how to take advantage of this with CLQL is coming soon.
+ The release script was updated to generated change logs.

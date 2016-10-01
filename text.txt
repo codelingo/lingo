@@ -1,0 +1,21 @@
+ ## Changelogcd68667 (HEAD -> master, origin/master, origin/HEAD) update glide
+3f4991c rename examples to _examples so glide ignores it
+e9709eb bug fix
+f35967c comment buggy code
+599ab15 comment buggy code
+9230cd6 add dotlingo
+4bcb540 add Dotlingo
+761a873 add Dotlingo to protoc
+b59e2de add VCS
+9d9b062 Add vcs field to protoc
+d23d1f6 disable tracing
+6213dbf add missing protoc fields for pull-request review
+67cc10b silly bug
+f5681f1 set host
+fbe4291 bug fixes for pull-request cmd and host
+cd23418 Merge branch 'master' of https://github.com/codelingo/lingo
+c070689 Add review subcommand: pull-request
+dacfb72 Update documentation with PHP specific info
+5920589 Merge branch 'master' of https://github.com/codelingo/lingo
+02a3fb5 simplify example
+d3518b8 Don't update deps on install
