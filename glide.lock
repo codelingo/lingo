@@ -1,5 +1,5 @@
-hash: 6d271108c30302733b9d72788139992ad7372a611d9ac86116a834a3313d097f
-updated: 2016-10-01T13:45:45.921353108+13:00
+hash: fce7042c250822a0bfb048af690ebd45eede7c78255d0d99de508718f68379d6
+updated: 2016-10-02T09:46:50.09676958+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -106,7 +106,7 @@ imports:
 - name: github.com/waigani/diffparser
   version: 42ae6ebdde8d5414cb002ac435c1d6be3f926c32
 - name: golang.org/x/crypto
-  version: 351dc6a5bf92a5f2ae22fadeee08eb6a45aa2d93
+  version: c197bcf24cde29d3f73c7b4ac6fd41f4384e8af6
   subpackages:
   - curve25519
   - nacl/box
@@ -115,12 +115,13 @@ imports:
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/net
-  version: 6a513affb38dc9788b449d59ffed099b8de18fa0
+  version: 0d8126fc6144eb5257485c59148128691e8ff849
   subpackages:
   - context
   - context/ctxhttp
   - http2
   - http2/hpack
+  - idna
   - internal/timeseries
   - lex/httplex
   - trace
@@ -142,9 +143,10 @@ imports:
 - name: gopkg.in/check.v1
   version: 4f90aeace3a26ad7021961c297b22c42160c7b25
 - name: gopkg.in/mgo.v2
-  version: 01ee097136da162d1dd3c9b44fbdf3abf4fd6552
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
   - bson
+  - internal/json
   - internal/sasl
   - internal/scram
 - name: gopkg.in/yaml.v1
