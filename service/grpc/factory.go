@@ -8,7 +8,6 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/codelingo/lingo/service/grpc/codelingo"
-	"github.com/codelingo/lingo/service/grpc/query"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/sd"
@@ -27,7 +26,7 @@ func MakeQueryEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logge
 			"Query",
 			encodeQueryRequest,
 			decodeQueryResponse,
-			query.QueryReply{},
+			codelingo.QueryReply{},
 			// grpctransport.SetClientBefore(kitot.ToGRPCRequest(tracer, tracingLogger)),
 		).Endpoint(), cc, err
 	}

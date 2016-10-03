@@ -4,19 +4,18 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/codelingo/lingo/service/grpc/codelingo"
-	"github.com/codelingo/lingo/service/grpc/query"
 	"github.com/codelingo/lingo/service/server"
 )
 
 func encodeQueryRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(server.QueryRequest)
-	return &query.QueryRequest{
+	return &codelingo.QueryRequest{
 		Clql: req.CLQL,
 	}, nil
 }
 
 func decodeQueryResponse(ctx context.Context, response interface{}) (interface{}, error) {
-	resp := response.(*query.QueryReply)
+	resp := response.(*codelingo.QueryReply)
 	return server.QueryResponse{
 		Result: resp.Result,
 	}, nil
