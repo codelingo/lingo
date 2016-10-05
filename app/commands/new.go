@@ -45,15 +45,8 @@ func newLingo(c *cli.Context) error {
 		return errors.Trace(err)
 	}
 
-	cfgPath, err := getCfgPath(c)
+	cfgPath, err := writeDotLingoToCurrentDir(c)
 	if err != nil {
-		return errors.Trace(err)
-	}
-	if _, err := os.Stat(cfgPath); err == nil {
-		return errors.Errorf("Already initialised. Using %q", cfgPath)
-	}
-
-	if err := writeDotLingo(cfgPath); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -68,6 +61,18 @@ func newLingo(c *cli.Context) error {
 
 	}
 	return cmd.Wait()
+}
+
+func writeDotLingoToCurrentDir(c *cli.Context) (string, error) {
+	cfgPath, err := getCfgPath(c)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	if _, err := os.Stat(cfgPath); err == nil {
+		return "", errors.Errorf("Already initialised. Using %q", cfgPath)
+	}
+
+	return cfgPath, writeDotLingo(cfgPath)
 }
 
 func writeDotLingo(cfgPath string) error {

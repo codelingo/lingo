@@ -45,7 +45,7 @@ func init() {
 func reviewAction(ctx *cli.Context) {
 	msg, err := reviewCMD(ctx)
 	if err != nil {
-		fmt.Println(err.Error())
+		util.OSErrf(err.Error())
 		return
 	}
 	fmt.Println(msg)

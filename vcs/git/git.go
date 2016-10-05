@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -15,6 +16,28 @@ func New() backing.Repo {
 }
 
 type Repo struct {
+}
+
+func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
+	cfg, err := config.Platform()
+	if err != nil {
+		return "", "", errors.Trace(err)
+	}
+	remoteName, err := cfg.GitRemoteName()
+	if err != nil {
+		return "", "", errors.Trace(err)
+	}
+
+	addr, err := cfg.GitServerAddr()
+	if err != nil {
+		return "", "", errors.Trace(err)
+	}
+	remoteAddr := fmt.Sprintf("%s/%s/%s.git", addr, repoOwner, repoName)
+	out, err := gitCMD("remote", "add", remoteName, remoteAddr)
+	if err != nil {
+		return "", "", errors.Annotate(err, out)
+	}
+	return remoteName, remoteAddr, nil
 }
 
 func (r *Repo) Sync() error {

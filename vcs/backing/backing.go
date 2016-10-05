@@ -6,6 +6,7 @@ type Repo interface {
 	Sync() error
 	CurrentCommitId() (string, error)
 	Patches() ([]string, error)
+	SetRemote(owner, name string) (string, string, error)
 }
 
 const (
