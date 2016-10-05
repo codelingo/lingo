@@ -28,6 +28,7 @@ upgrades
 https://medium.com/modern-user-interfaces/architectural-tips-for-people-still-writing-ui-in-blaze-a034d7bc6d0#.j27goo6ef
 Embedded systems with restricted APIs
 Extending package boundaries and API contracts
+If a todo is removed, check the todo was addressed.
 
 Juju queries:
 indicate there's a relationship between certupdater and apiserver
@@ -35,6 +36,8 @@ indicate the envworkermanager makes lots of those things
 indicate dependencies on env or agent config
 
 errorsf, sprintf without any args
+
+If PR is very long, commit message body should not be empty
 
 concise example vs PMP, pystylecheck etc
 one tenet, different languages

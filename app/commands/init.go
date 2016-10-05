@@ -23,7 +23,7 @@ func init() {
 	}, false, vcsRq)
 }
 
-// TODO(waigani) start injesting repo as soon as it's inited
+// TODO(waigani) start ingesting repo as soon as it's inited
 
 func initRepoAction(ctx *cli.Context) {
 	remoteName, remoteAddr, err := initRepo(ctx)
@@ -37,7 +37,7 @@ func initRepoAction(ctx *cli.Context) {
 		}
 		return
 	}
-	fmt.Printf("Successfully initialised. \n Added remote %q %s\a Starting injest...\n", remoteName, remoteAddr)
+	fmt.Printf("Successfully initialised. \n Added remote %q %s\n Starting ingest...\n", remoteName, remoteAddr)
 }
 
 func initRepo(ctx *cli.Context) (string, string, error) {
