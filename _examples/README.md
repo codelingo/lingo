@@ -34,6 +34,8 @@ indicate there's a relationship between certupdater and apiserver
 indicate the envworkermanager makes lots of those things
 indicate dependencies on env or agent config
 
+errorsf, sprintf without any args
+
 concise example vs PMP, pystylecheck etc
 one tenet, different languages
 

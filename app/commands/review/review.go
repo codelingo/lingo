@@ -142,10 +142,10 @@ func repoOwnerAndNameFromRemote() (string, string, error) {
 	r := regexp.MustCompile(`.*[\/:](.*)\/(.*)\.git`)
 	m := r.FindStringSubmatch(string(b))
 	if len(m) < 2 || m[1] == "" {
-		return "", "", errors.Errorf("could not find repository owner, have you run `lingo init`?")
+		return "", "", errors.New("could not find repository owner, have you run `lingo init`?")
 	}
 	if len(m) < 3 || m[2] == "" {
-		return "", "", errors.Errorf("could not find repository name, have you run `lingo init?`")
+		return "", "", errors.New("could not find repository name, have you run `lingo init?`")
 	}
 	return m[1], m[2], nil
 
