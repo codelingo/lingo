@@ -37,7 +37,7 @@ func initRepoAction(ctx *cli.Context) {
 		}
 		return
 	}
-	fmt.Printf("Successfully initialised. \n Added remote %q %s\a Starting injest...\n", remoteName, remoteAddr)
+	fmt.Printf("Successfully initialised. \n Added remote %q %s\n Starting injest...\n", remoteName, remoteAddr)
 }
 
 func initRepo(ctx *cli.Context) (string, string, error) {
