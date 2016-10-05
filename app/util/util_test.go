@@ -3,9 +3,6 @@ package util_test
 import (
 	"testing"
 
-	"github.com/codelingo/lingo/app/util"
-	"github.com/waigani/xxx"
-
 	. "gopkg.in/check.v1"
 )
 
@@ -17,12 +14,6 @@ func Test(t *testing.T) {
 type utilSuite struct{}
 
 var _ = Suite(&utilSuite{})
-
-func (s *utilSuite) TestConfig(c *C) {
-	cfg, err := util.LingoConfig()
-	c.Assert(err, jc.ErrorIsNil)
-	xxx.Dump(cfg)
-}
 
 // TODO(waigani) below is taken from old lingo.reviews. Reuse any tests that still apply.
 

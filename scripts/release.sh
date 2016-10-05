@@ -18,16 +18,12 @@ repoRoot=$GOPATH/src/github.com/codelingo/lingo
 
 description=`cat $repoRoot/scripts/next_release_notes.md`
 
-# build change log
+# build changelog and add to description
 lastTag=`git describe --abbrev=0 --tags`
 lastReleaseSHA=`git rev-list -n 1 $lastTag`
 # lastReleaseSHA="3284553324fb95b5bc2e592d03a7e71a2f94681f"
 changelog=`git log --oneline --decorate $lastReleaseSHA..HEAD`
-
-description="$description"$'\r'" ### Changelog"$'\r'$'\r'"$changelog"
-
-echo "$description"
-exit
+description="$description"$'\r'$'\r'"# Changelog"$'\r'$'\r'"$changelog"
 
 # init array
 compressedFilenames=()

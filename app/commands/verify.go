@@ -94,19 +94,30 @@ func verifyVCS() error {
 }
 
 func verifyAuth() error {
-	// TODO(waigani) sort out auth. For now, everything is allowed.
-	return nil
 
-	authCfg, err := util.ReadAuthConfig()
+	errMsg := "Authentication failed. Please run `lingo setup`."
+	cfg, err := util.AuthConfig()
+	if err != nil {
+		return errors.Annotate(err, errMsg)
+	}
+
+	authFile, err := cfg.Get("gitserver.credentials_filename")
+	if err != nil {
+		return errors.Annotate(err, errMsg)
+	} else if authFile == "" {
+		return errors.New(errMsg)
+	}
+
+	cfgDir, err := util.ConfigHome()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	if authCfg.CurrentUserToken == "" {
-		return errors.New("no current user token found, please log in: `$ lingo login`")
+	_, err = os.Stat(filepath.Join(cfgDir, authFile))
+	if os.IsNotExist(err) {
+		return errors.New(errMsg)
 	}
-
-	return nil
+	return errors.Trace(err)
 }
 
 func verifyDotLingo() error {
@@ -159,7 +170,6 @@ func verifyLingoHome() error {
 }
 
 func verifyConfig() error {
-
 	lHome, err := util.LingoHome()
 	if err != nil {
 		return errors.Trace(err)

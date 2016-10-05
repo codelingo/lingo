@@ -29,13 +29,31 @@ func (p *platformConfig) GitRemoteName() (string, error) {
 	return p.Get("gitserver.remote.name")
 }
 
+func (p *platformConfig) GitServerHost() (string, error) {
+	return p.Get("gitserver.remote.host")
+}
+
+func (p *platformConfig) GitServerPort() (string, error) {
+	return p.Get("gitserver.remote.port")
+}
+
+func (p *platformConfig) GitServerProtocol() (string, error) {
+	return p.Get("gitserver.remote.protocol")
+}
+
 func (p *platformConfig) GitServerAddr() (string, error) {
 
-	addr, err := p.Get("gitserver.remote.addr")
+	protocol, err := p.Get("gitserver.remote.protocol")
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
+	host, err := p.Get("gitserver.remote.host")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	addr := protocol + "://" + host
 	port, err := p.Get("gitserver.remote.port")
 	if err != nil || port == "" {
 		return addr, nil
@@ -65,20 +83,23 @@ all:
   gitserver:
     remote:
       name: "codelingo"
-      addr: "http://codelingo.io"
+      protocol: "http"
+      host: "codelingo.io"
       port: "3030"
 dev:
   addr: localhost
   gitserver:
     remote:
       name: "codelingo_dev"
-      addr: "http://localhost"
+      protocol: "http"
+      host: "localhost"
       port: "3000"
 test:
   addr: localhost
   gitserver:
     remote:
       name: "codelingo_dev"
-      addr: "http://localhost"
+      protocol: "http"
+      host: "localhost"
       port: "3000"
 `[1:]

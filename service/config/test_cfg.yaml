@@ -1,22 +1,27 @@
-# TODO(waigani) migrate all platform config opts to this file.
-
 all:
   addr: codelingo.io
-  grpc_port: "8002"
   gitserver:
     remote:
-      name: "codelingo"
-      addr: "http://codelingo.io"
+      addr: http://codelingo.io
+      name: new-name
       port: "3030"
+  grpc_port: "8002"
+blah:
+  gitserver:
+    remote:
+      name:
+        nested:
+          super: new-name
+          x: b
 dev:
   addr: localhost
   gitserver:
     remote:
-      name: "codelingo_dev"
-      addr: "http://localhost"
+      addr: http://localhost
+      name: codelingo_dev
       port: "3000"
 test:
   addr: localhost
   gitserver:
     remote:
-      name: "codelingo_dev"
+      name: codelingo_dev

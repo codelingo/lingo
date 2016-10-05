@@ -70,6 +70,15 @@ func MustLingoHome() string {
 	return lHome
 }
 
+// func LingoConfig() (*config.Config, error) {
+// 	cfgPath, err := ConfigHome()
+// 	if err != nil {
+// 		return errors.Trace(err)
+// 	}
+
+// 	return config.New(cfgPath)
+// }
+
 // LingoHome returns the path to the user's lingo home directory.
 func LingoHome() (string, error) {
 	if lHome := os.Getenv("LINGO_HOME"); lHome != "" {

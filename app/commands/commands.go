@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/juju/errors"
@@ -49,7 +48,6 @@ func All() []cli.Command {
 }
 
 func Before(c *cli.Context) error {
-
 	cmdReq := cmdRequirements(cmds)
 
 	var currentCMDName string
@@ -81,8 +79,7 @@ func Before(c *cli.Context) error {
 	if reqs, ok := cmdReq[currentCMDName]; ok {
 		for _, req := range reqs {
 			if err := req.Verify(); err != nil {
-				fmt.Printf(err.Error())
-				return nil
+				return errors.Trace(err)
 			}
 		}
 	} else {

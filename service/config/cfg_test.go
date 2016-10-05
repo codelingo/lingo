@@ -18,7 +18,7 @@ type suite struct{}
 
 var _ = Suite(&suite{})
 
-func (s *suite) TestCfg(c *C) {
+func (s *suite) TestGetCfg(c *C) {
 
 	cfg, err := config.New("test_cfg.yaml")
 	c.Assert(err, jc.ErrorIsNil)
@@ -26,5 +26,15 @@ func (s *suite) TestCfg(c *C) {
 	addr, err := cfg.Get("gitserver.remote.name")
 	c.Assert(err, jc.ErrorIsNil)
 	xxx.Print(addr)
+}
+func (s *suite) TestSetCfg(c *C) {
 
+	cfg, err := config.New("test_cfg.yaml")
+	c.Assert(err, jc.ErrorIsNil)
+
+	err = cfg.Set("blah.gitserver.remote.name.nested.super", "new-name")
+	err = cfg.Set("blah.gitserver.remote.name.nested.x", "b")
+	c.Assert(err, jc.ErrorIsNil)
+
+	// TODO(waigani) assert config
 }

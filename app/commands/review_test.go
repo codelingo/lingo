@@ -1,7 +1,9 @@
-package commands
+package commands_test
 
 import (
 	"flag"
+
+	"github.com/codelingo/lingo/app/commands"
 
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/testhelper"
@@ -20,6 +22,6 @@ func (s *cmdSuite) TestReviewCMD(c *gc.C) {
 	ctx := cli.NewContext(app, set, nil)
 	// ctx.GlobalString("name")
 
-	initCMD := testhelper.Command("review", All())
+	initCMD := testhelper.Command("review", commands.All())
 	c.Assert(initCMD.Run(ctx), jc.ErrorIsNil)
 }
