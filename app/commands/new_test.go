@@ -11,7 +11,7 @@ import (
 	gc "gopkg.in/check.v1"
 )
 
-func (s *cmdSuite) TestInitCMD(c *gc.C) {
+func (s *cmdSuite) TestNewCMD(c *gc.C) {
 	// TODO(waigani) Do what the skip says.
 	// c.Skip("This test writes out a .lingo file in pwd. Test needs to write file to tmpdir and cleanup after.")
 	app := cli.NewApp()
@@ -22,6 +22,6 @@ func (s *cmdSuite) TestInitCMD(c *gc.C) {
 	ctx := cli.NewContext(app, set, nil)
 	// ctx.GlobalString("name")
 
-	initCMD := testhelper.Command("init", commands.All())
-	c.Assert(initCMD.Run(ctx), jc.ErrorIsNil)
+	newCMD := testhelper.Command("new", commands.All())
+	c.Assert(newCMD.Run(ctx), jc.ErrorIsNil)
 }

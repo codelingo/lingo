@@ -43,11 +43,18 @@ func init() {
 }
 
 func reviewAction(ctx *cli.Context) {
-
-	dotlingo, err := readDotLingo(ctx)
+	msg, err := reviewCMD(ctx)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
+	}
+	fmt.Println(msg)
+}
+
+func reviewCMD(ctx *cli.Context) (string, error) {
+	dotlingo, err := readDotLingo(ctx)
+	if err != nil {
+		return "", errors.Trace(err)
 	}
 
 	opts := review.Options{
@@ -60,12 +67,10 @@ func reviewAction(ctx *cli.Context) {
 
 	issues, err := review.Review(opts)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
-		// errors.ErrorStack(err)
+		return "", errors.Trace(err)
 	}
 
-	fmt.Printf("Done! Found %d issues \n", len(issues))
+	return fmt.Sprintf("Done! Found %d issues", len(issues)), nil
 }
 
 func readDotLingo(ctx *cli.Context) (string, error) {

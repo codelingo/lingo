@@ -18,9 +18,9 @@ import (
 
 func init() {
 	register(&cli.Command{
-		Name:   "init",
-		Usage:  "create a .lingo config file in the current directory",
-		Action: initLingo,
+		Name:   "new",
+		Usage:  "Create a .lingo file in the current directory",
+		Action: newLingoAction,
 	}, false, vcsRq)
 }
 
@@ -31,27 +31,43 @@ var intro = `
 
 // TODO(waigani) set lingo-home flag and test init creates correct home dir.
 
-func initLingo(c *cli.Context) {
-	if err := util.MaxArgs(c, 1); err != nil {
+func newLingoAction(ctx *cli.Context) {
+	if err := newLingo(ctx); err != nil {
 		util.OSErrf(err.Error())
 		return
+	}
+	fmt.Println("Successfully initialised. Lingo config file written in current directory")
+
+}
+
+func newLingo(c *cli.Context) error {
+	if err := util.MaxArgs(c, 1); err != nil {
+		return errors.Trace(err)
 	}
 
 	cfgPath, err := getCfgPath(c)
 	if err != nil {
-		util.OSErrf(err.Error())
-		return
+		return errors.Trace(err)
 	}
 	if _, err := os.Stat(cfgPath); err == nil {
-		util.OSErrf("Already initialised. Using %q", cfgPath)
-		return
+		return errors.Errorf("Already initialised. Using %q", cfgPath)
 	}
 
 	if err := writeDotLingo(cfgPath); err != nil {
-		util.OSErrf(err.Error())
-		return
+		return errors.Trace(err)
 	}
-	fmt.Printf("Successfully initialised. Lingo config file written to %q\n", cfgPath)
+
+	// TODO(waigani) don't hardcode vim. Use env var.
+	cmd, err := util.OpenFileCmd("vim", cfgPath, 1)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if err = cmd.Start(); err != nil {
+		return errors.Trace(err)
+
+	}
+	return cmd.Wait()
 }
 
 func writeDotLingo(cfgPath string) error {

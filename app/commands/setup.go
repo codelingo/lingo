@@ -27,7 +27,7 @@ const (
 func init() {
 	register(&cli.Command{
 		Name:   "setup",
-		Usage:  "Setup lingo for current repository",
+		Usage:  "Configure the lingo tool for the current machine",
 		Action: setupLingoAction,
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -39,9 +39,6 @@ func init() {
 				Usage: "Set the token of the lingo user",
 			},
 		},
-		// TODO(waigani) add --dev flag. Add current user to dev and testing
-		// section of auth config.
-
 		// TODO(waigani) docs on username and token
 
 	}, false, homeRq, configRq)

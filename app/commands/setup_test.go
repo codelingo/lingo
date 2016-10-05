@@ -25,6 +25,6 @@ func (s *cmdSuite) TestSetUpCMD(c *gc.C) {
 	ctx := cli.NewContext(app, set, nil)
 	// ctx.GlobalString("name")
 
-	initCMD := testhelper.Command("setup", commands.All())
-	c.Assert(initCMD.Run(ctx), jc.ErrorIsNil)
+	setupCMD := testhelper.Command("setup", commands.All())
+	c.Assert(setupCMD.Run(ctx), jc.ErrorIsNil)
 }
