@@ -7,6 +7,17 @@ import (
 	"github.com/codelingo/lingo/service/server"
 )
 
+func encodeSessionRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	return &codelingo.SessionRequest{}, nil
+}
+
+func decodeSessionResponse(ctx context.Context, response interface{}) (interface{}, error) {
+	resp := response.(*codelingo.SessionReply)
+	return server.SessionResponse{
+		Key: resp.Key,
+	}, nil
+}
+
 func encodeQueryRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(server.QueryRequest)
 	return &codelingo.QueryRequest{
@@ -24,6 +35,7 @@ func decodeQueryResponse(ctx context.Context, response interface{}) (interface{}
 func encodeReviewRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(*server.ReviewRequest)
 	return &codelingo.ReviewRequest{
+		Key:           req.Key,
 		Host:          req.Host,
 		Owner:         req.Owner,
 		Repo:          req.Repo,
@@ -39,6 +51,5 @@ func encodeReviewRequest(ctx context.Context, request interface{}) (interface{},
 }
 
 func decodeReviewResponse(ctx context.Context, response interface{}) (interface{}, error) {
-	resp := response.(*codelingo.ReviewReply)
-	return resp.Issues, nil
+	return server.ReviewResponse{}, nil
 }

@@ -15,7 +15,7 @@ import (
 	"github.com/juju/errors"
 )
 
-func Review(opts Options) ([]*codelingo.Issue, error) {
+func Review(opts Options) (int, error) {
 
 	// build the review request either from a pull request URL or the current repository
 	var reviewReq *server.ReviewRequest
@@ -25,7 +25,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		// TODO(waigani) support other hosts, e.g. bitbucket
 		prOpts, err := parseGithubPR(opts.PullRequest)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return 0, errors.Trace(err)
 		}
 
 		reviewReq = &server.ReviewRequest{
@@ -41,7 +41,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	} else {
 		owner, repoName, err := repoOwnerAndNameFromRemote()
 		if err != nil {
-			return nil, errors.Annotate(err, "\nlocal vcs error")
+			return 0, errors.Annotate(err, "\nlocal vcs error")
 		}
 
 		// TODO(waigani) pass this in as opt
@@ -49,16 +49,16 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 		sha, err := repo.CurrentCommitId()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return 0, errors.Trace(err)
 		}
 
 		if err := repo.Sync(); err != nil {
-			return nil, err
+			return 0, err
 		}
 
 		patches, err := repo.Patches()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return 0, errors.Trace(err)
 		}
 
 		reviewReq = &server.ReviewRequest{
@@ -77,29 +77,29 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 	svc, err := service.New()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return 0, errors.Trace(err)
 	}
 
 	issues, err := svc.Review(reviewReq)
 	if err != nil {
 		if strings.Contains(err.Error(), "ambiguous argument 'HEAD'") {
-			return nil, errors.New("\nThis looks like a new repository. Please make an initial commit and push to codelingo remote before reviewing. This is only required for the initial commit.")
+			return 0, errors.New("\nThis looks like a new repository. Please make an initial commit and push to codelingo remote before reviewing. This is only required for the initial commit.")
 		}
 
-		return nil, errors.Annotate(err, "\nbad request")
+		return 0, errors.Annotate(err, "\nbad request")
 	}
 
-	var confirmedIssues []*codelingo.Issue
-	for _, issue := range issues {
+	confirmedIssues := 0
+	for issue := range issues {
 		output := opts.SaveToFile == ""
 		cfm, err := NewConfirmer(output, opts.KeepAll, nil)
 		if err != nil {
 			panic(err.Error())
-			return nil, nil
+			return 0, nil
 		}
-		cfm.Confirm(0, issue)
-
-		confirmedIssues = append(confirmedIssues, issue)
+		if cfm.Confirm(0, issue) {
+			confirmedIssues++
+		}
 	}
 	return confirmedIssues, nil
 }

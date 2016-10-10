@@ -1,5 +1,11 @@
 package server
 
+type SessionRequest struct{}
+
+type SessionResponse struct {
+	Key string `json:"key"`
+}
+
 // QueryRequest is the business domain type for a Query method request.
 type QueryRequest struct {
 	CLQL string `json:"clql"`
@@ -12,6 +18,8 @@ type QueryResponse struct {
 
 // ReviewRequest is the business domain type for a Review method request.
 type ReviewRequest struct {
+	// Session key for coordinating pubsub queues and multiple rpc requests
+	Key string `json:"key"`
 	// The repository host. Examples: "local", "github_com"
 	Host string
 	// name of the git user or org that owns the repo
@@ -40,6 +48,4 @@ type ReviewRequest struct {
 }
 
 // ReviewResponse is the business domain type for a Review method response.
-// type ReviewResponse struct {
-// 	Issues []*codelingo.Issue `json:"issues"`
-// }
+type ReviewResponse struct{}

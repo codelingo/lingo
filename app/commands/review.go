@@ -58,14 +58,14 @@ func reviewAction(ctx *cli.Context) {
 		DotLingo:     dotlingo,
 	}
 
-	issues, err := review.Review(opts)
+	issueCount, err := review.Review(opts)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 		// errors.ErrorStack(err)
 	}
 
-	fmt.Printf("Done! Found %d issues \n", len(issues))
+	fmt.Printf("Done! Found %d issues \n", issueCount)
 }
 
 func readDotLingo(ctx *cli.Context) (string, error) {
