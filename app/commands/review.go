@@ -65,12 +65,12 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		DotLingo:     dotlingo,
 	}
 
-	issues, err := review.Review(opts)
+	issueCount, err := review.Review(opts)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	return fmt.Sprintf("Done! Found %d issues", len(issues)), nil
+	return fmt.Sprintf("Done! Found %d issues \n", issueCount), nil
 }
 
 func readDotLingo(ctx *cli.Context) (string, error) {

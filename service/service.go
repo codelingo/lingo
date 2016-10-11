@@ -1,8 +1,11 @@
 package service
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-kit/kit/sd"
@@ -19,16 +22,25 @@ import (
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/pubsub/rabbitmq"
 	loadbalancer "github.com/go-kit/kit/sd/lb"
 	// kitot "github.com/go-kit/kit/tracing/opentracing"
 
 	"github.com/codelingo/lingo/service/server"
 )
 
+const mqAddress = "amqp://guest:guest@localhost:5672/"
+
 type client struct {
 	context.Context
 	log.Logger
 	endpoints map[string]endpoint.Endpoint
+}
+
+// isEnd returns true if a buffer contains only a single null byte,
+// indicating that the queue will have no further messages
+func isEnd(b []byte) bool {
+	return len(b) == 1 && b[0] == '\x00'
 }
 
 // TODO(pb): If your service interface methods don't return an error, we have
@@ -46,6 +58,16 @@ type client struct {
 //   can take a context as its first argument. This may or may not be
 //   important.
 
+func (c client) Session(req *server.SessionRequest) (string, error) {
+	reply, err := c.endpoints["session"](c.Context, req)
+	if err != nil {
+		return "", err
+	}
+
+	r := reply.(server.SessionResponse)
+	return r.Key, nil
+}
+
 func (c client) Query(clql string) (string, error) {
 	request := server.QueryRequest{
 		CLQL: clql,
@@ -60,7 +82,7 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
-func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
+func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, error) {
 	// set defaults
 	if req.Host == "" {
 		return nil, errors.New("repository host is not set")
@@ -72,13 +94,77 @@ func (c client) Review(req *server.ReviewRequest) ([]*codelingo.Issue, error) {
 		return nil, errors.New("repository name is not set")
 	}
 
-	reply, err := c.endpoints["review"](c.Context, req)
+	// Initialise review session and receive channel prefix
+	prefix, err := c.Session(&server.SessionRequest{})
+	req.Key = prefix
+
+	issueSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-issues", "")
 	if err != nil {
-		// c.Logger.Log("err", err)
+		return nil, errors.Trace(err)
+	}
+
+	messageSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-messages", "")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	issues := make(chan *codelingo.Issue, 1)
+
+	issueMessages := issueSubscriber.Start()
+	messageMessages := messageSubscriber.Start()
+
+	// Only finish review after both publishers closed and channels drained
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		wg.Wait()
+		close(issues)
+	}()
+
+	go func() {
+		for m := range messageMessages {
+			b, err := ioutil.ReadAll(m)
+			if err != nil {
+				c.Logger.Log(err)
+				continue
+			}
+
+			if isEnd(b) {
+				messageSubscriber.Stop()
+				break
+			}
+
+			// TODO: Process messages
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		for m := range issueMessages {
+			b, err := ioutil.ReadAll(m)
+			if err != nil {
+				c.Logger.Log(err)
+				continue
+			}
+
+			if isEnd(b) {
+				issueSubscriber.Stop()
+				break
+			}
+
+			i := &codelingo.Issue{}
+			err = json.Unmarshal(b, i)
+			issues <- i
+		}
+		wg.Done()
+	}()
+
+	_, err = c.endpoints["review"](c.Context, req)
+	if err != nil {
 		return nil, err
 	}
 
-	return reply.([]*codelingo.Issue), nil
+	return issues, nil
 }
 
 // TODO(waigani) construct logger separately and pass into New.
@@ -155,6 +241,7 @@ func New() (server.CodeLingoService, error) {
 	// }
 
 	instances := strings.Split(grpcAddrs, ",")
+	sessionFactory := grpcclient.MakeSessionEndpointFactory(tracer, tracingLogger)
 	queryFactory := grpcclient.MakeQueryEndpointFactory(tracer, tracingLogger)
 	reviewFactory := grpcclient.MakeReviewEndpointFactory(tracer, tracingLogger)
 
@@ -163,8 +250,9 @@ func New() (server.CodeLingoService, error) {
 		Logger:  logger,
 		endpoints: map[string]endpoint.Endpoint{
 			// TODO(waigani) this could be refactored further, a lot of dups
-			"query":  buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
-			"review": buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
+			"session": buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
+			"query":   buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
+			"review":  buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
 		},
 	}, nil
 }
