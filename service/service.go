@@ -37,6 +37,12 @@ type client struct {
 	endpoints map[string]endpoint.Endpoint
 }
 
+// isEnd returns true if a buffer contains only a single null byte,
+// indicating that the queue will have no further messages
+func isEnd(b []byte) bool {
+	return len(b) == 1 && b[0] == '\x00'
+}
+
 // TODO(pb): If your service interface methods don't return an error, we have
 // no way to signal problems with a service client. If they don't take a
 // context, we have to provide a global context for any transport that
@@ -123,7 +129,7 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 				continue
 			}
 
-			if len(b) == 1 && b[0] == '\x00' {
+			if isEnd(b) {
 				messageSubscriber.Stop()
 				break
 			}
@@ -141,7 +147,7 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 				continue
 			}
 
-			if len(b) == 1 && b[0] == '\x00' {
+			if isEnd(b) {
 				issueSubscriber.Stop()
 				break
 			}
