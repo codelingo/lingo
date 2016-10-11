@@ -6,6 +6,18 @@ import (
 	"golang.org/x/net/context"
 )
 
+func DecodeSessionRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	return &server.SessionRequest{}, nil
+}
+
+func EncodeSessionResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	key := resp.(string)
+
+	return &codelingo.SessionReply{
+		Key: key,
+	}, nil
+}
+
 func DecodeQueryRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	queryRequest := req.(*codelingo.QueryRequest)
 
@@ -25,6 +37,7 @@ func EncodeQueryResponse(ctx context.Context, resp interface{}) (interface{}, er
 func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	reviewRequest := req.(*codelingo.ReviewRequest)
 	return &server.ReviewRequest{
+		Key:           reviewRequest.Key,
 		Host:          reviewRequest.Host,
 		Owner:         reviewRequest.Owner,
 		Repo:          reviewRequest.Repo,
@@ -40,9 +53,5 @@ func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, err
 }
 
 func EncodeReviewResponse(ctx context.Context, resp interface{}) (interface{}, error) {
-	issues := resp.([]*codelingo.Issue)
-
-	return codelingo.ReviewReply{
-		Issues: issues,
-	}, nil
+	return codelingo.ReviewReply{}, nil
 }
