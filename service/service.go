@@ -97,7 +97,7 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 		return nil, errors.Trace(err)
 	}
 
-	controlSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-control", "")
+	messageSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-messages", "")
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -105,7 +105,7 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 	issues := make(chan *codelingo.Issue, 1)
 
 	issueMessages := issueSubscriber.Start()
-	controlMessages := controlSubscriber.Start()
+	messageMessages := messageSubscriber.Start()
 
 	// Only finish review after both publishers closed and channels drained
 	var wg sync.WaitGroup
@@ -116,19 +116,19 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 	}()
 
 	go func() {
-		for m := range controlMessages {
+		for m := range messageMessages {
 			b, err := ioutil.ReadAll(m)
 			if err != nil {
 				c.Logger.Log(err)
 				continue
 			}
 
-			// TODO: Json?
-			switch string(b) {
-			case "review-done":
-				issueSubscriber.Stop()
-				controlSubscriber.Stop()
+			if len(b) == 1 && b[0] == '\x00' {
+				messageSubscriber.Stop()
+				break
 			}
+
+			// TODO: Process messages
 		}
 		wg.Done()
 	}()
@@ -139,6 +139,11 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 			if err != nil {
 				c.Logger.Log(err)
 				continue
+			}
+
+			if len(b) == 1 && b[0] == '\x00' {
+				issueSubscriber.Stop()
+				break
 			}
 
 			i := &codelingo.Issue{}
