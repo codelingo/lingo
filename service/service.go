@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kit/kit/sd"
+	"github.com/codelingo/kit/sd"
 
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
@@ -18,13 +18,13 @@ import (
 	// appdashot "github.com/sourcegraph/appdash/opentracing"
 	"golang.org/x/net/context"
 
+	"github.com/codelingo/kit/endpoint"
+	"github.com/codelingo/kit/log"
+	loadbalancer "github.com/codelingo/kit/sd/lb"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
-	"github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/pubsub/rabbitmq"
-	loadbalancer "github.com/go-kit/kit/sd/lb"
-	// kitot "github.com/go-kit/kit/tracing/opentracing"
+
+	// kitot "github.com/codelingo/kit/tracing/opentracing"
 
 	"github.com/codelingo/lingo/service/server"
 )
