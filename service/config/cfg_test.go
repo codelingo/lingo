@@ -5,7 +5,6 @@ import (
 
 	"github.com/codelingo/lingo/service/config"
 	jc "github.com/juju/testing/checkers"
-	"github.com/waigani/xxx"
 	. "gopkg.in/check.v1"
 )
 
@@ -25,7 +24,6 @@ func (s *suite) TestGetCfg(c *C) {
 
 	addr, err := cfg.Get("gitserver.remote.name")
 	c.Assert(err, jc.ErrorIsNil)
-	xxx.Print(addr)
 }
 func (s *suite) TestSetCfg(c *C) {
 
