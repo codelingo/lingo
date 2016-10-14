@@ -63,12 +63,12 @@ func reviewPullRequestAction(ctx *cli.Context) {
 		DotLingo:    dotlingo,
 	}
 
-	issues, err := review.Review(opts)
+	issueCount, err := review.Review(opts)
 	if err != nil {
 		fmt.Println(errors.ErrorStack(err))
 		return
 		// errors.ErrorStack(err)
 	}
 
-	fmt.Printf("Done! Found %d issues \n", len(issues))
+	fmt.Printf("Done! Found %d issues \n", issueCount)
 }

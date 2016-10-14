@@ -38,14 +38,20 @@ package codelingo;
 
 // The query service definition.
 service CodeLingo {
-  // Reviews files
-  // TODO(waigani) support streaming
-  // rpc Review (ReviewRequest) returns (stream Issue) {}
+  // Initialise session
+  rpc Session (SessionRequest) returns (SessionReply) {}
 
+  // Reviews files
   rpc Review (ReviewRequest) returns (ReviewReply) {}
 
   // Queries source code
   rpc Query (QueryRequest) returns (QueryReply) {}
+}
+
+message SessionRequest {}
+
+message SessionReply {
+  string key = 1;
 }
 
 // The request message containing the CLQL source code.
@@ -60,6 +66,7 @@ message QueryReply {
 
 // The request message containing the files or directories to review.
 message ReviewRequest {
+  string key = 12;
   string host = 1;
   string owner = 2;
   string repo= 3;
@@ -73,11 +80,8 @@ message ReviewRequest {
   string dotlingo = 11;
 }
 
-message ReviewReply {
-  repeated Issue issues = 1;
-  // TODO(waigani) implement messaging from server to client.
-  // string message  = 2; // generic messages sent back to the client.
-}
+// Empty, we use the control queue once a review is started
+message ReviewReply {}
 
 // Issue returned from a review.
 message Issue {
