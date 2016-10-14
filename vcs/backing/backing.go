@@ -6,7 +6,10 @@ type Repo interface {
 	Sync() error
 	CurrentCommitId() (string, error)
 	Patches() ([]string, error)
+	// TODO(waigani) owner + name should be part of Repo struct.
 	SetRemote(owner, name string) (string, string, error)
+	CreateRemote(name string) error
+	Exists(name string) (bool, error)
 }
 
 const (

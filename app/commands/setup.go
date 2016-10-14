@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/skratchdot/open-golang/open"
+	"golang.org/x/crypto/ssh/terminal"
+
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 
 	"github.com/codelingo/lingo/service/config"
@@ -50,9 +53,10 @@ func setupLingoAction(c *cli.Context) {
 		util.OSErrf(err.Error())
 	}
 
-	fmt.Sprintln("CodeLingo user set to %q", username)
+	fmt.Println("Success! CodeLingo user set to", username)
 }
 
+// TODO(waigani) dry run this
 func setupLingo(c *cli.Context) (string, error) {
 	if err := util.MaxArgs(c, 0); err != nil {
 		return "", errors.Trace(err)
@@ -65,7 +69,7 @@ func setupLingo(c *cli.Context) (string, error) {
 	username := c.String("username")
 	if username == "" {
 
-		fmt.Print("enter username: ")
+		fmt.Print("Enter Your CodeLingo Username: ")
 		fmt.Scanln(&username)
 	}
 	if username == "" {
@@ -73,20 +77,39 @@ func setupLingo(c *cli.Context) (string, error) {
 		//return "", errors.New("username not set")
 	}
 
+	platConfig, err := utilConfig.Platform()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	webAddr, err := platConfig.Address()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
 	password := c.String("token")
 	if password == "" {
-		fmt.Print("enter user-token:")
-		fmt.Scanln(&password)
+
+		// Launch website to gen token
+		lingoTokenAddr := "http://" + webAddr + "/lingo-token"
+		fmt.Print("Enter User-Token:")
+		if err := open.Run(lingoTokenAddr); err != nil {
+			return "", errors.Trace(err)
+		}
+		byt, err := terminal.ReadPassword(0)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		password = string(byt)
+		fmt.Println("")
 	}
+
 	if password == "" {
 		return "", errors.New("token cannot be empty")
 	}
 
-	// check token matches again
+	// TODO(waigani) check token matches again
 	// store username and password in config
-
-	// Check user is logged into platform. If so, generate token.
-	// https://github.com/gogits/go-gogs-client/wiki/Users#create-a-access-token
 
 	// set creds in auth config
 	if err := setLingoUser(username, password); err != nil {
@@ -94,11 +117,6 @@ func setupLingo(c *cli.Context) (string, error) {
 	}
 
 	cfgDir, err := util.ConfigHome()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	platConfig, err := utilConfig.Platform()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -196,5 +214,4 @@ func setLingoUser(username, password string) error {
 		return errors.Trace(err)
 	}
 	return cfg.Set("all."+gitUserPasswordCfgPath, password)
-
 }
