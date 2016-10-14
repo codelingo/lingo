@@ -1,5 +1,5 @@
 hash: 1c755b81f16308c4434944e1b92f642eb7368868ffd0f42416373bf1a93463df
-updated: 2016-10-14T16:35:10.565763044+13:00
+updated: 2016-10-14T16:59:01.107970325+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -10,6 +10,8 @@ imports:
   subpackages:
   - endpoint
   - log
+  - pubsub
+  - pubsub/rabbitmq
   - sd
   - sd/lb
   - transport/grpc
@@ -97,6 +99,8 @@ imports:
   version: 26a631f9dd067865f87a885179204f4499a33de3
   subpackages:
   - opentracing
+- name: github.com/streadway/amqp
+  version: 2e25825abdbd7752ff08b270d313b93519a0a232
 - name: github.com/waigani/diffparser
   version: 42ae6ebdde8d5414cb002ac435c1d6be3f926c32
 - name: golang.org/x/crypto

@@ -20,6 +20,7 @@ import (
 
 	"github.com/codelingo/kit/endpoint"
 	"github.com/codelingo/kit/log"
+	"github.com/codelingo/kit/pubsub/rabbitmq"
 	loadbalancer "github.com/codelingo/kit/sd/lb"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
