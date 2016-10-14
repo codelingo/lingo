@@ -3,15 +3,15 @@ package grpc
 import (
 	"io"
 
-	// kitot "github.com/go-kit/kit/tracing/opentracing"
+	// kitot "github.com/codelingo/kit/tracing/opentracing"
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 
+	"github.com/codelingo/kit/endpoint"
+	"github.com/codelingo/kit/log"
+	"github.com/codelingo/kit/sd"
+	grpctransport "github.com/codelingo/kit/transport/grpc"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
-	"github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/sd"
-	grpctransport "github.com/go-kit/kit/transport/grpc"
 )
 
 func MakeSessionEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger) sd.Factory {
