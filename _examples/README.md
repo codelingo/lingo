@@ -73,3 +73,9 @@ func:
 little bash script to scrape out facts:
 
 cat `find . | grep '\.lingo'` | tr '\t' ' ' | sed 's/ -//g' | grep -oE '^ *[a-z0-9\._\-]+:' | grep -oE '[a-z0-9\._\-]+:' | sort | uniq
+
+check lifecycles new -> dying -> dead
+golang
+check a chan is not closed twice
+
+defining var outside of block, but is only ever used inside block.

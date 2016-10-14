@@ -37,8 +37,7 @@ func initRepoAction(ctx *cli.Context) {
 		}
 		return
 	}
-
-	fmt.Printf("Successfully initialised. \n Added remote %q %s\n Starting ingest...\n", remoteName, remoteAddr)
+	fmt.Printf("Successfully initialised. \n Added remote %q %s\n", remoteName, remoteAddr)
 }
 
 func initRepo(ctx *cli.Context) (string, string, error) {
@@ -75,6 +74,17 @@ func initRepo(ctx *cli.Context) (string, string, error) {
 	fmt.Scanln(&repoNameCustom)
 	if repoNameCustom != "" {
 		repoName = repoNameCustom
+	}
+
+	// create remote if it doesn't exist
+	exists, err := repo.Exists(repoName)
+	if err != nil {
+		return "", "", errors.Trace(err)
+	}
+	if !exists {
+		if err := repo.CreateRemote(repoName); err != nil {
+			return "", "", errors.Trace(err)
+		}
 	}
 
 	return repo.SetRemote(repoOwner, repoName)

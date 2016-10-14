@@ -28,34 +28,24 @@ Place the lingo binary on your $PATH.
 
 1. Create a CodeLingo account: [http://codelingo.io:3030/user/sign_up](http://codelingo.io:3030/user/sign_up)
 
-2. Create a remote repositoy [http://codelingo.io:3030/repo/create](http://codelingo.io:3030/repo/create)
-
-(Note, for now the repository MUST be public)
-
-3. Add a new or existing local repository as a remote:
-
-  ```bash
-  touch README.md
-  git init
-  git add README.md
-  git commit -m "first commit"
-  git remote add codelingo http://codelingo.io:3030/<your-username>/<your-repo-name>.git
-  git push -u codelingo master
-  ```
-
-  It's important that the remote is called “codelingo”, as this is how the lingo client knows which repository to sync with on codelingo.io.
-
-4. Initiate lingo:
+2. Setup lingo with your user account:
 
 ```bash
+$ lingo setup
+```
+
+3. Initiate a repository:
+
+```bash
+# cd into a git repository
 $ lingo init
 ```
 
-This will write a .lingo file in the current directory.
+That's it. The lingo tool is now set up to be used the repository. If you which to use it with another, simply cd into the repository and run `lingo init.
 
 ## Run a Review
 
-The `lingo` tool uses Tenets to review code. Tenets live in .lingo files. The `$ lingo init` command adds a simple Tenet which finds all functions to get you started. To test this Tenet add a file, named “test.php”, with the following source code:
+The `lingo` tool uses Tenets to review code. Tenets live in .lingo files. The `$ lingo new` command adds a simple Tenet which finds all functions to get you started. To test this Tenet add a file, named “test.php”, with the following source code:
 
 ```PHP
 <?php
@@ -86,7 +76,23 @@ test.php:2
 [o]pen [d]iscard [K]eep: 
 ```
 
-To open the test.php file at the line of the issue, type `o` and hit return. It will give you an option (which it will remember) to set your editor, defaulting to vi.
+As the Tenet is using the inbuilt common fact "func", it will match functions in both PHP and Golang (the two currently supported languages). Add a go file called "main.go" with the following source code:
+
+```go
+package main
+
+import (
+  "fmt"
+)
+
+func main() {
+  fmt.Println("Hello world")
+}
+```
+
+Run `$ lingo review` and you should now see two comments - one on the PHP function and the other on the Go function.
+
+To open a file at the line of the issue, type `o` and hit return. It will give you an option (which it will remember) to set your editor, defaulting to vi.
 
 ## Write a Tenet
 

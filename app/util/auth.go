@@ -41,6 +41,7 @@ func CreateAuthConfig() (*config.Config, error) {
 	return cfg, nil
 }
 
+// TODO(waigani) move this to util/common/config. Follow the platform config example.
 func AuthConfig() (*config.Config, error) {
 	cfgPath, err := authCfgPath()
 	if err != nil {
