@@ -61,6 +61,20 @@ func (p *platformConfig) GitServerAddr() (string, error) {
 	return addr + ":" + port, nil
 }
 
+func (p *platformConfig) Address() (string, error) {
+	addr, err := p.Get("addr")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	port, err := p.Get("port")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return addr + ":" + port, nil
+}
+
 func (p *platformConfig) GrpcAddress() (string, error) {
 
 	addr, err := p.Get("addr")
@@ -79,6 +93,7 @@ func (p *platformConfig) GrpcAddress() (string, error) {
 var PlatformTmpl = `
 all:
   addr: codelingo.io
+  port: "80"
   grpc_port: "8002"
   gitserver:
     remote:
@@ -88,6 +103,7 @@ all:
       port: "3030"
 dev:
   addr: localhost
+  port: "3030"
   gitserver:
     remote:
       name: "codelingo_dev"
@@ -96,6 +112,7 @@ dev:
       port: "3000"
 test:
   addr: localhost
+  port: "3030"
   gitserver:
     remote:
       name: "codelingo_dev"
