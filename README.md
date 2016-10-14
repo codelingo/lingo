@@ -24,9 +24,7 @@ Place the lingo binary on your $PATH.
 
 ## Setup
 
-(Note, these steps will be automated in a future release)
-
-1. Create a CodeLingo account: [http://codelingo.io:3030/user/sign_up](http://codelingo.io:3030/user/sign_up)
+1. Create a CodeLingo account: [http://codelingo.io/join](http://codelingo.io/join)
 
 2. Setup lingo with your user account:
 
