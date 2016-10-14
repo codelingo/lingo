@@ -5,12 +5,16 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/codelingo/lingo/app/util"
+	"github.com/gogits/go-gogs-client"
+
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/vcs/backing"
 )
 
+// TODO(waigani) pass in owner/name here and set them on Repo.
 func New() backing.Repo {
 	return &Repo{}
 }
@@ -38,6 +42,67 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 		return "", "", errors.Annotate(err, out)
 	}
 	return remoteName, remoteAddr, nil
+}
+
+func gogsClientForCurrentUser() (*gogs.Client, error) {
+
+	cfg, err := config.Platform()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	addr, err := cfg.GitServerAddr()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	authCfg, err := util.AuthConfig()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	// TODO(waigani) change "password" to "token"
+	token, err := authCfg.Get("gitserver.user.password")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return gogs.NewClient(addr, token), nil
+}
+
+func (r *Repo) Exists(name string) (bool, error) {
+	gogsClient, err := gogsClientForCurrentUser()
+	if err != nil {
+		return false, errors.Trace(err)
+	}
+
+	repos, err := gogsClient.ListMyRepos()
+	if err != nil {
+		return false, errors.Trace(err)
+	}
+	for _, repo := range repos {
+		if repo.Name == name {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (r *Repo) CreateRemote(name string) error {
+
+	gogsClient, err := gogsClientForCurrentUser()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	_, err = gogsClient.CreateRepo(gogs.CreateRepoOption{
+		Name: name,
+		// TODO(waigani) make all repos private
+		Private:  false,
+		AutoInit: false,
+		//	Readme:   "Default",
+	})
+	return errors.Trace(err)
 }
 
 func (r *Repo) Sync() error {

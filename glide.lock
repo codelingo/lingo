@@ -1,5 +1,5 @@
-hash: fce7042c250822a0bfb048af690ebd45eede7c78255d0d99de508718f68379d6
-updated: 2016-10-02T09:46:50.09676958+13:00
+hash: 5a6bebb8741544f5595cfab4cc704b138e9fb569de04f9e1258ce54f0d790f77
+updated: 2016-10-12T12:24:37.454414521+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -97,8 +97,14 @@ imports:
   version: a3b886889ac213bb046a3214181207ee865f8f27
 - name: github.com/openzipkin/zipkin-go-opentracing
   version: a20910139607957cf3a4c0903421e637feebb621
+- name: github.com/pkg/browser
+  version: 9302be274faad99162b9d48ec97b24306872ebb0
 - name: github.com/Sirupsen/logrus
   version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
+- name: github.com/skratchdot/open-golang
+  version: 75fb7ed4208cf72d323d7d02fd1a5964a7a9073c
+  subpackages:
+  - open
 - name: github.com/sourcegraph/appdash
   version: 26a631f9dd067865f87a885179204f4499a33de3
   subpackages:
@@ -130,7 +136,7 @@ imports:
   subpackages:
   - unix
 - name: google.golang.org/grpc
-  version: 0032a855ba5c8a3c8e0d71c2deef354b70af1584
+  version: b1a2821ca5a4fd6b6e48ddfbb7d6d7584d839d21
   subpackages:
   - codes
   - credentials
