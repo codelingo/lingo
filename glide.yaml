@@ -8,7 +8,7 @@ import:
   version: ^1.0.0
 - package: github.com/fsouza/go-dockerclient
 - package: github.com/codelingo/kit
-  version: 8a537aeac56d73daef58078fe8e8dd4c58db4ef8 #483f2cd7ba88 #^0.2.0
+  version: 27b2194fb0398eb38d86f436cc375f48d32b2850 #483f2cd7ba88 #^0.2.0
   subpackages:
   - endpoint
   - log
