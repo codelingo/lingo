@@ -15,7 +15,10 @@ import (
 	"github.com/juju/errors"
 )
 
-func Review(opts Options) (int, error) {
+// TODO(waigani) this function is used by other services, such as CLAIR.
+// Refactor to have a services package, which both the lingo tool and services
+// such as CLAIR use.
+func Review(opts Options) ([]*codelingo.Issue, error) {
 
 	// build the review request either from a pull request URL or the current repository
 	var reviewReq *server.ReviewRequest
@@ -25,7 +28,7 @@ func Review(opts Options) (int, error) {
 		// TODO(waigani) support other hosts, e.g. bitbucket
 		prOpts, err := parseGithubPR(opts.PullRequest)
 		if err != nil {
-			return 0, errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 
 		reviewReq = &server.ReviewRequest{
@@ -41,7 +44,7 @@ func Review(opts Options) (int, error) {
 	} else {
 		owner, repoName, err := repoOwnerAndNameFromRemote()
 		if err != nil {
-			return 0, errors.Annotate(err, "\nlocal vcs error")
+			return nil, errors.Annotate(err, "\nlocal vcs error")
 		}
 
 		// TODO(waigani) pass this in as opt
@@ -49,16 +52,16 @@ func Review(opts Options) (int, error) {
 
 		sha, err := repo.CurrentCommitId()
 		if err != nil {
-			return 0, errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 
 		if err := repo.Sync(); err != nil {
-			return 0, err
+			return nil, err
 		}
 
 		patches, err := repo.Patches()
 		if err != nil {
-			return 0, errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 
 		reviewReq = &server.ReviewRequest{
@@ -77,28 +80,29 @@ func Review(opts Options) (int, error) {
 
 	svc, err := service.New()
 	if err != nil {
-		return 0, errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
 
 	issues, err := svc.Review(reviewReq)
 	if err != nil {
 		if strings.Contains(err.Error(), "ambiguous argument 'HEAD'") {
-			return 0, errors.New("\nThis looks like a new repository. Please make an initial commit and push to codelingo remote before reviewing. This is only required for the initial commit.")
+			return nil, errors.New("\nThis looks like a new repository. Please make an initial commit and push to codelingo remote before reviewing. This is only required for the initial commit.")
 		}
 
-		return 0, errors.Annotate(err, "\nbad request")
+		return nil, errors.Annotate(err, "\nbad request")
 	}
 
-	confirmedIssues := 0
+	var confirmedIssues []*codelingo.Issue
 	for issue := range issues {
 		output := opts.SaveToFile == ""
 		cfm, err := NewConfirmer(output, opts.KeepAll, nil)
 		if err != nil {
 			panic(err.Error())
-			return 0, nil
+			return nil, nil
 		}
+
 		if cfm.Confirm(0, issue) {
-			confirmedIssues++
+			confirmedIssues = append(confirmedIssues, issue)
 		}
 	}
 	return confirmedIssues, nil
