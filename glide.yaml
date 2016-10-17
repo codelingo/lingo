@@ -8,7 +8,7 @@ import:
   version: ^1.0.0
 - package: github.com/fsouza/go-dockerclient
 - package: github.com/codelingo/kit
-  version: 27b2194fb0398eb38d86f436cc375f48d32b2850 #483f2cd7ba88 #^0.2.0
+  version: 27b2194fb0398eb38d86f436cc375f48d32b2850
   subpackages:
   - endpoint
   - log
@@ -47,5 +47,7 @@ import:
   subpackages:
   - open
 - package: github.com/pkg/browser
+- package: github.com/streadway/amqp
+- package: github.com/juju/version
 testImport:
 - package: github.com/waigani/xxx

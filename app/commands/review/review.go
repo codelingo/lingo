@@ -15,11 +15,12 @@ import (
 	"github.com/juju/errors"
 )
 
+const noCommitErrMsg = "This looks like a new repository. Please make an initial commit before running `lingo review`. This is only required for the initial commit, subsequent changes to your repo will be picked up by lingo without committing."
+
 // TODO(waigani) this function is used by other services, such as CLAIR.
 // Refactor to have a services package, which both the lingo tool and services
 // such as CLAIR use.
 func Review(opts Options) ([]*codelingo.Issue, error) {
-
 	// build the review request either from a pull request URL or the current repository
 	var reviewReq *server.ReviewRequest
 
@@ -52,6 +53,9 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 		sha, err := repo.CurrentCommitId()
 		if err != nil {
+			if noCommitErr(err) {
+				return nil, errors.New(noCommitErrMsg)
+			}
 			return nil, errors.Trace(err)
 		}
 
@@ -82,11 +86,10 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-
 	issues, err := svc.Review(reviewReq)
 	if err != nil {
-		if strings.Contains(err.Error(), "ambiguous argument 'HEAD'") {
-			return nil, errors.New("\nThis looks like a new repository. Please make an initial commit and push to codelingo remote before reviewing. This is only required for the initial commit.")
+		if noCommitErr(err) {
+			return nil, errors.New(noCommitErrMsg)
 		}
 
 		return nil, errors.Annotate(err, "\nbad request")
@@ -106,6 +109,11 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 	}
 	return confirmedIssues, nil
+}
+
+// TODO(waigani) use typed error
+func noCommitErr(err error) bool {
+	return strings.Contains(err.Error(), "ambiguous argument 'HEAD'")
 }
 
 func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {
