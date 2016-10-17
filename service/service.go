@@ -30,8 +30,6 @@ import (
 	"github.com/codelingo/lingo/service/server"
 )
 
-const mqAddress = "amqp://guest:guest@localhost:5672/"
-
 type client struct {
 	context.Context
 	log.Logger
@@ -98,6 +96,15 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 	// Initialise review session and receive channel prefix
 	prefix, err := c.Session(&server.SessionRequest{})
 	req.Key = prefix
+
+	platConfig, err := config.Platform()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	mqAddress, err := platConfig.MessageQueueAddr()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 
 	issueSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-issues", "")
 	if err != nil {
