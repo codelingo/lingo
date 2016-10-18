@@ -49,7 +49,19 @@ That's it!
 
 ## Run a Review
 
-The `lingo` tool uses Tenets to review code. Tenets live in .lingo files alongside your source code. The `lingo new` command writes a .lingo file, adds a simple Tenet (which simply finds all functions) and opens it for you to edit. To test this Tenet add a file, named “test.php”, with the following source code:
+The `lingo` tool uses Tenets to review code. Tenets live in .lingo files alongside your source code. The `lingo new` command writes a .lingo file, adds a simple Tenet (which simply finds all functions) and opens it for you to edit. 
+
+### First Run
+
+Setup a test repository:
+
+```bash
+mkdir myawesomepkg
+cd myawesomepkg
+git init
+```
+
+Add a file, named “test.php”, with the following source code:
 
 ```PHP
 <?php
@@ -59,6 +71,19 @@ function writeMsg() {
 
 writeMsg(); // call the function
 ?>
+```
+
+Add your first Tenet and save it, unchanged:
+
+```bash
+lingo new
+```
+
+Commit:
+
+```bash
+git add -A .
+git commit -m"initial commit"
 ```
 
 Then run `lingo review`. You should see the following output:
@@ -96,11 +121,13 @@ func main() {
 
 Run `$ lingo review` and you should now see two comments - one on the PHP function and the other on the Go function.
 
+Note: you don't have to commit this second file. From here on, lingo will be able to see all changes in your repository, whether they are committed or not.
+
 To open a file at the line of the issue, type `o` and hit return. It will give you an option (which it will remember) to set your editor, defaulting to vi.
 
 ## Write a Tenet
 
-Open .lingo in your editor of choice and change it to the following:
+Continuing on from the first run above, open the .lingo file in your editor of choice and change it to the following:
 
 ```yaml
 tenets:
@@ -111,7 +138,7 @@ tenets:
       name: "writeMsg"
 ```
 
-This will find funcs named "writeMsg". Save and close the file, then run `$ lingo review`. Try adding another func called "readMsg" and run a review. Only the "writeMsg" func should be highlighted. Now, update the Tenet to find all funcs that end in "Msg":
+This will find funcs named "writeMsg". Save and close the file, then run `lingo review`. Try adding another func called "readMsg" and run a review. Only the "writeMsg" func should be highlighted. Now, update the Tenet to find all funcs that end in "Msg":
 
 ```yaml
   match: 
@@ -134,3 +161,4 @@ Other than the match statement, written in CLQL, the rest of a .lingo file is wr
 ## Running Examples
 
 All examples under [examples/php](examples/php) are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and follow the same steps as in the tutorial above.
+
