@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -143,6 +144,7 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 			}
 
 			// TODO: Process messages
+			fmt.Printf("%s\n", (string(b)))
 		}
 		wg.Done()
 	}()
