@@ -28,22 +28,28 @@ Place the lingo binary on your $PATH.
 
 2. Setup lingo with your user account:
 
-```bash
-$ lingo setup
-```
+    ```bash
+    $ lingo setup
+    ```
 
-3. Initiate a repository:
+You will be prompted to enter a username and token. You can generate the token at codelingo.io/lingo-token. That's it. The lingo tool is now setup on your computer.
+
+*Under The Hood*: The setup command creates a ~/.codelingo folder in which it stores credentials and configuration details to push code up and get issues back from the CodeLingo platform. You'll note it also adds a ~/.codelingo/config/git-credentials file. This is used by the lingo tool, via git, to sync code to the CodeLingo git server.
+
+
+## Initiate a repository:
+Before running a review on a repository, the CodeLingo git server needs to be added as a remote, so that changes can be synced and analysed on the CodeLingo platform. To do this, run:
 
 ```bash
 # cd into a git repository
 $ lingo init
 ```
 
-That's it. The lingo tool is now setup on your computer and your repository. If you wish to use lingo with another repository, simply cd into the repository and run `lingo init`.
+That's it!
 
 ## Run a Review
 
-The `lingo` tool uses Tenets to review code. Tenets live in .lingo files along side your source code. The `$ lingo new` command writes a .lingo file, adds a simple Tenet (which simply finds all functions) and opens it for you to edit. To test this Tenet add a file, named “test.php”, with the following source code:
+The `lingo` tool uses Tenets to review code. Tenets live in .lingo files alongside your source code. The `lingo new` command writes a .lingo file, adds a simple Tenet (which simply finds all functions) and opens it for you to edit. To test this Tenet add a file, named “test.php”, with the following source code:
 
 ```PHP
 <?php
@@ -55,7 +61,7 @@ writeMsg(); // call the function
 ?>
 ```
 
-Then run `$ lingo review`. You should see the following output:
+Then run `lingo review`. You should see the following output:
 
 ```bash
 test.php:2
@@ -119,7 +125,7 @@ The "<" symbol returns the node that you're interested in. The review comment is
 
 CLQL is the query language under the `match:` section of a Tenet. It stands for CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but a practical to get acquainted with the language is to review the [examples](examples).
 
-Release v0.1.1 has a partial implementation of CLQL. String and regex assertions, as demonstrated above, are supported against found facts. This list of avaialable facts are currently language specific and can be found in the relevant doc page in the manual:
+Release v0.1.1 has a partial implementation of CLQL. String and regex assertions, as demonstrated above, are supported against found facts. This list of available facts are currently language specific and can be found in the relevant doc page in the manual:
 
 * [PHP](doc/PHP.md)
 
