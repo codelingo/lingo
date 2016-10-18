@@ -39,11 +39,11 @@ $ lingo setup
 $ lingo init
 ```
 
-That's it. The lingo tool is now set up to be used the repository. If you which to use it with another, simply cd into the repository and run `lingo init.
+That's it. The lingo tool is now setup on your computer and your repository. If you wish to use lingo with another repository, simply cd into the repository and run `lingo init`.
 
 ## Run a Review
 
-The `lingo` tool uses Tenets to review code. Tenets live in .lingo files. The `$ lingo new` command adds a simple Tenet which finds all functions to get you started. To test this Tenet add a file, named “test.php”, with the following source code:
+The `lingo` tool uses Tenets to review code. Tenets live in .lingo files along side your source code. The `$ lingo new` command writes a .lingo file, adds a simple Tenet (which simply finds all functions) and opens it for you to edit. To test this Tenet add a file, named “test.php”, with the following source code:
 
 ```PHP
 <?php
@@ -94,7 +94,7 @@ To open a file at the line of the issue, type `o` and hit return. It will give y
 
 ## Write a Tenet
 
-Run `$ vi .lingo` and update .lingo to the following:
+Open .lingo in your editor of choice and change it to the following:
 
 ```yaml
 tenets:
