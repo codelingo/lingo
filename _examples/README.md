@@ -79,3 +79,16 @@ golang
 check a chan is not closed twice
 
 defining var outside of block, but is only ever used inside block.
+
+func in which nothing but nil is returned, yet func sig defines something should be returned.
+
+"for _, i := range issues" 
+	- don't use "i" as var name, reserved for interator int
+	- don't user single letter variables
+	- The singular of issues is issue or iss
+
+naming:
+ - overused package names
+ - ensuring leaving hints of type in name: e.g. "namec" for chans
+
+ make(chan error, n) - n is a code smell

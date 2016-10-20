@@ -2,11 +2,9 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/codelingo/kit/sd"
@@ -39,9 +37,9 @@ type client struct {
 
 // isEnd returns true if a buffer contains only a single null byte,
 // indicating that the queue will have no further messages
-func isEnd(b []byte) bool {
-	return len(b) == 1 && b[0] == '\x00'
-}
+// func isEnd(b []byte) bool {
+// 	return len(b) == 1 && b[0] == '\x00'
+// }
 
 // TODO(pb): If your service interface methods don't return an error, we have
 // no way to signal problems with a service client. If they don't take a
@@ -82,16 +80,16 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
-func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, error) {
+func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
 	// set defaults
 	if req.Host == "" {
-		return nil, errors.New("repository host is not set")
+		return nil, nil, errors.New("repository host is not set")
 	}
 	if req.Owner == "" {
-		return nil, errors.New("repository owner is not set")
+		return nil, nil, errors.New("repository owner is not set")
 	}
 	if req.Repo == "" {
-		return nil, errors.New("repository name is not set")
+		return nil, nil, errors.New("repository name is not set")
 	}
 
 	// Initialise review session and receive channel prefix
@@ -100,81 +98,81 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 
 	platConfig, err := config.Platform()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 	mqAddress, err := platConfig.MessageQueueAddr()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 
 	issueSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-issues", "")
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 
 	messageSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-messages", "")
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 
-	issues := make(chan *codelingo.Issue, 1)
+	issueSubc := issueSubscriber.Start()
+	messageSubc := messageSubscriber.Start()
+	issuec := make(server.Issuec)
+	messagec := make(server.Messagec)
 
-	issueMessages := issueSubscriber.Start()
-	messageMessages := messageSubscriber.Start()
-
-	// Only finish review after both publishers closed and channels drained
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		wg.Wait()
-		close(issues)
-	}()
-
-	go func() {
-		for m := range messageMessages {
-			b, err := ioutil.ReadAll(m)
-			if err != nil {
-				c.Logger.Log(err)
-				continue
+	// helper func to send errors to the message chan
+	sendErrIfErr := func(err error) {
+		if err != nil {
+			if err2 := messagec.Send(err.Error()); err != nil {
+				panic(errors.Annotate(err, err2.Error()))
 			}
-
-			if isEnd(b) {
-				messageSubscriber.Stop()
-				break
-			}
-
-			// TODO: Process messages
-			fmt.Printf("%s\n", (string(b)))
 		}
-		wg.Done()
-	}()
+	}
 
+	// read from subscriber chans onto issue and message chans, transforming
+	// pubsub.Message into codelingo.Issue or server.Message
 	go func() {
-		for m := range issueMessages {
-			b, err := ioutil.ReadAll(m)
-			if err != nil {
-				c.Logger.Log(err)
-				continue
-			}
+		defer close(messagec)
+		defer close(issuec)
+		defer issueSubscriber.Stop()
+		defer messageSubscriber.Stop()
+	l:
+		for {
+			select {
+			case issueMsg, ok := <-issueSubc:
+				if !ok {
+					// no more issues.
+					break l
+				}
 
-			if isEnd(b) {
-				issueSubscriber.Stop()
-				break
-			}
+				byt, err := ioutil.ReadAll(issueMsg)
+				sendErrIfErr(err)
 
-			i := &codelingo.Issue{}
-			err = json.Unmarshal(b, i)
-			issues <- i
+				issue := &codelingo.Issue{}
+				sendErrIfErr(json.Unmarshal(byt, issueMsg))
+				sendErrIfErr(issuec.Send(issue))
+				sendErrIfErr(issuec.Send(issue))
+
+			case msg, ok := <-messageSubc:
+				if !ok {
+					// no more messages.
+					break l
+				}
+				byt, err := ioutil.ReadAll(msg)
+				sendErrIfErr(err)
+
+				// TODO: Process messages
+				sendErrIfErr(messagec.Send(string(byt) + "\n"))
+			}
 		}
-		wg.Done()
 	}()
 
 	_, err = c.endpoints["review"](c.Context, req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return issues, nil
+	return issuec, messagec, nil
 }
 
 // TODO(waigani) construct logger separately and pass into New.

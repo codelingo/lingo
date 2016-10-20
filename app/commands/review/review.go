@@ -1,6 +1,7 @@
 package review
 
 import (
+	"fmt"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -86,7 +87,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	issues, err := svc.Review(reviewReq)
+	issuesc, messagesc, err := svc.Review(reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
 			return nil, errors.New(noCommitErrMsg)
@@ -95,17 +96,31 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		return nil, errors.Annotate(err, "\nbad request")
 	}
 
+	// TODO(waigani) these should both be chans - as per firt MVP.
 	var confirmedIssues []*codelingo.Issue
-	for issue := range issues {
-		output := opts.SaveToFile == ""
-		cfm, err := NewConfirmer(output, opts.KeepAll, nil)
-		if err != nil {
-			panic(err.Error())
-			return nil, nil
-		}
+l:
+	for {
+		select {
+		case issue, ok := <-issuesc:
+			if !ok {
+				break l
+			}
+			output := opts.SaveToFile == ""
+			cfm, err := NewConfirmer(output, opts.KeepAll, nil)
+			if err != nil {
+				panic(err.Error())
+				return nil, nil
+			}
 
-		if cfm.Confirm(0, issue) {
-			confirmedIssues = append(confirmedIssues, issue)
+			if cfm.Confirm(0, issue) {
+				confirmedIssues = append(confirmedIssues, issue)
+			}
+		case message := <-messagesc:
+			// we don't listen for the close of the message chan, as this is
+			// only information while waiting for issues.
+			if message != "" {
+				fmt.Println(string(message))
+			}
 		}
 	}
 	return confirmedIssues, nil
