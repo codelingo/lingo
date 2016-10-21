@@ -37,9 +37,9 @@ type client struct {
 
 // isEnd returns true if a buffer contains only a single null byte,
 // indicating that the queue will have no further messages
-// func isEnd(b []byte) bool {
-// 	return len(b) == 1 && b[0] == '\x00'
-// }
+func isEnd(b []byte) bool {
+	return len(b) == 1 && b[0] == '\x00'
+}
 
 // TODO(pb): If your service interface methods don't return an error, we have
 // no way to signal problems with a service client. If they don't take a
@@ -123,7 +123,7 @@ func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Message
 	// helper func to send errors to the message chan
 	sendErrIfErr := func(err error) {
 		if err != nil {
-			if err2 := messagec.Send(err.Error()); err != nil {
+			if err2 := messagec.Send(err.Error()); err2 != nil {
 				panic(errors.Annotate(err, err2.Error()))
 			}
 		}
@@ -140,29 +140,35 @@ func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Message
 		for {
 			select {
 			case issueMsg, ok := <-issueSubc:
-				if !ok {
+				// TODO(waigani) !ok is never used and isEnd is a workarond. A
+				// proper pubsub should close the chan upstream.
+				byt, err := ioutil.ReadAll(issueMsg)
+				sendErrIfErr(err)
+				if !ok || isEnd(byt) {
 					// no more issues.
 					break l
 				}
 
-				byt, err := ioutil.ReadAll(issueMsg)
-				sendErrIfErr(err)
-
 				issue := &codelingo.Issue{}
-				sendErrIfErr(json.Unmarshal(byt, issueMsg))
+				sendErrIfErr(json.Unmarshal(byt, issue))
 				sendErrIfErr(issuec.Send(issue))
 				sendErrIfErr(issuec.Send(issue))
+				sendErrIfErr(issueMsg.Done())
 
 			case msg, ok := <-messageSubc:
-				if !ok {
+				byt, err := ioutil.ReadAll(msg)
+				sendErrIfErr(err)
+				if !ok || isEnd(byt) {
 					// no more messages.
 					break l
 				}
-				byt, err := ioutil.ReadAll(msg)
-				sendErrIfErr(err)
 
 				// TODO: Process messages
 				sendErrIfErr(messagec.Send(string(byt) + "\n"))
+				sendErrIfErr(msg.Done())
+			case <-time.After(time.Second * 30):
+				sendErrIfErr(errors.New("timed out waiting for issues"))
+				break l
 			}
 		}
 	}()

@@ -98,6 +98,16 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 	// TODO(waigani) these should both be chans - as per firt MVP.
 	var confirmedIssues []*codelingo.Issue
+	go func() {
+		for message := range messagesc {
+			//  Currently, the message chan just prints while we're waiting
+			//  for issues. So we don't worry about closing it or timeouts
+			//  etc.
+			if message != "" {
+				fmt.Println(string(message))
+			}
+		}
+	}()
 l:
 	for {
 		select {
@@ -114,12 +124,6 @@ l:
 
 			if cfm.Confirm(0, issue) {
 				confirmedIssues = append(confirmedIssues, issue)
-			}
-		case message := <-messagesc:
-			// we don't listen for the close of the message chan, as this is
-			// only information while waiting for issues.
-			if message != "" {
-				fmt.Println(string(message))
 			}
 		}
 	}
