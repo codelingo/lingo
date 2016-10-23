@@ -121,12 +121,15 @@ func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Message
 	messagec := make(server.Messagec)
 
 	// helper func to send errors to the message chan
-	sendErrIfErr := func(err error) {
+	sendErrIfErr := func(err error) bool {
 		if err != nil {
 			if err2 := messagec.Send(err.Error()); err2 != nil {
+				// yes panic, this is a developer error
 				panic(errors.Annotate(err, err2.Error()))
 			}
+			return true
 		}
+		return false
 	}
 
 	// read from subscriber chans onto issue and message chans, transforming
@@ -143,22 +146,27 @@ func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Message
 				// TODO(waigani) !ok is never used and isEnd is a workarond. A
 				// proper pubsub should close the chan upstream.
 				byt, err := ioutil.ReadAll(issueMsg)
-				sendErrIfErr(err)
+				if sendErrIfErr(err) {
+					break l
+				}
 				if !ok || isEnd(byt) {
 					// no more issues.
 					break l
 				}
 
 				issue := &codelingo.Issue{}
-				sendErrIfErr(json.Unmarshal(byt, issue))
-				sendErrIfErr(issuec.Send(issue))
-				sendErrIfErr(issuec.Send(issue))
-				sendErrIfErr(issueMsg.Done())
+				if sendErrIfErr(json.Unmarshal(byt, issue)) ||
+					sendErrIfErr(issuec.Send(issue)) ||
+					sendErrIfErr(issuec.Send(issue)) ||
+					sendErrIfErr(issueMsg.Done()) {
+					break l
+				}
 
 			case msg, ok := <-messageSubc:
 				byt, err := ioutil.ReadAll(msg)
-				sendErrIfErr(err)
-				if !ok || isEnd(byt) {
+				if sendErrIfErr(err) ||
+					!ok ||
+					isEnd(byt) {
 					// no more messages.
 					break l
 				}

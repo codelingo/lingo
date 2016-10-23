@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
@@ -108,6 +109,20 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 			}
 		}
 	}()
+
+	output := opts.SaveToFile == ""
+	cfm, err := NewConfirmer(output, opts.KeepAll, nil)
+	if err != nil {
+		panic(err.Error())
+		return nil, nil
+	}
+
+	// If user is manually confirming reviews, set a long timeout.
+	timeout := time.After(time.Hour * 1)
+	if opts.KeepAll {
+		timeout = time.After(time.Second * 30)
+	}
+
 l:
 	for {
 		select {
@@ -115,16 +130,11 @@ l:
 			if !ok {
 				break l
 			}
-			output := opts.SaveToFile == ""
-			cfm, err := NewConfirmer(output, opts.KeepAll, nil)
-			if err != nil {
-				panic(err.Error())
-				return nil, nil
-			}
-
 			if cfm.Confirm(0, issue) {
 				confirmedIssues = append(confirmedIssues, issue)
 			}
+		case <-timeout:
+			return nil, errors.New("timed out waiting for issue")
 		}
 	}
 	return confirmedIssues, nil
