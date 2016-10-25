@@ -117,7 +117,7 @@ func (r *Repo) Sync() error {
 	}
 
 	// sync local and remote before reviewing
-	_, err = gitCMD("push", remote, "HEAD")
+	_, err = gitCMD("push", remote, "HEAD", "--force")
 	return errors.Trace(err)
 }
 
