@@ -2,11 +2,9 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/codelingo/kit/sd"
@@ -82,16 +80,16 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
-func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, error) {
+func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
 	// set defaults
 	if req.Host == "" {
-		return nil, errors.New("repository host is not set")
+		return nil, nil, errors.New("repository host is not set")
 	}
 	if req.Owner == "" {
-		return nil, errors.New("repository owner is not set")
+		return nil, nil, errors.New("repository owner is not set")
 	}
 	if req.Repo == "" {
-		return nil, errors.New("repository name is not set")
+		return nil, nil, errors.New("repository name is not set")
 	}
 
 	// Initialise review session and receive channel prefix
@@ -100,81 +98,95 @@ func (c client) Review(req *server.ReviewRequest) (<-chan *codelingo.Issue, erro
 
 	platConfig, err := config.Platform()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 	mqAddress, err := platConfig.MessageQueueAddr()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 
 	issueSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-issues", "")
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 
 	messageSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-messages", "")
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
 
-	issues := make(chan *codelingo.Issue, 1)
+	issueSubc := issueSubscriber.Start()
+	messageSubc := messageSubscriber.Start()
+	issuec := make(server.Issuec)
+	messagec := make(server.Messagec)
 
-	issueMessages := issueSubscriber.Start()
-	messageMessages := messageSubscriber.Start()
-
-	// Only finish review after both publishers closed and channels drained
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		wg.Wait()
-		close(issues)
-	}()
-
-	go func() {
-		for m := range messageMessages {
-			b, err := ioutil.ReadAll(m)
-			if err != nil {
-				c.Logger.Log(err)
-				continue
+	// helper func to send errors to the message chan
+	sendErrIfErr := func(err error) bool {
+		if err != nil {
+			if err2 := messagec.Send(err.Error()); err2 != nil {
+				// yes panic, this is a developer error
+				panic(errors.Annotate(err, err2.Error()))
 			}
-
-			if isEnd(b) {
-				messageSubscriber.Stop()
-				break
-			}
-
-			// TODO: Process messages
-			fmt.Printf("%s\n", (string(b)))
+			return true
 		}
-		wg.Done()
-	}()
+		return false
+	}
 
+	// read from subscriber chans onto issue and message chans, transforming
+	// pubsub.Message into codelingo.Issue or server.Message
 	go func() {
-		for m := range issueMessages {
-			b, err := ioutil.ReadAll(m)
-			if err != nil {
-				c.Logger.Log(err)
-				continue
-			}
+		defer close(messagec)
+		defer close(issuec)
+		defer issueSubscriber.Stop()
+		defer messageSubscriber.Stop()
+	l:
+		for {
+			select {
+			case issueMsg, ok := <-issueSubc:
+				// TODO(waigani) !ok is never used and isEnd is a workarond. A
+				// proper pubsub should close the chan upstream.
+				byt, err := ioutil.ReadAll(issueMsg)
+				if sendErrIfErr(err) {
+					break l
+				}
+				if !ok || isEnd(byt) {
+					// no more issues.
+					break l
+				}
 
-			if isEnd(b) {
-				issueSubscriber.Stop()
-				break
-			}
+				issue := &codelingo.Issue{}
+				if sendErrIfErr(json.Unmarshal(byt, issue)) ||
+					sendErrIfErr(issuec.Send(issue)) ||
+					sendErrIfErr(issuec.Send(issue)) ||
+					sendErrIfErr(issueMsg.Done()) {
+					break l
+				}
 
-			i := &codelingo.Issue{}
-			err = json.Unmarshal(b, i)
-			issues <- i
+			case msg, ok := <-messageSubc:
+				byt, err := ioutil.ReadAll(msg)
+				if sendErrIfErr(err) ||
+					!ok ||
+					isEnd(byt) {
+					// no more messages.
+					break l
+				}
+
+				// TODO: Process messages
+				sendErrIfErr(messagec.Send(string(byt) + "\n"))
+				sendErrIfErr(msg.Done())
+			case <-time.After(time.Second * 30):
+				sendErrIfErr(errors.New("timed out waiting for issues"))
+				break l
+			}
 		}
-		wg.Done()
 	}()
 
 	_, err = c.endpoints["review"](c.Context, req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return issues, nil
+	return issuec, messagec, nil
 }
 
 // TODO(waigani) construct logger separately and pass into New.
