@@ -14,6 +14,7 @@ import (
 )
 
 func (s *cmdSuite) TestSetUpCMD(c *gc.C) {
+	c.Skip("prompt for username and password")
 	app := ap.New()
 	set := flag.NewFlagSet("test", 0)
 	// TODO(waigani) prompt for username and password

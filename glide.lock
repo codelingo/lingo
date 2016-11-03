@@ -1,5 +1,5 @@
 hash: 982517236c5ca5b02290c828ff584691933290654bceeb957b70080bad00cbb5
-updated: 2016-10-21T10:06:48.947851507+13:00
+updated: 2016-10-26T13:14:23.301666895+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -16,7 +16,7 @@ imports:
   - sd/lb
   - transport/grpc
 - name: github.com/docker/docker
-  version: bf0077c138a1cf64a42828014c44f8e2b2001703
+  version: 282b0aff08030a2521adf7d64bdd333f0864b720
   subpackages:
   - opts
   - pkg/archive
@@ -30,18 +30,18 @@ imports:
   - pkg/stdcopy
   - pkg/system
 - name: github.com/docker/engine-api
-  version: fa0eea948c32ababd784fc1ad76172d986617e56
+  version: c9fd33c91008b9c558a6ed1cb11a68dbe4db0493
   subpackages:
   - types/filters
   - types/mount
   - types/swarm
   - types/versions
 - name: github.com/docker/go-units
-  version: 9b001659dd36225e356b4467c465d732e745f53d
+  version: eb879ae3e2b84e2a142af415b679ddeda47ec71c
 - name: github.com/fatih/color
   version: dea9d3a26a087187530244679c1cfb3a42937794
 - name: github.com/fsouza/go-dockerclient
-  version: 2ce05b8e04b7475b63ae21c1aeaf72b8a5b05eb5
+  version: 4efaf0ea3c8990e1648f68672d011289f0c0cb0a
 - name: github.com/go-logfmt/logfmt
   version: d4327190ff838312623b09bfeb50d7c93c8d9c1d
 - name: github.com/go-stack/stack
@@ -79,7 +79,7 @@ imports:
 - name: github.com/mitchellh/go-homedir
   version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
 - name: github.com/opencontainers/runc
-  version: 189a2ab2f7acc59043e457cea25b58f631443f08
+  version: 6df383c2f881fbdeb85060fd27d8bf61afedacd9
   subpackages:
   - libcontainer/system
   - libcontainer/user
@@ -139,9 +139,10 @@ imports:
 - name: gopkg.in/check.v1
   version: 4f90aeace3a26ad7021961c297b22c42160c7b25
 - name: gopkg.in/mgo.v2
-  version: 01ee097136da162d1dd3c9b44fbdf3abf4fd6552
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
   - bson
+  - internal/json
   - internal/sasl
   - internal/scram
 - name: gopkg.in/yaml.v1
