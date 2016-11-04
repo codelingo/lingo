@@ -150,7 +150,7 @@ The "<" symbol returns the node that you're interested in. The review comment is
 
 ## CLQL
 
-CLQL is the query language under the `match:` section of a Tenet. It stands for CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but a practical to get acquainted with the language is to review the [examples](examples).
+CLQL is the query language under the `match:` section of a Tenet. It stands for CodeLingo Query Language. The full spec can be found [here](https://docs.google.com/document/d/1NIw1J9u2hiez9ZYZ0S1sV8lJamdE9eyqWa8R9uho0MU/edit), but a practical to get acquainted with the language is to review the [examples](_examples).
 
 Release v0.1.1 has a partial implementation of CLQL. String and regex assertions, as demonstrated above, are supported against found facts. This list of available facts are currently language specific and can be found in the relevant doc page in the manual:
 
@@ -160,5 +160,5 @@ Other than the match statement, written in CLQL, the rest of a .lingo file is wr
 
 ## Running Examples
 
-All examples under [examples/php](examples/php) are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and follow the same steps as in the tutorial above.
+All examples under [examples/php](_examples/php) are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and follow the same steps as in the tutorial above.
 
