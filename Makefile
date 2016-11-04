@@ -20,7 +20,8 @@ install:
 	# build and install lingo
 	go install
 
-
+test:
+	scripts/./pre-push
 # waigani xxx
 # git hg bazar
 # hg launchpad
