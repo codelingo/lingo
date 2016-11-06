@@ -97,7 +97,8 @@ func writeDotLingo(cfgPath string) error {
 	}
 
 	// add comment to file
-	byt = append(byt, []byte(intro)...)
+	// TODO(waigani) comments seem to cause a "corrupt patch" error, removing this for now.
+	// byt = append(byt, []byte(intro)...)
 
 	if err = ioutil.WriteFile(cfgPath, byt, 0644); err != nil {
 		return errors.Trace(err)
