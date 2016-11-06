@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Put this script in the lingo/.git/hooks directory
+# Make sure that it has this name, as that determines when it is run
+
+go test $(go list ./... | grep -v /vendor/)	
+if [ $? -ne 0 ]
+then
+	echo "Failed to run tests."
+	exit 1
+fi
+
+exit 0
