@@ -36,7 +36,7 @@ func newLingoAction(ctx *cli.Context) {
 		util.OSErrf(err.Error())
 		return
 	}
-	fmt.Println("Successfully initialised. Lingo config file written in current directory")
+	fmt.Println("Success! A .lingo file has been written in the current directory. Edit it with your editor of choice to get started writing Tenets.")
 
 }
 
@@ -45,22 +45,8 @@ func newLingo(c *cli.Context) error {
 		return errors.Trace(err)
 	}
 
-	cfgPath, err := writeDotLingoToCurrentDir(c)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	// TODO(waigani) don't hardcode vim. Use env var.
-	cmd, err := util.OpenFileCmd("vim", cfgPath, 1)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	if err = cmd.Start(); err != nil {
-		return errors.Trace(err)
-
-	}
-	return cmd.Wait()
+	_, err := writeDotLingoToCurrentDir(c)
+	return errors.Trace(err)
 }
 
 func writeDotLingoToCurrentDir(c *cli.Context) (string, error) {
@@ -69,7 +55,7 @@ func writeDotLingoToCurrentDir(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 	if _, err := os.Stat(cfgPath); err == nil {
-		return "", errors.Errorf("Already initialised. Using %q", cfgPath)
+		return "", errors.Errorf(".lingo file already exists: %q", cfgPath)
 	}
 
 	return cfgPath, writeDotLingo(cfgPath)
