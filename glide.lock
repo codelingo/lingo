@@ -1,5 +1,5 @@
-hash: 982517236c5ca5b02290c828ff584691933290654bceeb957b70080bad00cbb5
-updated: 2016-10-26T13:14:23.301666895+13:00
+hash: 9871d6de781d7d057822ca6334cbff44a4ba829c7d493fd301ff7efaf5ea2428
+updated: 2016-11-07T19:45:23.29397405+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -16,8 +16,10 @@ imports:
   - sd/lb
   - transport/grpc
 - name: github.com/docker/docker
-  version: 282b0aff08030a2521adf7d64bdd333f0864b720
+  version: cc8b8ce0b3d2d6b3345687464d3a3b1c2c4971ef
   subpackages:
+  - api/types/filters
+  - api/types/versions
   - opts
   - pkg/archive
   - pkg/fileutils
@@ -30,18 +32,16 @@ imports:
   - pkg/stdcopy
   - pkg/system
 - name: github.com/docker/engine-api
-  version: c9fd33c91008b9c558a6ed1cb11a68dbe4db0493
+  version: fa0eea948c32ababd784fc1ad76172d986617e56
   subpackages:
-  - types/filters
   - types/mount
   - types/swarm
-  - types/versions
 - name: github.com/docker/go-units
-  version: eb879ae3e2b84e2a142af415b679ddeda47ec71c
+  version: 9b001659dd36225e356b4467c465d732e745f53d
 - name: github.com/fatih/color
   version: dea9d3a26a087187530244679c1cfb3a42937794
 - name: github.com/fsouza/go-dockerclient
-  version: 4efaf0ea3c8990e1648f68672d011289f0c0cb0a
+  version: 2ce05b8e04b7475b63ae21c1aeaf72b8a5b05eb5
 - name: github.com/go-logfmt/logfmt
   version: d4327190ff838312623b09bfeb50d7c93c8d9c1d
 - name: github.com/go-stack/stack
@@ -49,9 +49,10 @@ imports:
 - name: github.com/gogits/go-gogs-client
   version: d8aff570fa22d4e38954c753ec8b21862239b31d
 - name: github.com/golang/protobuf
-  version: 888eb0692c857ec880338addf316bd662d5e630e
+  version: 98fa357170587e470c5f27d3c3ea0947b71eb455
   subpackages:
   - proto
+  - protoc-gen-go
 - name: github.com/hashicorp/go-cleanhttp
   version: ad28ea4487f05916463e2423a55166280e8254b5
 - name: github.com/juju/errors
@@ -79,7 +80,7 @@ imports:
 - name: github.com/mitchellh/go-homedir
   version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
 - name: github.com/opencontainers/runc
-  version: 6df383c2f881fbdeb85060fd27d8bf61afedacd9
+  version: 189a2ab2f7acc59043e457cea25b58f631443f08
   subpackages:
   - libcontainer/system
   - libcontainer/user
@@ -126,7 +127,7 @@ imports:
   subpackages:
   - unix
 - name: google.golang.org/grpc
-  version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
+  version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
   subpackages:
   - codes
   - credentials
@@ -139,10 +140,9 @@ imports:
 - name: gopkg.in/check.v1
   version: 4f90aeace3a26ad7021961c297b22c42160c7b25
 - name: gopkg.in/mgo.v2
-  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  version: 01ee097136da162d1dd3c9b44fbdf3abf4fd6552
   subpackages:
   - bson
-  - internal/json
   - internal/sasl
   - internal/scram
 - name: gopkg.in/yaml.v1
