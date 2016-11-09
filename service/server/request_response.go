@@ -1,5 +1,11 @@
 package server
 
+type ListLexiconRequest struct{}
+
+type ListLexiconResponse struct {
+	Key string `json:"lexicons"`
+}
+
 type SessionRequest struct{}
 
 type SessionResponse struct {

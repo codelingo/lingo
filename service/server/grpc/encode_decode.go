@@ -6,6 +6,18 @@ import (
 	"golang.org/x/net/context"
 )
 
+func DecodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	return &codelingo.ListLexiconsRequest{}
+}
+
+func EncodeListLexiconsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	lexicons := resp.(codelingo.ListLexiconsReply).Lexicons
+	return &codelingo.ListLexiconsReply{
+		Lexicons: lexicons,
+	}, nil
+	return &codelingo.ListLexiconsReply{}, nil
+}
+
 func DecodeSessionRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	return &server.SessionRequest{}, nil
 }
