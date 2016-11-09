@@ -1,5 +1,5 @@
-hash: 982517236c5ca5b02290c828ff584691933290654bceeb957b70080bad00cbb5
-updated: 2016-10-21T10:06:48.947851507+13:00
+hash: 9871d6de781d7d057822ca6334cbff44a4ba829c7d493fd301ff7efaf5ea2428
+updated: 2016-11-07T19:45:23.29397405+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -16,8 +16,10 @@ imports:
   - sd/lb
   - transport/grpc
 - name: github.com/docker/docker
-  version: bf0077c138a1cf64a42828014c44f8e2b2001703
+  version: cc8b8ce0b3d2d6b3345687464d3a3b1c2c4971ef
   subpackages:
+  - api/types/filters
+  - api/types/versions
   - opts
   - pkg/archive
   - pkg/fileutils
@@ -32,10 +34,8 @@ imports:
 - name: github.com/docker/engine-api
   version: fa0eea948c32ababd784fc1ad76172d986617e56
   subpackages:
-  - types/filters
   - types/mount
   - types/swarm
-  - types/versions
 - name: github.com/docker/go-units
   version: 9b001659dd36225e356b4467c465d732e745f53d
 - name: github.com/fatih/color
@@ -49,9 +49,10 @@ imports:
 - name: github.com/gogits/go-gogs-client
   version: d8aff570fa22d4e38954c753ec8b21862239b31d
 - name: github.com/golang/protobuf
-  version: 888eb0692c857ec880338addf316bd662d5e630e
+  version: 98fa357170587e470c5f27d3c3ea0947b71eb455
   subpackages:
   - proto
+  - protoc-gen-go
 - name: github.com/hashicorp/go-cleanhttp
   version: ad28ea4487f05916463e2423a55166280e8254b5
 - name: github.com/juju/errors
@@ -126,7 +127,7 @@ imports:
   subpackages:
   - unix
 - name: google.golang.org/grpc
-  version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
+  version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
   subpackages:
   - codes
   - credentials

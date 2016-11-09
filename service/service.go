@@ -157,7 +157,6 @@ func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Message
 				issue := &codelingo.Issue{}
 				if sendErrIfErr(json.Unmarshal(byt, issue)) ||
 					sendErrIfErr(issuec.Send(issue)) ||
-					sendErrIfErr(issuec.Send(issue)) ||
 					sendErrIfErr(issueMsg.Done()) {
 					break l
 				}

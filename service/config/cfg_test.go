@@ -18,15 +18,16 @@ type suite struct{}
 var _ = Suite(&suite{})
 
 func (s *suite) TestGetCfg(c *C) {
-
+	c.Skip("Assert address")
 	cfg, err := config.New("test_cfg.yaml")
 	c.Assert(err, jc.ErrorIsNil)
 
 	addr, err := cfg.Get("gitserver.remote.name")
 	c.Assert(err, jc.ErrorIsNil)
+	c.Assert(addr, DeepEquals, "")
 }
-func (s *suite) TestSetCfg(c *C) {
 
+func (s *suite) TestSetCfg(c *C) {
 	cfg, err := config.New("test_cfg.yaml")
 	c.Assert(err, jc.ErrorIsNil)
 

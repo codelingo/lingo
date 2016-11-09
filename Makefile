@@ -4,6 +4,10 @@
 
 PKG_NAME=$(shell basename `pwd`)
 
+updateproto:
+	go get -u github.com/golang/protobuf/proto
+	go get -u github.com/golang/protobuf/protoc-gen-go
+
 install:
 	# first install glide to manage deps
 	go get github.com/Masterminds/glide
@@ -20,7 +24,8 @@ install:
 	# build and install lingo
 	go install
 
-
+test:
+	scripts/./pre-push
 # waigani xxx
 # git hg bazar
 # hg launchpad
