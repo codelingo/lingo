@@ -46,6 +46,16 @@ service CodeLingo {
 
   // Queries source code
   rpc Query (QueryRequest) returns (QueryReply) {}
+
+  // Lists available lexicons
+  rpc ListLexicons (ListLexiconsRequest) returns (ListLexiconsReply) {}
+
+}
+
+message ListLexiconsRequest {}
+
+message ListLexiconsReply {
+  repeated string lexicons = 1;
 }
 
 message SessionRequest {}
