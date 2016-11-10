@@ -50,6 +50,16 @@ service CodeLingo {
   // Lists available lexicons
   rpc ListLexicons (ListLexiconsRequest) returns (ListLexiconsReply) {}
 
+  rpc ListFacts (ListFactsRequest) returns (FactList) {}
+
+}
+
+message ListFactsRequest {
+  string lexicon = 1;
+}
+
+message FactList {
+  string facts = 1;
 }
 
 message ListLexiconsRequest {}
