@@ -7,7 +7,7 @@ import (
 )
 
 func DecodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	return &codelingo.ListLexiconsRequest{}
+	return &codelingo.ListLexiconsRequest{}, nil
 }
 
 func EncodeListLexiconsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
