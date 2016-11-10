@@ -22,6 +22,8 @@ import (
 	"github.com/codelingo/kit/pubsub/rabbitmq"
 	loadbalancer "github.com/codelingo/kit/sd/lb"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
+	googlegrpc "google.golang.org/grpc"
+
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 
 	// kitot "github.com/codelingo/kit/tracing/opentracing"
@@ -78,6 +80,36 @@ func (c client) Query(clql string) (string, error) {
 
 	r := reply.(server.QueryResponse)
 	return r.Result, nil
+}
+
+func (c client) ListLexicons() ([]string, error) {
+	cfg, err := config.Platform()
+	if err != nil {
+		return nil, err
+	}
+
+	address, err := cfg.GrpcAddress()
+	if err != nil {
+		return nil, err
+	}
+
+	// Sets up a connection to the server.
+	//TODO(BlakeMScurr) use clientgrpc package instead
+	conn, err := googlegrpc.Dial(address, googlegrpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	defer conn.Close()
+	client := codelingo.NewCodeLingoClient(conn)
+
+	// Contact the server and print out its response.
+	r, err := client.ListLexicons(context.Background(), &codelingo.ListLexiconsRequest{})
+	if err != nil {
+		return nil, err
+	}
+	return r.Lexicons, nil
+
 }
 
 func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
