@@ -76,6 +76,10 @@ var (
 		"lingo-file",
 		"lf",
 	}
+	FormatFlg = flagName{
+		"format",
+		"f",
+	}
 )
 
 func (f *flagName) String() string {
