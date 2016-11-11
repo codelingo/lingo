@@ -18,6 +18,7 @@ type CodeLingoService interface {
 	Session(*SessionRequest) (string, error)
 	Query(src string) (string, error)
 	Review(*ReviewRequest) (Issuec, Messagec, error)
+	ListLexicons() ([]string, error)
 }
 
 func (mc Messagec) Send(msgFmt string, vars ...interface{}) error {

@@ -21,7 +21,7 @@ func init() {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  util.LingoFile.String(),
-				Usage: "A .lingo file to preform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
+				Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
 			},
 			// cli.BoolFlag{
 			// 	Name:  "all",
