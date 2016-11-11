@@ -52,6 +52,7 @@ func listLexicons(ctx *cli.Context) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+
 	err = outputBytes(ctx.String("output"), getFormat(ctx.String("format"), lexicons))
 	if err != nil {
 		return errors.Trace(err)
@@ -69,7 +70,7 @@ func getFormat(format string, lexicons []string) []byte {
 		content = buf.Bytes()
 	default:
 		// TODO(BlakeMScurr) append more efficiently
-		str := strings.Join(lexicons, ", ")
+		str := strings.Join(lexicons, "\n")
 		str += "\n"
 		content = []byte(str)
 	}

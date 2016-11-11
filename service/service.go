@@ -82,6 +82,40 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
+//TODO(BlakeMScurr) this code is literally copied from the below function
+//parametise it in a way that's consistent with interface requirements
+//and service conventions
+func (c client) ListFacts(lexicon string) ([]string, error) {
+	cfg, err := config.Platform()
+	if err != nil {
+		return nil, err
+	}
+
+	address, err := cfg.GrpcAddress()
+	if err != nil {
+		return nil, err
+	}
+
+	// Sets up a connection to the server.
+	//TODO(BlakeMScurr) use clientgrpc package instead
+	conn, err := googlegrpc.Dial(address, googlegrpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	defer conn.Close()
+	client := codelingo.NewCodeLingoClient(conn)
+
+	// Contact the server and print out its response.
+	r, err := client.ListFacts(context.Background(), &codelingo.ListFactsRequest{Lexicon: lexicon})
+	if err != nil {
+		return nil, err
+	}
+	//TODO(BlakeMScurr) update proto such that facts is a more useful structure
+	return []string{r.Facts, "and here are more facts"}, nil
+
+}
+
 func (c client) ListLexicons() ([]string, error) {
 	cfg, err := config.Platform()
 	if err != nil {

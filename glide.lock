@@ -1,5 +1,5 @@
 hash: 9871d6de781d7d057822ca6334cbff44a4ba829c7d493fd301ff7efaf5ea2428
-updated: 2016-11-11T13:33:19.80639198+13:00
+updated: 2016-11-11T17:24:47.219096443+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -10,10 +10,7 @@ imports:
   subpackages:
   - endpoint
   - log
-  - pubsub
-  - pubsub/rabbitmq
   - sd
-  - sd/lb
   - transport/grpc
 - name: github.com/docker/docker
   version: cc8b8ce0b3d2d6b3345687464d3a3b1c2c4971ef
