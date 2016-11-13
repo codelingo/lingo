@@ -24,7 +24,7 @@ func init() {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  util.FormatFlg.String(),
-				Usage: "The format for the output. Can be plain golang structs (default) or JSON",
+				Usage: "The format for the output. Can be listed (default) or \"json\" encoded.",
 			},
 			cli.StringFlag{
 				Name:  util.OutputFlg.String(),
@@ -69,7 +69,7 @@ func getFormat(format string, lexicons []string) []byte {
 		content = buf.Bytes()
 	default:
 		// TODO(BlakeMScurr) append more efficiently
-		str := strings.Join(lexicons, ", ")
+		str := strings.Join(lexicons, "\n")
 		str += "\n"
 		content = []byte(str)
 	}
