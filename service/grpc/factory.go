@@ -61,3 +61,33 @@ func MakeReviewEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logg
 		).Endpoint(), cc, err
 	}
 }
+
+func MakeListFactsEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger) sd.Factory {
+	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
+		cc, err := grpc.Dial(instance, grpc.WithInsecure())
+		return grpctransport.NewClient(
+			cc,
+			"codelingo.CodeLingo",
+			"ListFacts",
+			encodeListFactsRequest,
+			decodeListFactsResponse,
+			codelingo.FactList{},
+			// grpctransport.SetClientBefore(kitot.ToGRPCRequest(tracer, tracingLogger)),
+		).Endpoint(), cc, err
+	}
+}
+
+func MakeListLexiconsEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger) sd.Factory {
+	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
+		cc, err := grpc.Dial(instance, grpc.WithInsecure())
+		return grpctransport.NewClient(
+			cc,
+			"codelingo.CodeLingo",
+			"ListLexicons",
+			encodeListLexiconsRequest,
+			decodeListLexiconsResponse,
+			codelingo.ListLexiconsReply{},
+			// grpctransport.SetClientBefore(kitot.ToGRPCRequest(tracer, tracingLogger)),
+		).Endpoint(), cc, err
+	}
+}

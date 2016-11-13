@@ -59,7 +59,13 @@ message ListFactsRequest {
 }
 
 message FactList {
-  string facts = 1;
+  repeated fact facts = 1;
+}
+
+message fact {
+  repeated fact facts = 1;
+  repeated string properties = 2;
+  string kind = 3;
 }
 
 message ListLexiconsRequest {}

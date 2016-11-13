@@ -1,18 +1,14 @@
 package commands
 
 import (
-	//"bytes"
-	//"encoding/json"
-	//"fmt"
+	"bytes"
+	"encoding/json"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
-	//"io/ioutil"
-	//"strings"
-
+	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/juju/errors"
-	//"path/filepath"
-	//"os"
+	"strings"
 )
 
 func init() {
@@ -23,7 +19,7 @@ func init() {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  util.FormatFlg.String(),
-				Usage: "The format for the output. Can be plain golang structs (default) or JSON",
+				Usage: "The format for the output. Can be listed (default) or \"json\" encoded.",
 			},
 			cli.StringFlag{
 				Name:  util.OutputFlg.String(),
@@ -46,18 +42,23 @@ func listFacts(ctx *cli.Context) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+
 	var lexicon string
 	if len(ctx.Args()) > 0 {
 		lexicon = ctx.Args()[0]
 	} else {
-		lexicon = "codelingo/php"
+		lexicon = "codelingo/golang"
 	}
 
 	facts, err := svc.ListFacts(lexicon)
+
 	if err != nil {
 		return errors.Trace(err)
 	}
-	err = outputBytes(ctx.String("output"), getFormat(ctx.String("format"), facts))
+
+	byt := getFactFormat(ctx.String("format"), facts)
+
+	err = outputBytes(ctx.String("output"), byt)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -65,54 +66,43 @@ func listFacts(ctx *cli.Context) error {
 	return nil
 }
 
-// TODO(BlakeMScurr) this logic be needed (in a reworked form) to decode actual
-// facts struct but as we are currently using []string, we can reuse
-// logic from list_lexicons
+func formatFacts(factList *codelingo.FactList) []string {
+	// TODO(BlakeMScurr) check and optimise append and concat efficiency
+	ret := []string{}
 
-// func getFormat(format string, lexicons []string) []byte {
-// 	var content []byte
-// 	switch format {
-// 	case "json":
-// 		var buf bytes.Buffer
-// 		json.NewEncoder(&buf).Encode(lexicons)
-// 		content = buf.Bytes()
-// 	default:
-// 		// TODO(BlakeMScurr) append more efficiently
-// 		str := strings.Join(lexicons, ", ")
-// 		str += "\n"
-// 		content = []byte(str)
-// 	}
-// 	return content
-// }
+	for _, branchFact := range factList.Facts {
+		ret = append(ret, indentFacts(branchFact, "")...)
+	}
+	return ret
+}
 
-// func outputBytes(output string, content []byte) error {
-// 	if output == "" {
-// 		fmt.Print(string(content))
-// 		return nil
-// 	}
+func indentFacts(facts *codelingo.Fact, tabs string) []string {
+	// TODO(BlakeMScurr) check and optimise append and concat efficiency
 
-// 	outputPath, err := getFilePath(output)
-// 	if err != nil {
-// 		return errors.Trace(err)
-// 	}
+	ret := []string{tabs + facts.Kind}
+	for _, prop := range facts.Properties {
+		newStr := tabs + "\t" + prop
+		ret = append(ret, newStr)
+	}
+	for _, branchFact := range facts.Facts {
+		ret = append(ret, indentFacts(branchFact, tabs+"\t")...)
+	}
+	return ret
 
-// 	if _, err := os.Stat(outputPath); err == nil {
-// 		return errors.Trace(err)
-// 	}
+}
 
-// 	return errors.Trace(ioutil.WriteFile(outputPath, content, 0644))
-// }
-
-// func getFilePath(path string) (string, error) {
-// 	dirPath := filepath.Dir(path)
-// 	fileName := filepath.Base(path)
-
-// 	// Check that it exists and is a directory
-// 	if pathInfo, err := os.Stat(dirPath); os.IsNotExist(err) {
-// 		return "", errors.Annotatef(err, "directory %q not found", dirPath)
-// 	} else if !pathInfo.IsDir() {
-// 		return "", errors.Errorf("%q is not a directory", dirPath)
-// 	}
-
-// 	return filepath.Join(dirPath, fileName), nil
-// }
+// TODO(BlakeMScurr) Refactor this and getFormat (from list_lexicons)
+// which very similar logic
+func getFactFormat(format string, facts *codelingo.FactList) []byte {
+	var content []byte
+	switch format {
+	case "json":
+		var buf bytes.Buffer
+		json.NewEncoder(&buf).Encode(facts)
+		content = buf.Bytes()
+	default:
+		// TODO(BlakeMScurr) append more efficiently
+		content = []byte(strings.Join(formatFacts(facts), "\n") + "\n")
+	}
+	return content
+}

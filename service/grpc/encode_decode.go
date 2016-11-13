@@ -53,3 +53,29 @@ func encodeReviewRequest(ctx context.Context, request interface{}) (interface{},
 func decodeReviewResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	return server.ReviewResponse{}, nil
 }
+
+func encodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	lexicon := req.(codelingo.ListFactsRequest).Lexicon
+	return &codelingo.ListFactsRequest{
+		Lexicon: lexicon,
+	}, nil
+}
+
+func decodeListFactsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	facts := resp.(*codelingo.FactList).Facts
+	return &codelingo.FactList{
+		Facts: facts,
+	}, nil
+}
+
+func encodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	return &codelingo.ListLexiconsRequest{}, nil
+}
+
+func decodeListLexiconsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	lexicons := resp.(*codelingo.ListLexiconsReply).Lexicons
+	return &codelingo.ListLexiconsReply{
+		Lexicons: lexicons,
+	}, nil
+	return &codelingo.ListLexiconsReply{}, nil
+}

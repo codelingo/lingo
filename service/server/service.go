@@ -19,7 +19,7 @@ type CodeLingoService interface {
 	Query(src string) (string, error)
 	Review(*ReviewRequest) (Issuec, Messagec, error)
 	ListLexicons() ([]string, error)
-	ListFacts(lexicon string) ([]string, error)
+	ListFacts(lexicon string) (*codelingo.FactList, error)
 }
 
 func (mc Messagec) Send(msgFmt string, vars ...interface{}) error {
