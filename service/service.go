@@ -22,7 +22,6 @@ import (
 	"github.com/codelingo/kit/pubsub/rabbitmq"
 	loadbalancer "github.com/codelingo/kit/sd/lb"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
-	googlegrpc "google.golang.org/grpc"
 
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 
@@ -82,34 +81,27 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
+func (c client) ListFacts(lexicon string) (*codelingo.FactList, error) {
+	request := codelingo.ListFactsRequest{
+		Lexicon: lexicon,
+	}
+	reply, err := c.endpoints["listfacts"](c.Context, request)
+	if err != nil {
+		return nil, err
+	}
+	r := reply.(*codelingo.FactList)
+	return r, nil
+
+}
+
 func (c client) ListLexicons() ([]string, error) {
-	cfg, err := config.Platform()
+	request := codelingo.ListLexiconsRequest{}
+	reply, err := c.endpoints["listlexicons"](c.Context, request)
 	if err != nil {
 		return nil, err
 	}
-
-	address, err := cfg.GrpcAddress()
-	if err != nil {
-		return nil, err
-	}
-
-	// Sets up a connection to the server.
-	//TODO(BlakeMScurr) use clientgrpc package instead
-	conn, err := googlegrpc.Dial(address, googlegrpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-
-	defer conn.Close()
-	client := codelingo.NewCodeLingoClient(conn)
-
-	// Contact the server and print out its response.
-	r, err := client.ListLexicons(context.Background(), &codelingo.ListLexiconsRequest{})
-	if err != nil {
-		return nil, err
-	}
+	r := reply.(*codelingo.ListLexiconsReply)
 	return r.Lexicons, nil
-
 }
 
 func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
@@ -297,15 +289,19 @@ func New() (server.CodeLingoService, error) {
 	sessionFactory := grpcclient.MakeSessionEndpointFactory(tracer, tracingLogger)
 	queryFactory := grpcclient.MakeQueryEndpointFactory(tracer, tracingLogger)
 	reviewFactory := grpcclient.MakeReviewEndpointFactory(tracer, tracingLogger)
+	listFactsFactory := grpcclient.MakeListFactsEndpointFactory(tracer, tracingLogger)
+	listLexiconsFactory := grpcclient.MakeListLexiconsEndpointFactory(tracer, tracingLogger)
 
 	return client{
 		Context: context.Background(),
 		Logger:  logger,
 		endpoints: map[string]endpoint.Endpoint{
 			// TODO(waigani) this could be refactored further, a lot of dups
-			"session": buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
-			"query":   buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
-			"review":  buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
+			"session":      buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
+			"query":        buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
+			"review":       buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
+			"listfacts":    buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
+			"listlexicons": buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
 		},
 	}, nil
 }

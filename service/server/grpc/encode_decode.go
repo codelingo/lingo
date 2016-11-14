@@ -6,6 +6,20 @@ import (
 	"golang.org/x/net/context"
 )
 
+func DecodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	lexicon := req.(*codelingo.ListFactsRequest).Lexicon
+	return &codelingo.ListFactsRequest{
+		Lexicon: lexicon,
+	}, nil
+}
+
+func EncodeListFactsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	facts := resp.(codelingo.FactList).Facts
+	return &codelingo.FactList{
+		Facts: facts,
+	}, nil
+}
+
 func DecodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	return &codelingo.ListLexiconsRequest{}, nil
 }
