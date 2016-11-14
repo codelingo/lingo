@@ -23,7 +23,7 @@ func init() {
 			},
 			cli.StringFlag{
 				Name:  util.OutputFlg.String(),
-				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli",
+				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
 			},
 		},
 	}, false)
@@ -51,7 +51,6 @@ func listFacts(ctx *cli.Context) error {
 	}
 
 	facts, err := svc.ListFacts(lexicon)
-
 	if err != nil {
 		return errors.Trace(err)
 	}

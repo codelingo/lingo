@@ -28,7 +28,7 @@ func init() {
 			},
 			cli.StringFlag{
 				Name:  util.OutputFlg.String(),
-				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli",
+				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
 			},
 		},
 	}, false)
