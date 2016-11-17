@@ -8,26 +8,39 @@ import re
 from pprint import pprint
 
 
-homePath = os.environ['HOME']
+homepath = os.environ['HOME']
 packagePath =  homePath + "/.config/sublime-text-3/Packages/lingo"
 
 class Lingo(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, location):
-		os.environ["CODELINGO_ENV"] = "dev"
+		completions = []
+		lexicons = bytes_to_json(subprocess.check_output(["/home/blakemscurr/work/bin/lingo","list-lexicons", "-f", "json"]))
+
+		if view.match_selector(location[0], "source.lingo") and not view.match_selector(location[0], "tenets.lingo"):
+			for lex in lexicons:
+				completions.append([lex, "- " + lex + "\n"])
+
+			# TODO(BlakeMScurr) put tenets and lexicons completions in static file and
+			# do not sublime.INHIBIT_EXPLICIT_COMPLETIONS
+			completions.append(["lexicons","lexicons:\n  "])
+			completions.append(["tenets","tenets:\n  - "])
+			print("returning these")
+			#TODO(BlakeMScurr) use INHIBIT_WORD_COMPLETIONS on static file
+			return (completions,sublime.INHIBIT_WORD_COMPLETIONS)
+
 		# Will need to refactor once scopes are cleaned up
 		if view.match_selector(location[0], "CLQL.lingo"):
 			#TODO figure out current branch name
-			#TODO get lexicon dynamically
+			# Write completions for lexicon section using "lexicons" data
+			# make full python struct
 			data = getData(view)
-			completions = []
 			#TODO(BlakeMScurr) leaves have no completion
 			currline = view.substr(view.line(location[0]))
 			line = currline
 			found = ""
-			m = re.search('([a-zA-Z0-9.]+):', line)
+			m = re.search('([a-zA-Z0-9.-]+):', line)
 			if m:
 				found = m.group(1)
-
 			if found not in data:
 				found = "match"
 
@@ -44,8 +57,6 @@ class Lingo(sublime_plugin.EventListener):
 				else:
 					branchProp = "branch"
 				completions.append([value + "\t" + branchProp,"\n\t" + value + ": "])
-			# print(completions)
-			print("second last line of code")
 			# TODO(BlakeMScurr) check completions append behaviour
 			return (completions,sublime.INHIBIT_WORD_COMPLETIONS)
 		else:
@@ -55,6 +66,7 @@ class Lingo(sublime_plugin.EventListener):
 def getData(view):
 	maxLexicons = 50
 	data = {}
+	data = append_completions(data, "- codelingo/common as _")
 	for x in range(maxLexicons):
 		point = view.text_point(x, 0)
 		scopes = view.scope_name(point)
@@ -63,28 +75,28 @@ def getData(view):
 			break
 		else:
 			line = view.substr(view.line(point))
-			m = re.search('^- ([a-zA-Z]+/[a-zA-Z.]+)(?: as ([a-zA-Z_]+))?$', line)
-			if m:
-				data = append_completions(data, m)				
+			print(line)
+			data = append_completions(data, line)
 	return data
 
-def append_completions(data, m):
-	found = m.group(1)
-	if m.group(2) == "_":
-		namespace = ""
-	elif m.group(2) == None:
-		 namespace = os.path.split(found)[1] + "."
-	else:
-		namespace = m.group(2) + "."
+def append_completions(data, line):
+	m = re.search('^\s*- ([a-zA-Z]+/[a-zA-Z.]+)(?: as ([a-zA-Z_]+))?\s*$', line)
+	if m:
+		found = m.group(1)
+		if m.group(2) == "_":
+			namespace = ""
+		elif m.group(2) == None:
+			 namespace = os.path.split(found)[1] + "."
+		else:
+			namespace = m.group(2) + "."
 
-	facts = getJSONFacts(found)
-	# TODO(BlakeMScurr) include logic for different namespaces having similar lexicons
-	for fact in facts:
-		children = []
-		for child in facts[fact]:
-			children.append(namespace + child)
-		data[namespace + fact] = children
-
+		facts = getJSONFacts(found)
+		# TODO(BlakeMScurr) include logic for different namespaces having similar lexicons
+		for fact in facts:
+			children = []
+			for child in facts[fact]:
+				children.append(namespace + child)
+			data[namespace + fact] = children
 	return data
 
 def getJSONFacts(lexicon):
@@ -110,10 +122,10 @@ def addToCompletions(completionData, contents):
 	completionData['completions'].insert(len(completionData), dict(trigger=contents, contents=contents))
 
 def ensure_dir(path):
-    if not path or os.path.exists(path):
-        return []
-    # TODO(BlakeMScurr) use python os library which has permissions issues
-    subprocess.call(["mkdir", path])
+	if not path or os.path.exists(path):
+		return []
+	# TODO(BlakeMScurr) use python os library which has permissions issues
+	subprocess.call(["mkdir", path])
 
 def bytes_to_json(byte):
 	return json.loads(byte.decode("utf-8"))

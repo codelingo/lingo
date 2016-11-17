@@ -72,9 +72,6 @@ func decodeListFactsResponse(ctx context.Context, resp interface{}) (interface{}
 		}
 	}
 	return factList, nil
-	// return &codelingo.FactList{
-	// 	Facts: facts,
-	// }, nil
 }
 
 func encodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {

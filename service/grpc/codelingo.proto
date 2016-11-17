@@ -55,7 +55,7 @@ service CodeLingo {
 }
 
 message ListFactsRequest {
- string lexicon = 1; 
+ string lexicon = 1;
 }
 
 message FactList {

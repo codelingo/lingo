@@ -89,7 +89,6 @@ func getFactFormat(format string, facts map[string][]string) []byte {
 		json.NewEncoder(&buf).Encode(facts)
 		content = buf.Bytes()
 	default:
-		// TODO(BlakeMScurr) append more efficiently
 		content = []byte(formatFacts(facts))
 	}
 	return content
