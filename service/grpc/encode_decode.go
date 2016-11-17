@@ -1,10 +1,9 @@
 package grpc
 
 import (
-	"golang.org/x/net/context"
-
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
+	"golang.org/x/net/context"
 )
 
 func encodeSessionRequest(ctx context.Context, request interface{}) (interface{}, error) {
@@ -63,9 +62,16 @@ func encodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, 
 
 func decodeListFactsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
 	facts := resp.(*codelingo.FactList).Facts
-	return &codelingo.FactList{
-		Facts: facts,
-	}, nil
+	factList := map[string][]string{}
+
+	for k, v := range facts {
+		if v.Child == nil {
+			factList[k] = []string{}
+		} else {
+			factList[k] = v.Child
+		}
+	}
+	return factList, nil
 }
 
 func encodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {

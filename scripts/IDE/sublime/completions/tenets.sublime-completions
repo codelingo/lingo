@@ -1,0 +1,12 @@
+{
+	"scope": "tenets.lingo -CLQL.lingo",
+
+	"completions":
+	[
+		{ "trigger": "name", "contents": "name: ${1:Name}"},
+		{ "trigger": "doc", "contents": "doc: ${1:Description}"},
+		{ "trigger": "comment", "contents": "comment: ${1:Review comment}"},
+		{ "trigger": "match", "contents": "match: \n\t" }
+
+	],
+}
