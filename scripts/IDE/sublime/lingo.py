@@ -9,12 +9,12 @@ from pprint import pprint
 
 
 homepath = os.environ['HOME']
-packagePath =  homePath + "/.config/sublime-text-3/Packages/lingo"
+packagePath =  homepath + "/.config/sublime-text-3/Packages/lingo"
 
 class Lingo(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, location):
 		completions = []
-		lexicons = bytes_to_json(subprocess.check_output(["/home/blakemscurr/work/bin/lingo","list-lexicons", "-f", "json"]))
+		lexicons = bytes_to_json(subprocess.check_output(["lingo","list-lexicons", "-f", "json"]))
 
 		if view.match_selector(location[0], "source.lingo") and not view.match_selector(location[0], "tenets.lingo"):
 			for lex in lexicons:
@@ -24,7 +24,6 @@ class Lingo(sublime_plugin.EventListener):
 			# do not sublime.INHIBIT_EXPLICIT_COMPLETIONS
 			completions.append(["lexicons","lexicons:\n  "])
 			completions.append(["tenets","tenets:\n  - "])
-			print("returning these")
 			#TODO(BlakeMScurr) use INHIBIT_WORD_COMPLETIONS on static file
 			return (completions,sublime.INHIBIT_WORD_COMPLETIONS)
 
@@ -59,9 +58,6 @@ class Lingo(sublime_plugin.EventListener):
 				completions.append([value + "\t" + branchProp,"\n\t" + value + ": "])
 			# TODO(BlakeMScurr) check completions append behaviour
 			return (completions,sublime.INHIBIT_WORD_COMPLETIONS)
-		else:
-			print("Not in branch scope")
-			return
 
 def getData(view):
 	maxLexicons = 50
@@ -75,7 +71,6 @@ def getData(view):
 			break
 		else:
 			line = view.substr(view.line(point))
-			print(line)
 			data = append_completions(data, line)
 	return data
 
@@ -104,7 +99,7 @@ def getJSONFacts(lexicon):
 	fname = packagePath + '/lexicons/' + lexicon + ".json"
 	ensure_dir(packagePath + "/lexicons/" + os.path.split(lexicon)[0])
 	if not os.path.isfile(fname):
-		subprocess.check_output([homepath + "/work/bin/lingo","list-facts", lexicon, "-f", "json", "-o", fname])	
+		subprocess.check_output([homepath + "lingo","list-facts", lexicon, "-f", "json", "-o", fname])	
 	with open(fname, 'r') as infile:
 		data = json.load(infile)
 		infile.close()
