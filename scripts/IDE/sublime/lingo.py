@@ -99,7 +99,7 @@ def getJSONFacts(lexicon):
 	fname = packagePath + '/lexicons/' + lexicon + ".json"
 	ensure_dir(packagePath + "/lexicons/" + os.path.split(lexicon)[0])
 	if not os.path.isfile(fname):
-		subprocess.check_output([homepath + "lingo","list-facts", lexicon, "-f", "json", "-o", fname])	
+		subprocess.check_output(["lingo","list-facts", lexicon, "-f", "json", "-o", fname])
 	with open(fname, 'r') as infile:
 		data = json.load(infile)
 		infile.close()
