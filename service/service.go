@@ -2,12 +2,11 @@ package service
 
 import (
 	"encoding/json"
+	"github.com/codelingo/kit/sd"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/codelingo/kit/sd"
 
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
@@ -81,7 +80,7 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
-func (c client) ListFacts(lexicon string) (*codelingo.FactList, error) {
+func (c client) ListFacts(lexicon string) (map[string][]string, error) {
 	request := codelingo.ListFactsRequest{
 		Lexicon: lexicon,
 	}
@@ -89,7 +88,9 @@ func (c client) ListFacts(lexicon string) (*codelingo.FactList, error) {
 	if err != nil {
 		return nil, err
 	}
-	r := reply.(*codelingo.FactList)
+
+	r := reply.(map[string][]string)
+
 	return r, nil
 
 }

@@ -1,0 +1,8 @@
+{
+	"scope": "source.lingo -tenets.lingo",
+
+	"completions":[
+		{ "trigger": "lexicons", "contents": "lexicons:\n- ${1:codelingo/common as _}" },
+		{ "trigger": "tenets", "contents": "tenets:\n  - ${1:name}"},
+	],
+}

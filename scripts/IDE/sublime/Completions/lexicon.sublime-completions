@@ -1,0 +1,9 @@
+{
+	"scope": "source.lingo -tenets.lingo", 
+	
+	"completions": [
+		{"contents": "codelingo/php as _\n- ${1:codelingo/common as _}", "trigger": "codelingo/php"},
+		{"contents": "codelingo/golang as _\n- ${1:codelingo/common as _}", "trigger": "codelingo/golang"}, 
+		{"contents": "codelingo/common as _\n- ${1:codelingo/common as _}", "trigger": "codelingo/common"}, 
+	]
+}

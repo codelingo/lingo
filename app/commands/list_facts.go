@@ -6,9 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
-	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/juju/errors"
-	"strings"
 )
 
 func init() {
@@ -65,34 +63,25 @@ func listFacts(ctx *cli.Context) error {
 	return nil
 }
 
-func formatFacts(factList *codelingo.FactList) []string {
-	// TODO(BlakeMScurr) check and optimise append and concat efficiency
-	ret := []string{}
-
-	for _, branchFact := range factList.Facts {
-		ret = append(ret, indentFacts(branchFact, "")...)
+func formatFacts(facts map[string][]string) string {
+	// TODO(BlakeMScurr) use a string builder and optimise this
+	ret := ""
+	for key, fact := range facts {
+		ret += key
+		ret += "\n"
+		for child := range fact {
+			ret += "\t"
+			ret += fact[child]
+			ret += "\n"
+		}
 	}
+
 	return ret
-}
-
-func indentFacts(facts *codelingo.Fact, tabs string) []string {
-	// TODO(BlakeMScurr) check and optimise append and concat efficiency
-
-	ret := []string{tabs + facts.Kind}
-	for _, prop := range facts.Properties {
-		newStr := tabs + "\t" + prop
-		ret = append(ret, newStr)
-	}
-	for _, branchFact := range facts.Facts {
-		ret = append(ret, indentFacts(branchFact, tabs+"\t")...)
-	}
-	return ret
-
 }
 
 // TODO(BlakeMScurr) Refactor this and getFormat (from list_lexicons)
 // which very similar logic
-func getFactFormat(format string, facts *codelingo.FactList) []byte {
+func getFactFormat(format string, facts map[string][]string) []byte {
 	var content []byte
 	switch format {
 	case "json":
@@ -101,7 +90,7 @@ func getFactFormat(format string, facts *codelingo.FactList) []byte {
 		content = buf.Bytes()
 	default:
 		// TODO(BlakeMScurr) append more efficiently
-		content = []byte(strings.Join(formatFacts(facts), "\n") + "\n")
+		content = []byte(formatFacts(facts))
 	}
 	return content
 }

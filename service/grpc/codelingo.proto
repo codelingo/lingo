@@ -55,17 +55,15 @@ service CodeLingo {
 }
 
 message ListFactsRequest {
-  string lexicon = 1;
+ string lexicon = 1; 
 }
 
 message FactList {
-  repeated fact facts = 1;
+  map<string, Children> facts = 1;
 }
 
-message fact {
-  repeated fact facts = 1;
-  repeated string properties = 2;
-  string kind = 3;
+message Children {
+  repeated string child = 1;
 }
 
 message ListLexiconsRequest {}
