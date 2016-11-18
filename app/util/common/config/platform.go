@@ -135,8 +135,8 @@ all:
   messagequeue:
     address:
       protocol: "amqp"
-      username: "guest"
-      password: "guest"
+      username: "codelingo"
+      password: "codelingo"
       host: "codelingo.io"
       port: "5672"
 dev:
@@ -151,8 +151,8 @@ dev:
   messagequeue:
     address:
       protocol: "amqp"
-      username: "guest"
-      password: "guest"
+      username: "codelingo"
+      password: "codelingo"
       host: "localhost"
       port: "5672"
 test:
@@ -167,8 +167,8 @@ test:
   messagequeue:
     address:
       protocol: "amqp"
-      username: "guest"
-      password: "guest"
+      username: "codelingo"
+      password: "codelingo"
       host: "localhost"
       port: "5672"
 `[1:]
