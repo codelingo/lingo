@@ -59,6 +59,6 @@ contexts:
     - match: "[a-zA-Z0-9\"]+"
       scope: string.unquoted.single.lingo
 file_extensions:
-  - lingo
+  - .lingo
 name: lingo
 scope: source.lingo
