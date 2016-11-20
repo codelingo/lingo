@@ -55,12 +55,6 @@ func initRepo(ctx *cli.Context) (string, string, error) {
 	if err != nil {
 		return "", "", errors.Trace(err)
 	}
-	var repoOwnerCustom string
-	fmt.Printf("repo owner(%s): ", repoOwner)
-	fmt.Scanln(&repoOwnerCustom)
-	if repoOwnerCustom != "" {
-		repoOwner = repoOwnerCustom
-	}
 
 	// get the repo name, default to working directory name
 	dir, err := os.Getwd()
