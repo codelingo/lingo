@@ -13,6 +13,7 @@ packagePath =  homepath + "/.config/sublime-text-3/Packages/lingo"
 
 class Lingo(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, location):
+		os.environ["CODELINGO_ENV"] = "prod"
 		completions = []
 		lexicons = bytes_to_json(subprocess.check_output(["lingo","list-lexicons", "-f", "json"]))
 
