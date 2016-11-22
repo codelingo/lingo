@@ -132,6 +132,21 @@ func (r *Repo) OwnerAndNameFromRemote() (string, string, error) {
 	//
 }
 
+func (r *Repo) AssertNotTracked() error {
+
+	out, err := gitCMD("remote", "show", "-n")
+	if err != nil {
+		return errors.Annotate(err, out)
+	}
+	parts := strings.Split(out, "\n")
+	for _, p := range parts {
+		if p == "codelingo" {
+			return errors.New("codelingo git remote already exists")
+		}
+	}
+	return nil
+}
+
 func (r *Repo) CreateRemote(name string) error {
 
 	gogsClient, err := gogsClientForCurrentUser()
@@ -173,6 +188,9 @@ func (r *Repo) CurrentCommitId() (string, error) {
 
 	return out, nil
 }
+
+// TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
+// by any git command-line actions
 
 func gitCMD(args ...string) (out string, err error) {
 	cmd := exec.Command("git", args...)
