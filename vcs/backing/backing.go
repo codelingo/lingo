@@ -10,6 +10,7 @@ type Repo interface {
 	SetRemote(owner, name string) (string, string, error)
 	CreateRemote(name string) error
 	Exists(name string) (bool, error)
+	OwnerAndNameFromRemote() (string, string, error)
 }
 
 const (
