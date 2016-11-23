@@ -11,6 +11,7 @@ type Repo interface {
 	CreateRemote(name string) error
 	Exists(name string) (bool, error)
 	OwnerAndNameFromRemote() (string, string, error)
+	AssertNotTracked() error
 }
 
 const (
