@@ -40,7 +40,7 @@ You will be prompted to enter a username and token. You can generate the token a
 
 ## Run a Review
 
-The `lingo` tool uses Tenets to review code. Tenets live in .lingo files alongside your source code. The `lingo new` command writes a .lingo file, adds a simple Tenet (which simply finds all functions) and opens it for you to edit.
+The `lingo` tool uses Tenets to review code. Tenets live in .lingo files alongside your source code. The `lingo new` command writes a .lingo file and adds a simple Tenet (which simply finds all functions).
 *Under The Hood*: The first time `lingo review` is run on a repository, `lingo` will automatically add the Codelingo git server as a remote, so that changes can be synced and analysed on the Codelingo platform.
 
 
