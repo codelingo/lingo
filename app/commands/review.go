@@ -46,7 +46,7 @@ func init() {
 		Action: reviewAction,
 	},
 		false,
-		vcsRq, dotLingoRq, homeRq, authRq, configRq,
+		vcsRq, dotLingoRq, homeRq, authRq, configRq, versionRq,
 	)
 }
 
