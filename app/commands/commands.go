@@ -8,8 +8,6 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-const ClientVersion = "0.1.1"
-
 type lingoCMD struct {
 	isSubCMD bool
 	cmd      *cli.Command
