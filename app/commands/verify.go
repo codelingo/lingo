@@ -220,19 +220,24 @@ func verifyConfig() error {
 }
 
 func verifyClientVersion() error {
+
+	updateNeededErr := errors.New("Update required. Please run `$ lingo setup --keep-creds`.")
 	cfg, err := utilConfig.Version()
 	if err != nil {
-		return err
+		// TODO(waigani) don't throw error away before checking type.
+		return updateNeededErr
 	}
 
 	version, err := cfg.ClientVersion()
 	if err != nil {
-		return err
+
+		// TODO(waigani) don't throw error away before checking type.
+		return updateNeededErr
 	}
 	// TODO: Use `hashicorp/go-version` package for comparing and setting semvers
 	// https://github.com/hashicorp/go-version
 	if version != common.ClientVersion {
-		return errors.New("Update required. Please run $ lingo setup --keep-creds.")
+		return updateNeededErr
 	}
 	return nil
 }
