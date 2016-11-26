@@ -14,8 +14,9 @@ packagePath =  homepath + "/.config/sublime-text-3/Packages/lingo"
 class Lingo(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, location):
 		completions = []
-		lexicons = bytes_to_json(subprocess.check_output(["lingo","list-lexicons", "-f", "json"]))
-
+		# TODO(BlakeMScurr) Get lexicons from platform if it does exist in file, rather than hard coding
+		# lexicons = bytes_to_json(subprocess.check_output(["lingo","list-lexicons", "-f", "json"]))
+		lexicons = ['codelingo/php', 'codelingo/golang', 'codelingo/common']
 		if view.match_selector(location[0], "source.lingo") and not view.match_selector(location[0], "tenets.lingo"):
 			for lex in lexicons:
 				completions.append([lex, "- " + lex + "\n"])
