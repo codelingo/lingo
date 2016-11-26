@@ -56,6 +56,7 @@ func reviewAction(ctx *cli.Context) {
 		util.OSErrf(err.Error())
 		return
 	}
+
 	fmt.Println(msg)
 }
 

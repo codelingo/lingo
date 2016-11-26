@@ -27,10 +27,25 @@ func (r *Repo) Patches() ([]string, error) {
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
+		if err := checkPatch(filePatch); err != nil {
+			return nil, errors.Trace(err)
+		}
 		patches = append(patches, filePatch)
 	}
 
 	return patches, nil
+}
+
+// checkPatch ensures the patch can be applied cleanly.
+func checkPatch(patch string) error {
+	out, err := gitCMD("apply", "--check", "-", patch)
+	if err != nil {
+		return errors.Annotate(err, out)
+	}
+	if out != "" {
+		return errors.New(out)
+	}
+	return nil
 }
 
 func newFiles() ([]string, error) {

@@ -165,7 +165,6 @@ func (r *Repo) CreateRemote(name string) error {
 }
 
 func (r *Repo) Sync() error {
-
 	cfg, err := config.Platform()
 	if err != nil {
 		return errors.Trace(err)
@@ -176,7 +175,7 @@ func (r *Repo) Sync() error {
 	}
 
 	// sync local and remote before reviewing
-	_, err = gitCMD("push", remote, "HEAD", "--force")
+	_, err = gitCMD("push", remote, "HEAD", "--force", "--no-verify")
 	return errors.Trace(err)
 }
 

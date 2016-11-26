@@ -20,6 +20,7 @@ const noCommitErrMsg = "This looks like a new repository. Please make an initial
 // Refactor to have a services package, which both the lingo tool and services
 // such as CLAIR use.
 func Review(opts Options) ([]*codelingo.Issue, error) {
+
 	// build the review request either from a pull request URL or the current repository
 	var reviewReq *server.ReviewRequest
 
@@ -42,6 +43,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 		// Otherwise, build review request from current repository
 	} else {
+
 		// TODO(waigani) pass this in as opt
 		repo := vcs.New(backing.Git)
 		owner, repoName, err := repo.OwnerAndNameFromRemote()
