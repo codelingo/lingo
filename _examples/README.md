@@ -92,3 +92,5 @@ naming:
  - ensuring leaving hints of type in name: e.g. "namec" for chans
 
  make(chan error, n) - n is a code smell
+
+ len(x) != 0 should be len(x) > 0

@@ -23,6 +23,7 @@ const noCommitErrMsg = "This looks like a new repository. Please make an initial
 // Refactor to have a services package, which both the lingo tool and services
 // such as CLAIR use.
 func Review(opts Options) ([]*codelingo.Issue, error) {
+
 	// build the review request either from a pull request URL or the current repository
 	var reviewReq *server.ReviewRequest
 
@@ -45,12 +46,14 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 		// Otherwise, build review request from current repository
 	} else {
+
 		owner, repoName, err := repoOwnerAndNameFromRemote()
 		if err != nil {
 			return nil, errors.Annotate(err, "\nlocal vcs error")
 		}
 
 		// TODO(waigani) pass this in as opt
+
 		repo := vcs.New(backing.Git)
 
 		sha, err := repo.CurrentCommitId()
@@ -88,6 +91,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+
 	issuesc, messagesc, err := svc.Review(reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
@@ -137,6 +141,7 @@ l:
 			return nil, errors.New("timed out waiting for issue")
 		}
 	}
+
 	return confirmedIssues, nil
 }
 

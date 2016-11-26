@@ -2,11 +2,12 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/codelingo/kit/sd"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/codelingo/kit/sd"
 
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
@@ -198,8 +199,9 @@ func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Message
 				// TODO: Process messages
 				sendErrIfErr(messagec.Send(string(byt) + "\n"))
 				sendErrIfErr(msg.Done())
-			case <-time.After(time.Second * 30):
-				sendErrIfErr(errors.New("timed out waiting for issues"))
+				// TODO(waigani) DEMOWARE setting to 600
+			case <-time.After(time.Second * 600):
+				sendErrIfErr(errors.New("timed out waiting for issues x"))
 				break l
 			}
 		}
