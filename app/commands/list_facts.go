@@ -3,6 +3,7 @@ package commands
 import (
 	"bytes"
 	"encoding/json"
+
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
@@ -24,7 +25,7 @@ func init() {
 				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
 			},
 		},
-	}, false)
+	}, false, versionRq)
 }
 
 func listFactsAction(ctx *cli.Context) {

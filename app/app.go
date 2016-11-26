@@ -6,6 +6,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands"
+	"github.com/codelingo/lingo/app/util/common"
 )
 
 // TODO(waigani) have a global state that tenets can share. An issue may be
@@ -19,7 +20,7 @@ func New() *cli.App {
 	app.Usage = "Code Quality That Scales."
 	app.Before = commands.Before
 	app.Commands = commands.All()
-	app.Version = commands.ClientVersion
+	app.Version = common.ClientVersion
 	// TODO(waigani) once messaging is implemented, add -q flag to suppress them here.
 	// app.Flags = common.GlobalOptions
 	// app.CommandNotFound = commands.TenetCMD

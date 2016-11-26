@@ -2,12 +2,9 @@ package review
 
 import (
 	"fmt"
-	"os/exec"
-	"regexp"
 	"strings"
 	"time"
 
-	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/lingo/vcs"
@@ -47,14 +44,13 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		// Otherwise, build review request from current repository
 	} else {
 
-		owner, repoName, err := repoOwnerAndNameFromRemote()
+		// TODO(waigani) pass this in as opt
+		repo := vcs.New(backing.Git)
+
+		owner, repoName, err := repo.OwnerAndNameFromRemote()
 		if err != nil {
 			return nil, errors.Annotate(err, "\nlocal vcs error")
 		}
-
-		// TODO(waigani) pass this in as opt
-
-		repo := vcs.New(backing.Git)
 
 		sha, err := repo.CurrentCommitId()
 		if err != nil {
@@ -165,51 +161,6 @@ func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {
 		Start: start,
 		End:   end,
 	}
-}
-
-func repoOwnerAndNameFromRemote() (string, string, error) {
-
-	pCfg, err := config.Platform()
-	if err != nil {
-		return "", "", errors.Trace(err)
-	}
-
-	remoteName, err := pCfg.GitRemoteName()
-	if err != nil {
-		return "", "", errors.Trace(err)
-	}
-
-	cmd := exec.Command("git", "remote", "show", "-n", remoteName)
-	b, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", "", errors.Trace(err)
-	}
-
-	r := regexp.MustCompile(`.*[\/:](.*)\/(.*)\.git`)
-	m := r.FindStringSubmatch(string(b))
-	if len(m) < 2 || m[1] == "" {
-		return "", "", errors.New("could not find repository owner, have you run `lingo init`?")
-	}
-	if len(m) < 3 || m[2] == "" {
-		return "", "", errors.New("could not find repository name, have you run `lingo init?`")
-	}
-	return m[1], m[2], nil
-
-	// TODO(waigani) user may have added remote, but not commited code. In
-	// that case, "git remote show" will give the following output:
-	//
-	// 	fatal: ambiguous argument 'remote': unknown revision or path not in the working tree.
-	// Use '--' to separate paths from revisions, like this:
-	// 'git <command> [<revision>...] -- [<file>...]'
-	//
-	// In this case, we need to tell the user to make an initial commit and
-	// push to the remote. The steps are:
-	//
-	// 1. Create remote repo on codelingo git server
-	// 2. Add remote as git remote
-	// 3. Commit code and push to remote: `git push codelingo_dev master`
-	//
-
 }
 
 // TODO(waigani) simplify representation of Issue.

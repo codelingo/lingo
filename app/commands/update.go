@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/blang/semver"
+	"github.com/codelingo/lingo/app/util/common"
 
 	"github.com/codegangsta/cli"
 )
@@ -36,7 +37,7 @@ func updateAction(ctx *cli.Context) {
 	fmt.Println("DISABLED: the update command will be enabled once the codelingo/lingo repository is public")
 
 	// first check if an update is avaliable
-	v, err := semver.Make(ClientVersion)
+	v, err := semver.Make(common.ClientVersion)
 	if err != nil {
 		fmt.Println(err.Error())
 		return

@@ -17,6 +17,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/app/util/common"
 )
 
 // TODO(waigani) add a quick-start cmd with --dry-run flag that: inits git,
@@ -41,6 +42,10 @@ func init() {
 				Name:  "token",
 				Usage: "Set the token of the lingo user",
 			},
+			cli.BoolFlag{
+				Name:  "keep-creds",
+				Usage: "Preserves existing credentials (if present)",
+			},
 		},
 		// TODO(waigani) docs on username and token
 
@@ -58,23 +63,17 @@ func setupLingoAction(c *cli.Context) {
 
 // TODO(waigani) dry run this
 func setupLingo(c *cli.Context) (string, error) {
+
 	if err := util.MaxArgs(c, 0); err != nil {
 		return "", errors.Trace(err)
 	}
-	// recieve generated token from server
-	// open codelingo.io/authclient/<token>
-	// user verifies on website
-	// recieve username, password and same token from server
-	// but for now, we'll grab them from flags.
-	username := c.String("username")
-	if username == "" {
 
-		fmt.Print("Enter Your CodeLingo Username: ")
-		fmt.Scanln(&username)
+	versionConfig, err := utilConfig.Version()
+	if err != nil {
+		return "", errors.Trace(err)
 	}
-	if username == "" {
-		return "", errors.New("username cannot be empty")
-		//return "", errors.New("username not set")
+	if err := versionConfig.SetClientVersion(common.ClientVersion); err != nil {
+		return "", errors.Trace(err)
 	}
 
 	platConfig, err := utilConfig.Platform()
@@ -87,9 +86,47 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	password := c.String("token")
-	if password == "" {
+	authConfig, authErr := util.AuthConfig()
+	if authErr != nil {
+		return "", errors.Trace(authErr)
+	}
 
+	// recieve generated token from server
+	// open codelingo.io/authclient/<token>
+	// user verifies on website
+	// recieve username, password and same token from server
+	// but for now, we'll grab them from flags.
+	username := c.String("username")
+	password := c.String("token")
+
+	// If --keep-creds is set, attempt to grab username/token
+	// from authConfig
+	if c.Bool("keep-creds") {
+		if username == "" {
+			username, authErr = authConfig.Get(gitUsernameCfgPath)
+			if authErr != nil {
+				return "", errors.Trace(authErr)
+			}
+		}
+
+		if password == "" {
+			password, authErr = authConfig.Get(gitUserPasswordCfgPath)
+			if authErr != nil {
+				return "", errors.Trace(authErr)
+			}
+		}
+	}
+
+	if username == "" {
+		fmt.Print("Enter Your CodeLingo Username: ")
+		fmt.Scanln(&username)
+	}
+	if username == "" {
+		return "", errors.New("username cannot be empty")
+		//return "", errors.New("username not set")
+	}
+
+	if password == "" {
 		// Launch website to gen token
 		lingoTokenAddr := "http://" + webAddr + "/lingo-token"
 		fmt.Print("Enter User-Token:")
@@ -116,7 +153,18 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
+	authConfig, err = getOrCreateAuthConfig()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
 	cfgDir, err := util.ConfigHome()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	// TODO(waigani) don't use string lit here
+	credFilename, err := authConfig.Get("gitserver.credentials_filename")
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -125,14 +173,6 @@ func setupLingo(c *cli.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
-	authCfg, err := util.AuthConfig()
-	// TODO(waigani) don't use string lit here
-	credFilename, err := authCfg.Get("gitserver.credentials_filename")
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
 	// Set creds in github.
 	// TODO(waigani) these should all be consts.
 	gitCredFile := filepath.Join(cfgDir, credFilename)
@@ -144,20 +184,11 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Annotate(err, out)
 	}
 
-	cfg, err := util.AuthConfig()
-	if err != nil {
-		// TODO(waigani) handle different errors
-		cfg, err = util.CreateAuthConfig()
-		if err != nil {
-			return "", errors.Trace(err)
-		}
-	}
-
-	gitUsername, err := cfg.Get(gitUsernameCfgPath)
+	gitUsername, err := authConfig.Get(gitUsernameCfgPath)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	gitPassword, err := cfg.Get(gitUserPasswordCfgPath)
+	gitPassword, err := authConfig.Get(gitUserPasswordCfgPath)
 	if err != nil {
 		return "", errors.Trace(err)
 	}

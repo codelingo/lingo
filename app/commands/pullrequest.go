@@ -40,7 +40,7 @@ var pullRequestCmd = &cli.Command{
 func init() {
 	register(pullRequestCmd,
 		true,
-		homeRq, authRq, configRq,
+		homeRq, authRq, configRq, versionRq,
 	)
 }
 

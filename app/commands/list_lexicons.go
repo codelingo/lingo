@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/service"
 	"io/ioutil"
 	"strings"
 
-	"github.com/juju/errors"
+	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/service"
+
 	"path/filepath"
+
+	"github.com/juju/errors"
 
 	"os"
 )
@@ -31,7 +33,7 @@ func init() {
 				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
 			},
 		},
-	}, false)
+	}, false, versionRq)
 }
 
 func listLexiconsAction(ctx *cli.Context) {
