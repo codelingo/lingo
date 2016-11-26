@@ -37,19 +37,13 @@ You will be prompted to enter a username and token. You can generate the token a
 *Under The Hood*: The setup command creates a ~/.codelingo folder in which it stores credentials and configuration details to push code up and get issues back from the CodeLingo platform. You'll note it also adds a ~/.codelingo/config/git-credentials file. This is used by the lingo tool, via git, to sync code to the CodeLingo git server.
 
 
-## Initiate a repository:
-Before running a review on a repository, the CodeLingo git server needs to be added as a remote, so that changes can be synced and analysed on the CodeLingo platform. To do this, run:
-
-```bash
-# cd into a git repository
-$ lingo init
-```
-
-That's it!
 
 ## Run a Review
 
-The `lingo` tool uses Tenets to review code. Tenets live in .lingo files alongside your source code. The `lingo new` command writes a .lingo file, adds a simple Tenet (which simply finds all functions) and opens it for you to edit. 
+The `lingo` tool uses Tenets to review code. Tenets live in .lingo files alongside your source code. The `lingo new` command writes a .lingo file and adds a simple Tenet (which simply finds all functions).
+*Under The Hood*: The first time `lingo review` is run on a repository, `lingo` will automatically add the Codelingo git server as a remote, so that changes can be synced and analysed on the Codelingo platform.
+
+
 
 ### First Run
 
@@ -92,17 +86,17 @@ Then run `lingo review`. You should see the following output:
 test.php:2
 
     This is a function, but you probably already knew that.
-    
+
 
     ...
-    
+
   > function writeMsg() {
         echo "Hello world!";
     }
-    
+
     ...
 
-[o]pen [d]iscard [K]eep: 
+[o]pen [d]iscard [K]eep:
 ```
 
 As the Tenet is using the inbuilt common fact "func", it will match functions in both PHP and Golang (the two currently supported languages). Add a go file called "main.go" with the following source code:
@@ -133,7 +127,7 @@ Continuing on from the first run above, open the .lingo file in your editor of c
 tenets:
 - name: first-tenet
   comment: This is a function, name 'writeMsg', but you probably knew that.
-  match: 
+  match:
     <func:
       name: "writeMsg"
 ```
@@ -141,7 +135,7 @@ tenets:
 This will find funcs named "writeMsg". Save and close the file, then run `lingo review`. Try adding another func called "readMsg" and run a review. Only the "writeMsg" func should be highlighted. Now, update the Tenet to find all funcs that end in "Msg":
 
 ```yaml
-  match: 
+  match:
     <func:
       name: /.*Msg$/
 ```
@@ -161,4 +155,3 @@ Other than the match statement, written in CLQL, the rest of a .lingo file is wr
 ## Running Examples
 
 All examples under [examples/php](_examples/php) are working. The other examples have varying levels of completeness and serve as an implementation roadmap. To run the examples, copy the directory out of the repository and follow the same steps as in the tutorial above.
-

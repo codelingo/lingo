@@ -9,7 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/app/util/common/config"
+	"github.com/codelingo/lingo/app/util/common"
+	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
 )
 
@@ -23,6 +24,7 @@ const (
 	homeRq
 	configRq
 	vcsRq
+	versionRq
 )
 
 func (r require) String() string {
@@ -46,6 +48,8 @@ func (r require) Verify() error {
 	switch r {
 	case baseRq:
 		return nil
+	case versionRq:
+		return verifyClientVersion()
 	case vcsRq:
 		return verifyVCS()
 	case dotLingoRq:
@@ -170,12 +174,10 @@ func verifyLingoHome() error {
 }
 
 func verifyConfig() error {
-	lHome, err := util.LingoHome()
+	configsHome, err := util.ConfigHome()
 	if err != nil {
 		return errors.Trace(err)
 	}
-
-	configsHome := filepath.Join(lHome, "configs")
 	if _, err := os.Stat(configsHome); os.IsNotExist(err) {
 		err := os.MkdirAll(configsHome, 0775)
 		if err != nil {
@@ -183,28 +185,54 @@ func verifyConfig() error {
 		}
 	}
 
-	platformCfg := filepath.Join(configsHome, config.PlatformCfgFile)
+	platformCfg := filepath.Join(configsHome, utilConfig.PlatformCfgFile)
 	if _, err := os.Stat(platformCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(platformCfg, []byte(config.PlatformTmpl), 0644)
+		err := ioutil.WriteFile(platformCfg, []byte(utilConfig.PlatformTmpl), 0644)
 		if err != nil {
 			fmt.Printf("WARNING: could not create platform config: %v \n", err)
 		}
 	}
 
-	// servicesCfg := filepath.Join(configsHome, config.ServicesCfgFile)
+	versionCfg := filepath.Join(configsHome, utilConfig.VersionCfgFile)
+	if _, err := os.Stat(versionCfg); os.IsNotExist(err) {
+		err := ioutil.WriteFile(versionCfg, []byte(utilConfig.VersionTmpl), 0644)
+		if err != nil {
+			fmt.Printf("WARNING: could not create version config: %v \n", err)
+		}
+	}
+
+	// servicesCfg := filepath.Join(configsHome, utilConfig.ServicesCfgFile)
 	// if _, err := os.Stat(servicesCfg); os.IsNotExist(err) {
-	// 	err := ioutil.WriteFile(servicesCfg, []byte(config.ServicesTmpl), 0644)
+	// 	err := ioutil.WriteFile(servicesCfg, []byte(utilConfig.ServicesTmpl), 0644)
 	// 	if err != nil {
 	// 		fmt.Printf("WARNING: could not create services config: %v \n", err)
 	// 	}
 	// }
 
-	// defaultsCfg := filepath.Join(configsHome, config.DefaultsCfgFile)
+	// defaultsCfg := filepath.Join(configsHome, utilConfig.DefaultsCfgFile)
 	// if _, err := os.Stat(defaultsCfg); os.IsNotExist(err) {
-	// 	err := ioutil.WriteFile(defaultsCfg, []byte(config.DefaultsTmpl), 0644)
+	// 	err := ioutil.WriteFile(defaultsCfg, []byte(utilConfig.DefaultsTmpl), 0644)
 	// 	if err != nil {
 	// 		fmt.Printf("WARNING: could not create services config: %v \n", err)
 	// 	}
 	// }
+	return nil
+}
+
+func verifyClientVersion() error {
+	cfg, err := utilConfig.Version()
+	if err != nil {
+		return err
+	}
+
+	version, err := cfg.ClientVersion()
+	if err != nil {
+		return err
+	}
+	// TODO: Use `hashicorp/go-version` package for comparing and setting semvers
+	// https://github.com/hashicorp/go-version
+	if version != common.ClientVersion {
+		return errors.New("Update required. Please run $ lingo setup --keep-creds.")
+	}
 	return nil
 }

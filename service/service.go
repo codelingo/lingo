@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/codelingo/kit/sd"
-
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
 

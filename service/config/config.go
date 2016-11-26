@@ -26,6 +26,8 @@ func ENV() string {
 	return "all"
 }
 
+// TODO: switch Config to an interface type and refactor
+
 type Config struct {
 	data     map[string]interface{}
 	filename string

@@ -21,7 +21,7 @@ func init() {
 		Name:   "new",
 		Usage:  "Create a .lingo file in the current directory",
 		Action: newLingoAction,
-	}, false, vcsRq)
+	}, false, vcsRq, versionRq)
 }
 
 var intro = `
