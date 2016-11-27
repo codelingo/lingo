@@ -38,7 +38,9 @@ func (r *Repo) Patches() ([]string, error) {
 
 // checkPatch ensures the patch can be applied cleanly.
 func checkPatch(patch string) error {
-	out, err := gitCMD("apply", "--check", "-", patch)
+	// TODO(waigani) Implement this. Currently buggy.
+	return nil
+	out, err := gitCMD("apply", "--index", "--check", "-", patch)
 	if err != nil {
 		return errors.Annotate(err, out)
 	}

@@ -20,7 +20,6 @@ const noCommitErrMsg = "This looks like a new repository. Please make an initial
 // Refactor to have a services package, which both the lingo tool and services
 // such as CLAIR use.
 func Review(opts Options) ([]*codelingo.Issue, error) {
-
 	// build the review request either from a pull request URL or the current repository
 	var reviewReq *server.ReviewRequest
 
@@ -60,7 +59,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 
 		if err := repo.Sync(); err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 
 		patches, err := repo.Patches()

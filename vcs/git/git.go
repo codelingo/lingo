@@ -46,7 +46,6 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 }
 
 func gogsClientForCurrentUser() (*gogs.Client, error) {
-
 	cfg, err := config.Platform()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -135,7 +134,6 @@ func (r *Repo) OwnerAndNameFromRemote() (string, string, error) {
 // AssertNotTracked checks for the existence of the appropriate
 // codelingo remote to avoid duplications on GOGS.
 func (r *Repo) AssertNotTracked() error {
-
 	platCfg, err := config.Platform()
 	if err != nil {
 		return errors.Trace(err)
