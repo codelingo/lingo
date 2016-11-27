@@ -132,16 +132,29 @@ func (r *Repo) OwnerAndNameFromRemote() (string, string, error) {
 	//
 }
 
+// AssertNotTracked checks for the existence of the appropriate
+// codelingo remote to avoid duplications on GOGS.
 func (r *Repo) AssertNotTracked() error {
+
+	platCfg, err := config.Platform()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	remote, err := platCfg.GitRemoteName()
+	if err != nil {
+		return errors.Trace(err)
+	}
 
 	out, err := gitCMD("remote", "show", "-n")
 	if err != nil {
 		return errors.Annotate(err, out)
 	}
+
 	parts := strings.Split(out, "\n")
 	for _, p := range parts {
-		if p == "codelingo" {
-			return errors.New("codelingo git remote already exists")
+		if p == remote {
+			return errors.Errorf("%s git remote already exists", r)
 		}
 	}
 	return nil
