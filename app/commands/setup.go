@@ -105,14 +105,24 @@ func setupLingo(c *cli.Context) (string, error) {
 		if username == "" {
 			username, authErr = authConfig.Get(gitUsernameCfgPath)
 			if authErr != nil {
-				return "", errors.Trace(authErr)
+				if strings.Contains(authErr.Error(), `"username" not found`) {
+					username = ""
+				} else {
+					errors.Annotate(authErr, "setup --keep-creds failed.")
+					return "", errors.Trace(authErr)
+				}
 			}
 		}
 
 		if password == "" {
 			password, authErr = authConfig.Get(gitUserPasswordCfgPath)
 			if authErr != nil {
-				return "", errors.Trace(authErr)
+				if strings.Contains(authErr.Error(), `"password" not found`) {
+					password = ""
+				} else {
+					errors.Annotate(authErr, "setup --keep-creds failed.")
+					return "", errors.Trace(authErr)
+				}
 			}
 		}
 	}
