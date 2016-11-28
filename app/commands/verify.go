@@ -221,7 +221,7 @@ func verifyConfig() error {
 
 func verifyClientVersion() error {
 
-	updateNeededErr := errors.New("Update required. Please run `$ lingo setup --keep-creds`.")
+	updateNeededErr := errors.New("Update required. Please run `$ lingo update`.")
 	cfg, err := utilConfig.Version()
 	if err != nil {
 		// TODO(waigani) don't throw error away before checking type.
