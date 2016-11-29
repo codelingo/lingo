@@ -181,7 +181,15 @@ func verifyConfig() error {
 	if _, err := os.Stat(configsHome); os.IsNotExist(err) {
 		err := os.MkdirAll(configsHome, 0775)
 		if err != nil {
-			errors.Annotatef(err, "WARNING: could not create configs directory")
+			return errors.Annotate(err, "verifyConfig: Could not create configs directory")
+		}
+	}
+
+	authCfg := filepath.Join(configsHome, utilConfig.AuthCfgFile)
+	if _, err := os.Stat(authCfg); os.IsNotExist(err) {
+		err := ioutil.WriteFile(authCfg, []byte(utilConfig.AuthTmpl), 0644)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create auth config")
 		}
 	}
 
@@ -189,7 +197,7 @@ func verifyConfig() error {
 	if _, err := os.Stat(platformCfg); os.IsNotExist(err) {
 		err := ioutil.WriteFile(platformCfg, []byte(utilConfig.PlatformTmpl), 0644)
 		if err != nil {
-			fmt.Printf("WARNING: could not create platform config: %v \n", err)
+			return errors.Annotate(err, "verifyConfig: Could not create platform config")
 		}
 	}
 
@@ -197,7 +205,7 @@ func verifyConfig() error {
 	if _, err := os.Stat(versionCfg); os.IsNotExist(err) {
 		err := ioutil.WriteFile(versionCfg, []byte(utilConfig.VersionTmpl), 0644)
 		if err != nil {
-			fmt.Printf("WARNING: could not create version config: %v \n", err)
+			return errors.Annotate(err, "verifyConfig: Could not create version config")
 		}
 	}
 
