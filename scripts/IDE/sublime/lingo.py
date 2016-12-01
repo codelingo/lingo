@@ -8,19 +8,13 @@ packagePath =  homepath + "/.config/sublime-text-3/Packages/Lingo"
 
 class Lingo(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, location):
-		# TODO(BlakeMScurr) make sure lingo is always on path
-		# LOCAL = '/path/to/lingo'
-		# os.environ['PATH'] += ':'
-		# os.environ['PATH'] += LOCAL
-
-		# os.environ['CODELINGO_ENV'] = dev
 		vs = view.settings()
 		setting = get_setting('codelingo_env')
 		if setting:
 			os.environ['CODELINGO_ENV'] = setting
 		lexicons = get_lexicons()
 		completions = []
-
+		# TODO (BlakeMScurr) invalidate the cache once a day, forcing a refresh on next call to plugin
 
 		if view.match_selector(location[0], "source.lingo") and not view.match_selector(location[0], "tenets.lingo"):
 			for lex in lexicons:
@@ -58,7 +52,6 @@ class Lingo(sublime_plugin.EventListener):
 					break
 				foundSpaces = m.group(1).count(" ") // 2 * 2
 
-			# m = re.search('([a-zA-Z0-9-._]+):', line)
 			if m:
 				found = m.group(2)
 			if found not in data:
@@ -82,7 +75,6 @@ class Lingo(sublime_plugin.EventListener):
 
 	def on_pre_save(self,view):
 		prev = -1
-		# view.show_popup("asdf",sublime.COOPERATE_WITH_AUTO_COMPLETE)
 		for x in range(100):
 			point = view.text_point(x, 0)
 			scopes = view.scope_name(point)
