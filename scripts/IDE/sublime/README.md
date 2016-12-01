@@ -10,7 +10,9 @@ Install [CodeLingo](https://github.com/codelingo/lingo) and make sure the binary
 
 Copy this directory to `~/.config/sublime-text-3/Packages` into a folder called Lingo or run `scripts/install_sublime_plugin.sh`.
 
-To run the client against development platform, go to Preferences > Package Settings > Lingo and add the preference `{"codelingo_env":"dev"}`
+The Lingo executable may not be on sublime's path, to fix this go to Preferences > Package Settings > Lingo and add the preference `"path":"/path/to/lingo/binary"`.
+
+To run the client against development platform, add `"codelingo_env":"dev"` as above.
 
 You may need to restart sublimetext.
 
