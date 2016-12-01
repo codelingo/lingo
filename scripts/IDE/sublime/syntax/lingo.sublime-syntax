@@ -7,32 +7,13 @@ contexts:
       pop: true
   CLQLContext:
     - meta_scope: CLQL.lingo
-    - match: "[a-zA-Z0-9-.]+"
+    - match: "[a-zA-Z0-9-._]+"
       scope: keyword.branch.lingo
       push: branchContext
     - match: "[a-zA-Z0-9\"]+"
       scope: string.unaquoted.single.lingo
-  lexiconContext:
-    - meta_scope: inLexicon.lingo
-    - match: endLexicon
-      pop: true
-      scope: endLexicon.lingo
-    - match: "[a-zA-Z0-9\"]+"
-      scope: string.unquoted.single.lingo
-  # stringContext:
-  # - meta_scope: string.unquotedtest.lingo
-  # - match: $
-  #   pop: True
   main:
-  
-    # TODO(BlakeMScurr) find a way to make this in all contexts nicely
-  # - match: ":"
-  #   scope: plain.text
-  #   push:  stringContext
-    
-  # TODO(BlakeMScurr) make sure that can end without "endLexicon"
     - match: lexicons
-  #   push: lexiconContext
       scope: keyword.lexicons
     - match: tenets
       push: tenetsContext

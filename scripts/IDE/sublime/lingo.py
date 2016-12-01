@@ -1,46 +1,66 @@
-import sublime
-import sublime_plugin
+import sublime, sublime_plugin
+import os, json, re
 import subprocess
-import os
-import json
-import yaml
-import re
-from pprint import pprint
-
+from .Edit import Edit as Edit
 
 homepath = os.environ['HOME']
-packagePath =  homepath + "/.config/sublime-text-3/Packages/lingo"
+packagePath =  homepath + "/.config/sublime-text-3/Packages/Lingo"
 
 class Lingo(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, location):
+		# TODO(BlakeMScurr) make sure lingo is always on path
+		# LOCAL = '/path/to/lingo'
+		# os.environ['PATH'] += ':'
+		# os.environ['PATH'] += LOCAL
+
+		# os.environ['CODELINGO_ENV'] = dev
+		vs = view.settings()
+		setting = get_setting('codelingo_env')
+		if setting:
+			os.environ['CODELINGO_ENV'] = setting
+		lexicons = get_lexicons()
 		completions = []
-		# TODO(BlakeMScurr) Get lexicons from platform if it does exist in file, rather than hard coding
-		# lexicons = bytes_to_json(subprocess.check_output(["lingo","list-lexicons", "-f", "json"]))
-		lexicons = ['codelingo/php', 'codelingo/golang', 'codelingo/common']
+
+
 		if view.match_selector(location[0], "source.lingo") and not view.match_selector(location[0], "tenets.lingo"):
 			for lex in lexicons:
-				completions.append([lex, "- " + lex + "\n"])
+				completions.append([lex,lex + "\n- "])
 
 			# TODO(BlakeMScurr) put tenets and lexicons completions in static file and
 			# do not sublime.INHIBIT_EXPLICIT_COMPLETIONS
-			completions.append(["lexicons","lexicons:\n  "])
+			completions.append(["lexicons","lexicons:\n  - "])
 			completions.append(["tenets","tenets:\n  - "])
 			#TODO(BlakeMScurr) use INHIBIT_WORD_COMPLETIONS on static file
 			return (completions,sublime.INHIBIT_WORD_COMPLETIONS)
 
 		# Will need to refactor once scopes are cleaned up
 		if view.match_selector(location[0], "CLQL.lingo"):
+			vs.set("word_separators", vs.get("word_separators").replace(".", ""))
 			#TODO figure out current branch name
 			# Write completions for lexicon section using "lexicons" data
 			# make full python struct
-			data = getData(view)
+			data = get_data(view)
 			#TODO(BlakeMScurr) leaves have no completion
 			currline = view.substr(view.line(location[0]))
-			line = currline
+			lineNumber = view.rowcol(location[0])[0]
 			found = ""
-			m = re.search('([a-zA-Z0-9.-]+):', line)
+			spaces = currline.count(" ")
+			foundSpaces = 0
+			m = None
+
+			while spaces - 2 != foundSpaces and lineNumber >= 0:
+				lineNumber -= 1
+				iterating_line = view.substr(view.line(view.text_point(lineNumber, 0)))
+				m = re.search('(\s*)([a-zA-Z0-9-._]+):', iterating_line)
+				if m is None:
+					continue
+				if m.group(2) == "match":
+					break
+				foundSpaces = m.group(1).count(" ") // 2 * 2
+
+			# m = re.search('([a-zA-Z0-9-._]+):', line)
 			if m:
-				found = m.group(1)
+				found = m.group(2)
 			if found not in data:
 				found = "match"
 
@@ -56,11 +76,78 @@ class Lingo(sublime_plugin.EventListener):
 					branchProp = "property"
 				else:
 					branchProp = "branch"
-				completions.append([value + "\t" + branchProp,"\n\t" + value + ": "])
+				completions.append([value + "\t" + branchProp, value + ": "])
 			# TODO(BlakeMScurr) check completions append behaviour
-			return (completions,sublime.INHIBIT_WORD_COMPLETIONS)
+			return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
-def getData(view):
+	def on_pre_save(self,view):
+		prev = -1
+		# view.show_popup("asdf",sublime.COOPERATE_WITH_AUTO_COMPLETE)
+		for x in range(100):
+			point = view.text_point(x, 0)
+			scopes = view.scope_name(point)
+			if "CLQL.lingo" in scopes:
+				region = view.line(point)
+				line = view.substr(region)
+				m = re.search('(\s*)([a-zA-Z0-9-._]+):', line)
+				if m.group(1).count(" ") % 2 == 1:
+					with Edit(view) as edit:
+						edit.insert(point, ' ')
+			if prev != -1 and view.rowcol(point)[0] == view.rowcol(prev)[0]:
+				break
+			prev = point
+
+	def on_text_command(self, view, command_name, args):
+		if command_name == "insert" and args['characters'] == "\n":
+			# TODO(BlakeMScurr) support multiple cursors
+			# for pos in self.view.sel():
+			#	self.view.insert(edit, pos.begin(), timestamp)
+
+			point = view.sel()[0].begin()
+			scopes = view.scope_name(point)
+
+			previous_line = view.substr(view.line(point))
+			addStr = ""
+			if "tenets.lingo" in scopes:
+				if re.search('  - ', previous_line) is not None:
+						addStr += "  "
+				if "CLQL.lingo" in scopes:
+					addStr += "  "
+
+			if addStr == "":
+				return None
+			else:
+				args['characters'] += addStr
+				return (command_name, args)
+
+def get_setting(key, default=None):
+	""" Returns the setting in the following hierarchy: project setting, user setting,
+	default setting.  If none are set the 'default' value passed in is returned.
+	"""
+	val = None
+	try:
+	   val = sublime.active_window().active_view().settings().get('Lingo', {}).get(key)
+	except AttributeError:
+		pass
+	if not val:
+		val = sublime.load_settings("LingoUser.sublime-settings").get(key)
+	if not val:
+		val = sublime.load_settings("Lingo.sublime-settings").get(key)
+	if not val:
+		val = default
+	return val
+
+def get_lexicons():
+	# TODO(BlakeMScurr) occassionally check whether lexicon list has changed
+	fname = packagePath + "/lexicons/list.json"
+	if not os.path.isfile(fname):
+		subprocess.check_output(["lingo","list-lexicons", "-f", "json", "-o", fname])
+	with open(fname, 'r') as infile:
+		data = json.load(infile)
+		infile.close()
+	return data
+
+def get_data(view):
 	maxLexicons = 50
 	data = {}
 	data = append_completions(data, "- codelingo/common as _")
@@ -86,7 +173,7 @@ def append_completions(data, line):
 		else:
 			namespace = m.group(2) + "."
 
-		facts = getJSONFacts(found)
+		facts = get_json_facts(found)
 		# TODO(BlakeMScurr) include logic for different namespaces having similar lexicons
 		for fact in facts:
 			children = []
@@ -95,8 +182,8 @@ def append_completions(data, line):
 			data[namespace + fact] = children
 	return data
 
-def getJSONFacts(lexicon):
-	getDataFromPlatform = False
+def get_json_facts(lexicon):
+	get_dataFromPlatform = False
 	fname = packagePath + '/lexicons/' + lexicon + ".json"
 	ensure_dir(packagePath + "/lexicons/" + os.path.split(lexicon)[0])
 	if not os.path.isfile(fname):
@@ -113,9 +200,6 @@ def countTabs(line):
 		if char == "\t":
 			x+=1
 	return x
-
-def addToCompletions(completionData, contents):
-	completionData['completions'].insert(len(completionData), dict(trigger=contents, contents=contents))
 
 def ensure_dir(path):
 	if not path or os.path.exists(path):
