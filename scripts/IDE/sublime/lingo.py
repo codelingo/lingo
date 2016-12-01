@@ -74,7 +74,7 @@ class Lingo(sublime_plugin.EventListener):
 				if len(data[value]) == 0:
 					branchProp = "property"
 				else:
-					branchProp = "branch"
+					branchProp = "fact"
 				completions.append([value + "\t" + branchProp, value + ": "])
 			# TODO(BlakeMScurr) check completions append behaviour
 			return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
