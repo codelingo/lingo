@@ -1,10 +1,13 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/codelingo/kit/sd"
@@ -105,6 +108,34 @@ func (c client) ListLexicons() ([]string, error) {
 	return r.Lexicons, nil
 }
 
+func cancelReview(sessionKey string) error {
+
+	platConfig, err := config.Platform()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	mqAddress, err := platConfig.MessageQueueAddr()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	cPub, err := rabbitmq.NewPublisher(mqAddress, sessionKey+"-cancel")
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	buf := new(bytes.Buffer)
+	_, err = buf.WriteRune('\x00')
+	if err != nil {
+		return err
+	}
+
+	err = cPub.Publish("", buf)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
 	// set defaults
 	if req.Host == "" {
@@ -120,6 +151,15 @@ func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Message
 	// Initialise review session and receive channel prefix
 	prefix, err := c.Session(&server.SessionRequest{})
 	req.Key = prefix
+
+	// Send a cancel signal to the platform on exit.
+	sigc := make(chan os.Signal, 2)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigc
+		cancelReview(prefix)
+		os.Exit(1)
+	}()
 
 	platConfig, err := config.Platform()
 	if err != nil {
