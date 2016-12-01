@@ -12,6 +12,12 @@ class Lingo(sublime_plugin.EventListener):
 		setting = get_setting('codelingo_env')
 		if setting:
 			os.environ['CODELINGO_ENV'] = setting
+
+		path = get_setting('path')
+		if path and path not in os.environ['PATH']:
+			os.environ['PATH'] += ':'
+			os.environ['PATH'] += path
+
 		lexicons = get_lexicons()
 		completions = []
 		# TODO (BlakeMScurr) invalidate the cache once a day, forcing a refresh on next call to plugin
