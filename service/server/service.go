@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -17,7 +18,7 @@ type Issuec chan *codelingo.Issue
 type CodeLingoService interface {
 	Session(*SessionRequest) (string, error)
 	Query(src string) (string, error)
-	Review(*ReviewRequest) (Issuec, Messagec, error)
+	Review(context.Context, *ReviewRequest) (Issuec, Messagec, error)
 	ListLexicons() ([]string, error)
 	ListFacts(lexicon string) (map[string][]string, error)
 }
