@@ -24,12 +24,12 @@ class Lingo(sublime_plugin.EventListener):
 
 		if view.match_selector(location[0], "source.lingo") and not view.match_selector(location[0], "tenets.lingo"):
 			for lex in lexicons:
-				completions.append([lex,lex + "\n- "])
+				completions.append([lex,lex])
 
 			# TODO(BlakeMScurr) put tenets and lexicons completions in static file and
 			# do not sublime.INHIBIT_EXPLICIT_COMPLETIONS
-			completions.append(["lexicons","lexicons:\n  - "])
-			completions.append(["tenets","tenets:\n  - "])
+			completions.append(["lexicons","lexicons:"])
+			completions.append(["tenets","tenets:"])
 			#TODO(BlakeMScurr) use INHIBIT_WORD_COMPLETIONS on static file
 			return (completions,sublime.INHIBIT_WORD_COMPLETIONS)
 
@@ -72,10 +72,9 @@ class Lingo(sublime_plugin.EventListener):
 
 			for value in compStub:
 				if len(data[value]) == 0:
-					branchProp = "property"
+					completions.append([value + "\t" + "property", value + ": ${1:\"property_value\"}"])
 				else:
-					branchProp = "fact"
-				completions.append([value + "\t" + branchProp, value + ": "])
+					completions.append([value + "\t" + "fact", value + ": "])
 			# TODO(BlakeMScurr) check completions append behaviour
 			return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
@@ -88,7 +87,7 @@ class Lingo(sublime_plugin.EventListener):
 				region = view.line(point)
 				line = view.substr(region)
 				m = re.search('(\s*)([a-zA-Z0-9-._]+):', line)
-				if m.group(1).count(" ") % 2 == 1:
+				if m and m.group(1).count(" ") % 2 == 1:
 					with Edit(view) as edit:
 						edit.insert(point, ' ')
 			if prev != -1 and view.rowcol(point)[0] == view.rowcol(prev)[0]:
@@ -111,7 +110,16 @@ class Lingo(sublime_plugin.EventListener):
 						addStr += "  "
 				if "CLQL.lingo" in scopes:
 					addStr += "  "
-
+				if re.search('tenets:', previous_line) is not None:
+					addStr = "  - "
+			# if we are in higher scope
+			elif "source.lingo" in scopes:
+				if re.search('  - ', previous_line) is not None:
+					addStr += "- "
+				else:
+					addStr += "  - "
+			if previous_line == "  - ":
+				return ("run_macro_file",{"file": "res://Packages/Default/Delete to Hard BOL.sublime-macro"})
 			if addStr == "":
 				return None
 			else:
