@@ -5,13 +5,17 @@ contexts:
     - meta_scope: "branch.lingo"
     - match: ":"
       pop: true
+  valueContext:
+    - meta_scope: "value.lingo"
+    - match: "$"
+      pop: true
   CLQLContext:
     - meta_scope: CLQL.lingo
+    - match: " *[a-zA-Z0-9-._\"]+$"
+      push: valueContext
     - match: "[a-zA-Z0-9-._]+"
       scope: keyword.branch.lingo
       push: branchContext
-    - match: "[a-zA-Z0-9\"]+"
-      scope: string.unaquoted.single.lingo
   main:
     - match: lexicons
       scope: keyword.lexicons
