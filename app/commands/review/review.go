@@ -85,7 +85,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	issuesc, messagesc, err := svc.Review(reviewReq)
+	issuesc, messagesc, err := svc.Review(nil, reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
 			return nil, errors.New(noCommitErrMsg)
