@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -17,7 +18,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 	// zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	// appdashot "github.com/sourcegraph/appdash/opentracing"
-	"golang.org/x/net/context"
 
 	"github.com/codelingo/kit/endpoint"
 	"github.com/codelingo/kit/log"
@@ -136,7 +136,11 @@ func cancelReview(sessionKey string) error {
 	return nil
 }
 
-func (c client) Review(req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
+// TODO(waigani) context.Context is here to conform to CodeLingoService
+// interface. The interface takes a context because the platform
+// implementation needs it. Refactor so this client side func sig does not
+// require a context.
+func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
 	// set defaults
 	if req.Host == "" {
 		return nil, nil, errors.New("repository host is not set")
