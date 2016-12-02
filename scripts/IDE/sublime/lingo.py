@@ -118,6 +118,8 @@ class Lingo(sublime_plugin.EventListener):
 					addStr += "- "
 				else:
 					addStr += "  - "
+			if previous_line == "":
+				addStr= ""
 			if previous_line == "  - ":
 				return ("run_macro_file",{"file": "res://Packages/Default/Delete to Hard BOL.sublime-macro"})
 			if addStr == "":
