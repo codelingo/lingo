@@ -182,12 +182,19 @@ def append_completions(data, line):
 			namespace = m.group(2) + "."
 
 		facts = get_json_facts(found)
-		# TODO(BlakeMScurr) include logic for different namespaces having similar lexicons
+		# TODO(BlakeMScurr) include logic for different owners having lexicons with the same name
 		for fact in facts:
-			children = []
-			for child in facts[fact]:
-				children.append(namespace + child)
-			data[namespace + fact] = children
+			# Facts must be namespaced, and properties must not be. 
+			if len(facts[fact]) != 0:
+				children = []
+				for child in facts[fact]:
+					if len (facts[child]) != 0:
+						children.append(namespace + child)
+					else:
+						children.append(child)
+				data[namespace + fact] = children
+			else:
+				data[fact] = []
 	return data
 
 def get_json_facts(lexicon):
