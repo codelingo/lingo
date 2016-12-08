@@ -12,6 +12,19 @@ type SessionResponse struct {
 	Key string `json:"key"`
 }
 
+type PathsFromOffsetRequest struct {
+	Lang     string
+	Dir      string
+	Filename string
+	Src      string
+	Start    int
+	End      int
+}
+
+type PathsFromOffsetResponse struct {
+	Paths [][]string
+}
+
 // QueryRequest is the business domain type for a Query method request.
 type QueryRequest struct {
 	CLQL string `json:"clql"`

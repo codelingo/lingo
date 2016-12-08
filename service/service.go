@@ -108,6 +108,15 @@ func (c client) ListLexicons() ([]string, error) {
 	return r.Lexicons, nil
 }
 
+func (c client) PathsFromOffset(request *server.PathsFromOffsetRequest) (*server.PathsFromOffsetResponse, error) {
+	reply, err := c.endpoints["pathsfromoffset"](c.Context, request)
+	if err != nil {
+		return nil, err
+	}
+	response := reply.(server.PathsFromOffsetResponse)
+	return &response, nil
+}
+
 func cancelReview(sessionKey string) error {
 
 	platConfig, err := config.Platform()
@@ -337,17 +346,19 @@ func New() (server.CodeLingoService, error) {
 	reviewFactory := grpcclient.MakeReviewEndpointFactory(tracer, tracingLogger)
 	listFactsFactory := grpcclient.MakeListFactsEndpointFactory(tracer, tracingLogger)
 	listLexiconsFactory := grpcclient.MakeListLexiconsEndpointFactory(tracer, tracingLogger)
+	pathsFromOffsetFactory := grpcclient.MakePathsFromOffsetEndpointFactory(tracer, tracingLogger)
 
 	return client{
 		Context: context.Background(),
 		Logger:  logger,
 		endpoints: map[string]endpoint.Endpoint{
 			// TODO(waigani) this could be refactored further, a lot of dups
-			"session":      buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
-			"query":        buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
-			"review":       buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
-			"listfacts":    buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
-			"listlexicons": buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
+			"session":         buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
+			"query":           buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
+			"review":          buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
+			"listfacts":       buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
+			"listlexicons":    buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
+			"pathsfromoffset": buildEndpoint(tracer, "pathsfromoffset", instances, pathsFromOffsetFactory, randomSeed, logger),
 		},
 	}, nil
 }

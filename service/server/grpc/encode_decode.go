@@ -6,6 +6,34 @@ import (
 	"golang.org/x/net/context"
 )
 
+func DecodePathsFromOffsetRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	// TODO(BlakeMScurr) is it sensible to decode this into a src.Fact here?
+	pathsRequest := req.(*codelingo.PathsFromOffsetRequest)
+	return &server.PathsFromOffsetRequest{
+		Lang:     pathsRequest.Lang,
+		Dir:      pathsRequest.Dir,
+		Filename: pathsRequest.Filename,
+		Src:      pathsRequest.Src,
+		Start:    int(pathsRequest.Start),
+		End:      int(pathsRequest.End),
+	}, nil
+}
+
+func EncodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	// may not populate properly, because other encode decode methods don't do it this way
+	pathsResponse := resp.(*server.PathsFromOffsetResponse)
+	response := codelingo.PathsFromOffsetReply{
+		Paths: []*codelingo.Path{},
+	}
+	for _, path := range pathsResponse.Paths {
+		response.Paths = append(response.Paths, &codelingo.Path{
+			Nodes: path,
+		})
+	}
+
+	return response, nil
+}
+
 func DecodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	lexicon := req.(*codelingo.ListFactsRequest).Lexicon
 	return &codelingo.ListFactsRequest{

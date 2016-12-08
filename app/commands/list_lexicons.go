@@ -108,5 +108,9 @@ func getFilePath(path string) (string, error) {
 		return "", errors.Errorf("%q is not a directory", dirPath)
 	}
 
-	return filepath.Join(dirPath, fileName), nil
+	abs, err := filepath.Abs(filepath.Join(dirPath, fileName))
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return abs, nil
 }
