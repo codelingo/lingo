@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/skratchdot/open-golang/open"
 	"golang.org/x/crypto/ssh/terminal"
 
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
@@ -121,6 +120,12 @@ func setupLingo(c *cli.Context) (string, error) {
 		}
 	}
 
+	// Prompt for user
+	if username == "" || password == "" {
+		lingoTokenAddr := "http://" + webAddr + "/lingo-token"
+		fmt.Println("Please sign in to " + lingoTokenAddr + " to generate a new Token linked with your CodeLingo User account.")
+	}
+
 	if username == "" {
 		fmt.Print("Enter Your CodeLingo Username: ")
 		fmt.Scanln(&username)
@@ -131,12 +136,7 @@ func setupLingo(c *cli.Context) (string, error) {
 	}
 
 	if password == "" {
-		// Launch website to gen token
-		lingoTokenAddr := "http://" + webAddr + "/lingo-token"
 		fmt.Print("Enter User-Token:")
-		if err := open.Run(lingoTokenAddr); err != nil {
-			return "", errors.Trace(err)
-		}
 		byt, err := terminal.ReadPassword(0)
 		if err != nil {
 			return "", errors.Trace(err)
