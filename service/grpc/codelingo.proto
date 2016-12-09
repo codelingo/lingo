@@ -52,6 +52,26 @@ service CodeLingo {
 
   rpc ListFacts (ListFactsRequest) returns (FactList) {}
 
+  rpc PathsFromOffset (PathsFromOffsetRequest) returns (PathsFromOffsetReply) {}
+
+}
+
+message PathsFromOffsetRequest {
+  string lang = 1;
+  string dir = 2;
+  string filename = 3;
+  string src = 4;
+  int64 start = 5;
+  int64 end = 6;
+
+}
+
+message PathsFromOffsetReply {
+  repeated Path paths = 1;
+}
+
+message Path {
+  repeated string nodes = 1;
 }
 
 message ListFactsRequest {

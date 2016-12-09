@@ -91,3 +91,17 @@ func MakeListLexiconsEndpointFactory(tracer opentracing.Tracer, tracingLogger lo
 		).Endpoint(), cc, err
 	}
 }
+
+func MakePathsFromOffsetEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger) sd.Factory {
+	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
+		cc, err := grpc.Dial(instance, grpc.WithInsecure())
+		return grpctransport.NewClient(
+			cc,
+			"codelingo.CodeLingo",
+			"PathsFromOffset",
+			encodePathsFromOffsetRequest,
+			decodePathsFromOffsetResponse,
+			codelingo.PathsFromOffsetReply{},
+		).Endpoint(), cc, err
+	}
+}

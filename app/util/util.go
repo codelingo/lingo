@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -55,7 +54,6 @@ func OpenFileCmd(editor, filename string, line int64) (*exec.Cmd, error) {
 func OSErrf(format string, a ...interface{}) {
 	format = fmt.Sprintf("error: %s\n", format)
 	errStr := fmt.Sprintf(format, a...)
-	log.Print(errStr)
 	Stderr.Write([]byte(errStr))
 	Exiter(1)
 }

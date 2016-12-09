@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	endpointCtx "golang.org/x/net/context"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/codelingo/kit/sd"
 	"github.com/codelingo/lingo/app/util/common/config"
@@ -20,6 +20,8 @@ import (
 	// appdashot "github.com/sourcegraph/appdash/opentracing"
 
 	"github.com/codelingo/kit/endpoint"
+	"time"
+
 	"github.com/codelingo/kit/log"
 	"github.com/codelingo/kit/pubsub/rabbitmq"
 	loadbalancer "github.com/codelingo/kit/sd/lb"
@@ -106,6 +108,15 @@ func (c client) ListLexicons() ([]string, error) {
 	}
 	r := reply.(*codelingo.ListLexiconsReply)
 	return r.Lexicons, nil
+}
+
+func (c client) PathsFromOffset(request *server.PathsFromOffsetRequest) (*server.PathsFromOffsetResponse, error) {
+	reply, err := c.endpoints["pathsfromoffset"](c.Context, request)
+	if err != nil {
+		return nil, err
+	}
+	response := reply.(server.PathsFromOffsetResponse)
+	return &response, nil
 }
 
 func cancelReview(sessionKey string) error {
@@ -337,17 +348,19 @@ func New() (server.CodeLingoService, error) {
 	reviewFactory := grpcclient.MakeReviewEndpointFactory(tracer, tracingLogger)
 	listFactsFactory := grpcclient.MakeListFactsEndpointFactory(tracer, tracingLogger)
 	listLexiconsFactory := grpcclient.MakeListLexiconsEndpointFactory(tracer, tracingLogger)
+	pathsFromOffsetFactory := grpcclient.MakePathsFromOffsetEndpointFactory(tracer, tracingLogger)
 
 	return client{
 		Context: context.Background(),
 		Logger:  logger,
 		endpoints: map[string]endpoint.Endpoint{
 			// TODO(waigani) this could be refactored further, a lot of dups
-			"session":      buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
-			"query":        buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
-			"review":       buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
-			"listfacts":    buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
-			"listlexicons": buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
+			"session":         buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
+			"query":           buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
+			"review":          buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
+			"listfacts":       buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
+			"listlexicons":    buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
+			"pathsfromoffset": buildEndpoint(tracer, "pathsfromoffset", instances, pathsFromOffsetFactory, randomSeed, logger),
 		},
 	}, nil
 }
@@ -372,7 +385,65 @@ func buildEndpoint(tracer opentracing.Tracer, operationName string, instances []
 
 	subscriber := sd.FixedSubscriber(endpoints)
 	random := loadbalancer.NewRandom(subscriber, seed)
-	endpoint := loadbalancer.Retry(10, 10*time.Second, random)
+
+	// TODO Refactor to have command specific endpoints, such that retry etc
+	// can be adjusted on a per command basis
+	// wrap result from loadbalancer.Retry() in function that handles nice printing
+	// rather than using retry() which is largely copied
+	endpoint, _ := random.Endpoint()
+	endpoint = retry(1, 10*time.Second, endpoint)
+
 	return endpoint
 	// return kitot.TraceClient(tracer, operationName)(endpoint)
+}
+
+func retry(max int, timeout time.Duration, endpoint endpoint.Endpoint) endpoint.Endpoint {
+	return func(ctx endpointCtx.Context, request interface{}) (response interface{}, err error) {
+		var (
+			newctx, cancel = context.WithTimeout(ctx, timeout)
+			responses      = make(chan interface{}, 1)
+			errs           = make(chan error, 1)
+			a              = []string{}
+		)
+		defer cancel()
+		for i := 1; i <= max; i++ {
+			go func() {
+				response, err := endpoint(newctx, request)
+				if err != nil {
+					errs <- err
+					return
+				}
+				responses <- response
+			}()
+
+			select {
+			case <-newctx.Done():
+				return nil, newctx.Err()
+			case response := <-responses:
+				return response, nil
+			case err := <-errs:
+				a = append(a, userFacingErrs(err).Error())
+				continue
+			}
+		}
+		return nil, errors.New(strings.Join(a, "\n"))
+	}
+}
+
+func userFacingErrs(err error) error {
+	// TODO type matching rather than string matching
+	// make err struct that can be reformed
+	message := err.Error()
+	switch {
+	case strings.Contains(message, "There is no language called:"):
+		lang := strings.Split(message, ":")[3]
+		lang = lang[1:]
+		return errors.Errorf("Lingo doesn't support \"%s\" yet", lang)
+	// TODO this should be more specific parse error on platform:
+	//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
+	case strings.Contains(message, "expected one of: < ! var indent id"):
+		return errors.New("The match statement is probably ends in a colon")
+	default:
+		return errors.Trace(err)
+	}
 }

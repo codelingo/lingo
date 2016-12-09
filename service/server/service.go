@@ -21,6 +21,7 @@ type CodeLingoService interface {
 	Review(context.Context, *ReviewRequest) (Issuec, Messagec, error)
 	ListLexicons() ([]string, error)
 	ListFacts(lexicon string) (map[string][]string, error)
+	PathsFromOffset(*PathsFromOffsetRequest) (*PathsFromOffsetResponse, error)
 }
 
 func (mc Messagec) Send(msgFmt string, vars ...interface{}) error {
