@@ -80,18 +80,6 @@ var (
 		"format",
 		"f",
 	}
-	StartFlg = flagName{
-		"start",
-		"st",
-	}
-	EndFlg = flagName{
-		"end",
-		"e",
-	}
-	InputFlg = flagName{
-		"input",
-		"in",
-	}
 )
 
 func (f *flagName) String() string {

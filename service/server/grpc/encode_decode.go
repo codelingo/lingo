@@ -7,7 +7,6 @@ import (
 )
 
 func DecodePathsFromOffsetRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	// TODO(BlakeMScurr) is it sensible to decode this into a src.Fact here?
 	pathsRequest := req.(*codelingo.PathsFromOffsetRequest)
 	return &server.PathsFromOffsetRequest{
 		Lang:     pathsRequest.Lang,
@@ -20,7 +19,6 @@ func DecodePathsFromOffsetRequest(ctx context.Context, req interface{}) (interfa
 }
 
 func EncodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (interface{}, error) {
-	// may not populate properly, because other encode decode methods don't do it this way
 	pathsResponse := resp.(*server.PathsFromOffsetResponse)
 	response := codelingo.PathsFromOffsetReply{
 		Paths: []*codelingo.Path{},

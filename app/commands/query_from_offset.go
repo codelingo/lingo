@@ -3,34 +3,30 @@ package commands
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/juju/errors"
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strconv"
 )
+
+// TODO(BlakeMScurr) usage info should be generated from cli
+const usage = `
+lingo query-from-facts - Generate CLQL to match segment of code within a given file
+ 
+USAGE:
+ 	lingo query-from-facts <filename> <start> <end>`
 
 func init() {
 	register(&cli.Command{
 		Name:   "query-from-offset",
 		Usage:  "Generate CLQL query to match code in a specific section of a file",
 		Action: pathFromOffsetAction,
-		Flags: []cli.Flag{
-			cli.Uint64Flag{
-				Name:  util.StartFlg.String(),
-				Usage: "The start of the range to find queries in.",
-			},
-			cli.Uint64Flag{
-				Name:  util.EndFlg.String(),
-				Usage: "The end of the range to find queries in.",
-			},
-			cli.StringFlag{
-				Name:  util.InputFlg.String(),
-				Usage: "The filepath of the file for which you want to generate queries.",
-			},
-		},
 	}, false, versionRq)
 }
 
@@ -47,11 +43,28 @@ func pathFromOffset(ctx *cli.Context) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	start := ctx.Int("start")
-	end := ctx.Int("end")
-	file, err := getFilePath(ctx.String("input"))
+	badArgsErr := errors.New(usage)
+	if len(ctx.Args()) != 3 {
+		return badArgsErr
+	}
+
+	file, err := validateFilePath(ctx.Args()[0])
 	if err != nil {
-		return errors.Trace(err)
+		return errors.Annotate(badArgsErr, err.Error())
+	}
+
+	start, err := strconv.Atoi(ctx.Args()[1])
+	if err != nil {
+		return errors.Annotate(badArgsErr, "start must be an integer")
+	}
+
+	end, err := strconv.Atoi(ctx.Args()[2])
+	if err != nil {
+		return errors.Annotate(badArgsErr, "end must be an integer")
+	}
+
+	if start > end {
+		return errors.Annotate(badArgsErr, "start must be smaller than end")
 	}
 
 	lang := filepath.Ext(file)[1:]
@@ -72,7 +85,8 @@ func pathFromOffset(ctx *cli.Context) error {
 		End:      end,
 	})
 	if err != nil {
-		return errors.Trace(err)
+
+		return errors.Annotate(badArgsErr, err.Error())
 	}
 
 	var buf bytes.Buffer
@@ -80,4 +94,20 @@ func pathFromOffset(ctx *cli.Context) error {
 	content := buf.Bytes()
 	outputBytes("", content)
 	return nil
+}
+
+func validateFilePath(path string) (string, error) {
+	dirPath := filepath.Dir(path)
+	fileName := filepath.Base(path)
+
+	// Check that it exists and is a directory
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return "", errors.New(fmt.Sprintf("file %q not found", path))
+	}
+
+	abs, err := filepath.Abs(filepath.Join(dirPath, fileName))
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return abs, nil
 }

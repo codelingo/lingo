@@ -22,6 +22,14 @@ type PathsFromOffsetRequest struct {
 }
 
 type PathsFromOffsetResponse struct {
+	// TODO In .lingo we have a *statement* of *facts*.
+	// With the store we have a *query* *path* that finds a *node*.
+	// We need to keep the naming consistent and specific to the domain.
+	// Using path here potentially bleeds the layers.
+	// Key terms to use consciously in the right places:
+	// fact, property, branch, leaf, kind, statement, query, path, node ...
+	// We need to define Tenets to guide this.
+
 	Paths [][]string
 }
 
