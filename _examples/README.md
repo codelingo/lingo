@@ -94,3 +94,5 @@ naming:
  make(chan error, n) - n is a code smell
 
  len(x) != 0 should be len(x) > 0
+
+ any comment that has a "?" should start with a "TODO"
