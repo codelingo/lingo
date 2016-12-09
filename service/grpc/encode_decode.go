@@ -85,3 +85,26 @@ func decodeListLexiconsResponse(ctx context.Context, resp interface{}) (interfac
 	}, nil
 	return &codelingo.ListLexiconsReply{}, nil
 }
+
+func encodePathsFromOffsetRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	pathsRequest := req.(*server.PathsFromOffsetRequest)
+	return &codelingo.PathsFromOffsetRequest{
+		Lang:     pathsRequest.Lang,
+		Dir:      pathsRequest.Dir,
+		Filename: pathsRequest.Filename,
+		Src:      pathsRequest.Src,
+		Start:    int64(pathsRequest.Start),
+		End:      int64(pathsRequest.End),
+	}, nil
+}
+
+func decodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	pathsResponse := resp.(*codelingo.PathsFromOffsetReply)
+	paths := [][]string{}
+	for _, path := range pathsResponse.Paths {
+		paths = append(paths, path.Nodes)
+	}
+	return server.PathsFromOffsetResponse{
+		Paths: paths,
+	}, nil
+}
