@@ -6,6 +6,31 @@ from .Edit import Edit as Edit
 homepath = os.environ['HOME']
 packagePath =  homepath + "/.config/sublime-text-3/Packages/Lingo"
 
+class LingoMakeQueriesCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		window = self.view.window()
+		panel = window.create_output_panel("clql")
+		window.run_command("show_panel",{"panel":"output.clql"})
+
+		for boundary in self.view.sel():
+			if boundary.a < boundary.b:
+				a,b = boundary.a, boundary.b
+			else:
+				a,b = boundary.b, boundary.a
+
+			output = subprocess.check_output(["lingo","query-from-offset", self.view.file_name(), str(a),str(b)])
+			results = bytes_to_json(output)
+			for result in results:
+				panel.insert(edit, panel.size(), array_to_clql(result))
+
+def array_to_clql(arr):
+	retstr = ""
+	tabs = ""
+	for fact in arr:
+		retstr += tabs + fact + ":\n"
+		tabs += "  "
+	return retstr[:len(retstr)-1]
+
 class Lingo(sublime_plugin.EventListener):
 	def on_query_completions(self, view, prefix, location):
 		vs = view.settings()
