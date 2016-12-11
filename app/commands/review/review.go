@@ -1,10 +1,11 @@
 package review
 
 import (
-	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/cheggaaa/pb"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/lingo/vcs"
@@ -85,7 +86,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	issuesc, messagesc, err := svc.Review(nil, reviewReq)
+	issuesc, _, ingestPingc, err := svc.Review(nil, reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
 			return nil, errors.New(noCommitErrMsg)
@@ -94,19 +95,23 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		return nil, errors.Annotate(err, "\nbad request")
 	}
 
-	// TODO(waigani) these should both be chans - as per firt MVP.
-	var confirmedIssues []*codelingo.Issue
-	go func() {
-		for message := range messagesc {
-			//  Currently, the message chan just prints while we're waiting
-			//  for issues. So we don't worry about closing it or timeouts
-			//  etc.
-			if message != "" {
-				fmt.Println(string(message))
-			}
+	// This first ping holds the total number of files to be ingested
+	// on the platform, which we use to initialise the progress bar.
+	ping := <-ingestPingc
+	fileTotal, err := strconv.Atoi(ping)
+	if err != nil {
+		panic(err) // can't directly return from inside this goroutine.
+	}
+	ingestProgress := pb.StartNew(fileTotal)
+	for _ = range ingestPingc {
+		if ingestProgress.Increment() == fileTotal {
+			ingestProgress.Finish()
+			break
 		}
-	}()
+	}
 
+	// TODO(waigani) these should both be chans - as per first MVP.
+	var confirmedIssues []*codelingo.Issue
 	output := opts.SaveToFile == ""
 	cfm, err := NewConfirmer(output, opts.KeepAll, nil)
 	if err != nil {
