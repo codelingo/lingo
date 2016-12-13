@@ -166,9 +166,8 @@ func (r *Repo) CreateRemote(name string) error {
 	}
 
 	_, err = gogsClient.CreateRepo(gogs.CreateRepoOption{
-		Name: name,
-		// TODO(waigani) make all repos private
-		Private:  false,
+		Name:     name,
+		Private:  true,
 		AutoInit: false,
 		//	Readme:   "Default",
 	})
