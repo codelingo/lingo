@@ -254,18 +254,18 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 	}()
 
 	go func() {
-		defer close(ingestc)
 		defer close(issuec)
 		defer issueSubscriber.Stop()
-		defer ingestSubscriber.Stop()
 		for {
 			ingestPing, ok := <-ingestSubc
 			byt, err := ioutil.ReadAll(ingestPing)
 			if sendErrIfErr(err) ||
+				isEnd(byt) ||
 				sendErrIfErr(ingestc.Send(string(byt))) ||
-				!ok ||
-				isEnd(byt) {
+				!ok {
 				// no more ingestion updates.
+				close(ingestc)
+				ingestSubscriber.Stop()
 				break
 			}
 		}
@@ -279,7 +279,7 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 				}
 				if !ok || isEnd(byt) {
 					// no more issues.
-					break
+					break l
 				}
 
 				issue := &codelingo.Issue{}
