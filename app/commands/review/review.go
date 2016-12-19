@@ -2,9 +2,11 @@ package review
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/cheggaaa/pb"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/lingo/vcs"
@@ -85,7 +87,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	issuesc, messagesc, err := svc.Review(nil, reviewReq)
+	issuesc, messagec, ingestPingc, err := svc.Review(nil, reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
 			return nil, errors.New(noCommitErrMsg)
@@ -93,11 +95,8 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 		return nil, errors.Annotate(err, "\nbad request")
 	}
-
-	// TODO(waigani) these should both be chans - as per firt MVP.
-	var confirmedIssues []*codelingo.Issue
 	go func() {
-		for message := range messagesc {
+		for message := range messagec {
 			//  Currently, the message chan just prints while we're waiting
 			//  for issues. So we don't worry about closing it or timeouts
 			//  etc.
@@ -107,6 +106,44 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 	}()
 
+	timeout := time.After(time.Second * 30)
+	var ingestTotal int
+	var ingestComplete bool
+
+	// ingestSteps is how far along the ingest process we are
+	var ingestSteps int
+	select {
+	case ping, ok := <-ingestPingc:
+		if !ok {
+			ingestComplete = true
+			break
+		}
+
+		parts := strings.Split(ping, "/")
+		if len(parts) != 2 {
+			return nil, errors.Errorf("ingest ping has wrong format. Expected n/n got %q", ping)
+		}
+		ingestSteps, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		ingestTotal, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	case <-timeout:
+		return nil, errors.New("timed out waiting for ingest to start")
+	}
+
+	if !ingestComplete {
+		// ingest is not complete
+		if ingestSteps < ingestTotal {
+			ingestBar(ingestSteps, ingestTotal, ingestPingc)
+		}
+	}
+
+	// TODO(waigani) these should both be chans - as per first MVP.
+	var confirmedIssues []*codelingo.Issue
 	output := opts.SaveToFile == ""
 	cfm, err := NewConfirmer(output, opts.KeepAll, nil)
 	if err != nil {
@@ -115,7 +152,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	}
 
 	// If user is manually confirming reviews, set a long timeout.
-	timeout := time.After(time.Hour * 1)
+	timeout = time.After(time.Hour * 1)
 	if opts.KeepAll {
 		timeout = time.After(time.Second * 30)
 	}
@@ -135,6 +172,29 @@ l:
 		}
 	}
 	return confirmedIssues, nil
+}
+
+func ingestBar(current, total int, ingestPingc server.Ingestc) {
+	ingestProgress := pb.StartNew(total)
+	var finished bool
+
+	// fast forward to where the ingest is up to.
+	for i := 0; i < current; i++ {
+		if ingestProgress.Increment() == total {
+			ingestProgress.Finish()
+			finished = true
+			break
+		}
+	}
+
+	if !finished {
+		for _ = range ingestPingc {
+			if ingestProgress.Increment() == total {
+				ingestProgress.Finish()
+				break
+			}
+		}
+	}
 }
 
 // TODO(waigani) use typed error

@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	endpointCtx "golang.org/x/net/context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	endpointCtx "golang.org/x/net/context"
 
 	"github.com/codelingo/kit/sd"
 	"github.com/codelingo/lingo/app/util/common/config"
@@ -19,8 +21,9 @@ import (
 	// zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	// appdashot "github.com/sourcegraph/appdash/opentracing"
 
-	"github.com/codelingo/kit/endpoint"
 	"time"
+
+	"github.com/codelingo/kit/endpoint"
 
 	"github.com/codelingo/kit/log"
 	"github.com/codelingo/kit/pubsub/rabbitmq"
@@ -151,16 +154,16 @@ func cancelReview(sessionKey string) error {
 // interface. The interface takes a context because the platform
 // implementation needs it. Refactor so this client side func sig does not
 // require a context.
-func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Issuec, server.Messagec, error) {
+func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Issuec, server.Messagec, server.Ingestc, error) {
 	// set defaults
 	if req.Host == "" {
-		return nil, nil, errors.New("repository host is not set")
+		return nil, nil, nil, errors.New("repository host is not set")
 	}
 	if req.Owner == "" {
-		return nil, nil, errors.New("repository owner is not set")
+		return nil, nil, nil, errors.New("repository owner is not set")
 	}
 	if req.Repo == "" {
-		return nil, nil, errors.New("repository name is not set")
+		return nil, nil, nil, errors.New("repository name is not set")
 	}
 
 	// Initialise review session and receive channel prefix
@@ -178,27 +181,36 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 
 	platConfig, err := config.Platform()
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, nil, errors.Trace(err)
 	}
 	mqAddress, err := platConfig.MessageQueueAddr()
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, nil, errors.Trace(err)
 	}
 
+	// TODO: Make prefix+"-issues" and equivs constants as they are shared
+	// between codelingo/platform and codelingo/lingo
 	issueSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-issues", "")
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, nil, errors.Trace(err)
 	}
 
 	messageSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-messages", "")
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, nil, errors.Trace(err)
+	}
+
+	ingestSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-ingest-progress", "")
+	if err != nil {
+		return nil, nil, nil, errors.Trace(err)
 	}
 
 	issueSubc := issueSubscriber.Start()
 	messageSubc := messageSubscriber.Start()
+	ingestSubc := ingestSubscriber.Start()
 	issuec := make(server.Issuec)
 	messagec := make(server.Messagec)
+	ingestc := make(server.Ingestc)
 
 	// helper func to send errors to the message chan
 	sendErrIfErr := func(err error) bool {
@@ -212,19 +224,55 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 		return false
 	}
 
-	// read from subscriber chans onto issue and message chans, transforming
-	// pubsub.Message into codelingo.Issue or server.Message
+	// read from subscriber chans onto message, issue, and ingest chans,
+	// transforming pubsub.Message into codelingo.Issue or server.Message
+	// (or a straight string in the case of the working version of ingest chan)
+
+	// TODO(waigani) !ok is never used and isEnd(byt) is a workarond.
+	// A proper pubsub should close the chan upstream.
 	go func() {
 		defer close(messagec)
-		defer close(issuec)
-		defer issueSubscriber.Stop()
 		defer messageSubscriber.Stop()
 	l:
 		for {
 			select {
+			case msg, ok := <-messageSubc:
+				byt, err := ioutil.ReadAll(msg)
+				if err != nil {
+					sendErrIfErr(err)
+				}
+				if !ok ||
+					isEnd(byt) {
+					// no more messages.
+					break l
+				}
+				fmt.Println(string(byt))
+			case <-time.After(time.Second * 5):
+				break
+			}
+		}
+	}()
+
+	go func() {
+		defer close(issuec)
+		defer issueSubscriber.Stop()
+		for {
+			ingestPing, ok := <-ingestSubc
+			byt, err := ioutil.ReadAll(ingestPing)
+			if sendErrIfErr(err) ||
+				isEnd(byt) ||
+				sendErrIfErr(ingestc.Send(string(byt))) ||
+				!ok {
+				// no more ingestion updates.
+				close(ingestc)
+				ingestSubscriber.Stop()
+				break
+			}
+		}
+	l:
+		for {
+			select {
 			case issueMsg, ok := <-issueSubc:
-				// TODO(waigani) !ok is never used and isEnd is a workarond. A
-				// proper pubsub should close the chan upstream.
 				byt, err := ioutil.ReadAll(issueMsg)
 				if sendErrIfErr(err) {
 					break l
@@ -241,19 +289,7 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 					break l
 				}
 
-			case msg, ok := <-messageSubc:
-				byt, err := ioutil.ReadAll(msg)
-				if sendErrIfErr(err) ||
-					!ok ||
-					isEnd(byt) {
-					// no more messages.
-					break l
-				}
-
-				// TODO: Process messages
-				sendErrIfErr(messagec.Send(string(byt) + "\n"))
-				sendErrIfErr(msg.Done())
-				// TODO(waigani) DEMOWARE setting to 600
+			// TODO(waigani) DEMOWARE setting to 600
 			case <-time.After(time.Second * 600):
 				sendErrIfErr(errors.New("timed out waiting for issues x"))
 				break l
@@ -263,10 +299,10 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 
 	_, err = c.endpoints["review"](c.Context, req)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return issuec, messagec, nil
+	return issuec, messagec, ingestc, nil
 }
 
 // TODO(waigani) construct logger separately and pass into New.
