@@ -257,8 +257,8 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 		defer close(issuec)
 		defer issueSubscriber.Stop()
 		for {
-			ingestPing, ok := <-ingestSubc
-			byt, err := ioutil.ReadAll(ingestPing)
+			ingestProgress, ok := <-ingestSubc
+			byt, err := ioutil.ReadAll(ingestProgress)
 			if sendErrIfErr(err) ||
 				isEnd(byt) ||
 				sendErrIfErr(ingestc.Send(string(byt))) ||
