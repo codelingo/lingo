@@ -87,7 +87,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	issuesc, messagec, ingestPingc, err := svc.Review(nil, reviewReq)
+	issuesc, messagec, progressc, err := svc.Review(nil, reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
 			return nil, errors.New(noCommitErrMsg)
@@ -106,41 +106,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 	}()
 
-	timeout := time.After(time.Second * 30)
-	var ingestTotal int
-	var ingestComplete bool
-
-	// ingestSteps is how far along the ingest process we are
-	var ingestSteps int
-	select {
-	case ping, ok := <-ingestPingc:
-		if !ok {
-			ingestComplete = true
-			break
-		}
-
-		parts := strings.Split(ping, "/")
-		if len(parts) != 2 {
-			return nil, errors.Errorf("ingest ping has wrong format. Expected n/n got %q", ping)
-		}
-		ingestSteps, err = strconv.Atoi(parts[0])
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		ingestTotal, err = strconv.Atoi(parts[1])
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-	case <-timeout:
-		return nil, errors.New("timed out waiting for ingest to start")
-	}
-
-	if !ingestComplete {
-		// ingest is not complete
-		if ingestSteps < ingestTotal {
-			ingestBar(ingestSteps, ingestTotal, ingestPingc)
-		}
-	}
+	showIngestProgress(progressc)
 
 	// TODO(waigani) these should both be chans - as per first MVP.
 	var confirmedIssues []*codelingo.Issue
@@ -152,7 +118,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	}
 
 	// If user is manually confirming reviews, set a long timeout.
-	timeout = time.After(time.Hour * 1)
+	timeout := time.After(time.Hour * 1)
 	if opts.KeepAll {
 		timeout = time.After(time.Second * 30)
 	}
@@ -174,7 +140,47 @@ l:
 	return confirmedIssues, nil
 }
 
-func ingestBar(current, total int, ingestPingc server.Ingestc) {
+func showIngestProgress(progressc server.Ingestc) error {
+	timeout := time.After(time.Second * 30)
+	var ingestTotal int
+	var ingestComplete bool
+
+	// ingestSteps is how far along the ingest process we are
+	var ingestSteps int
+	var err error
+	select {
+	case progress, ok := <-progressc:
+		if !ok {
+			ingestComplete = true
+			break
+		}
+
+		parts := strings.Split(progress, "/")
+		if len(parts) != 2 {
+			return errors.Errorf("ingest progress has wrong format. Expected n/n got %q", progress)
+		}
+		ingestSteps, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return errors.Trace(err)
+		}
+		ingestTotal, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return errors.Trace(err)
+		}
+	case <-timeout:
+		return errors.New("timed out waiting for ingest to start")
+	}
+
+	if !ingestComplete {
+		// ingest is not complete
+		if ingestSteps < ingestTotal {
+			return ingestBar(ingestSteps, ingestTotal, progressc)
+		}
+	}
+	return nil
+}
+
+func ingestBar(current, total int, progressc server.Ingestc) error {
 	ingestProgress := pb.StartNew(total)
 	var finished bool
 
@@ -188,13 +194,20 @@ func ingestBar(current, total int, ingestPingc server.Ingestc) {
 	}
 
 	if !finished {
-		for _ = range ingestPingc {
-			if ingestProgress.Increment() == total {
-				ingestProgress.Finish()
-				break
+		for {
+			timeout := time.After(time.Second * 600)
+			select {
+			case _, ok := <-progressc:
+				if ingestProgress.Increment() == total || !ok {
+					ingestProgress.Finish()
+					break
+				}
+			case <-timeout:
+				return errors.New("timed out waiting for progress")
 			}
 		}
 	}
+	return nil
 }
 
 // TODO(waigani) use typed error
