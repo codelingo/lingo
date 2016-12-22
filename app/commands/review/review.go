@@ -2,9 +2,11 @@ package review
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/cheggaaa/pb"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/lingo/vcs"
@@ -85,7 +87,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	issuesc, messagesc, err := svc.Review(nil, reviewReq)
+	issuesc, messagec, progressc, err := svc.Review(nil, reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
 			return nil, errors.New(noCommitErrMsg)
@@ -93,11 +95,8 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 		return nil, errors.Annotate(err, "\nbad request")
 	}
-
-	// TODO(waigani) these should both be chans - as per firt MVP.
-	var confirmedIssues []*codelingo.Issue
 	go func() {
-		for message := range messagesc {
+		for message := range messagec {
 			//  Currently, the message chan just prints while we're waiting
 			//  for issues. So we don't worry about closing it or timeouts
 			//  etc.
@@ -107,6 +106,10 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 	}()
 
+	showIngestProgress(progressc)
+
+	// TODO(waigani) these should both be chans - as per first MVP.
+	var confirmedIssues []*codelingo.Issue
 	output := opts.SaveToFile == ""
 	cfm, err := NewConfirmer(output, opts.KeepAll, nil)
 	if err != nil {
@@ -135,6 +138,77 @@ l:
 		}
 	}
 	return confirmedIssues, nil
+}
+
+func showIngestProgress(progressc server.Ingestc) error {
+	timeout := time.After(time.Second * 30)
+	var ingestTotal int
+	var ingestComplete bool
+
+	// ingestSteps is how far along the ingest process we are
+	var ingestSteps int
+	var err error
+	select {
+	case progress, ok := <-progressc:
+		if !ok {
+			ingestComplete = true
+			break
+		}
+
+		parts := strings.Split(progress, "/")
+		if len(parts) != 2 {
+			return errors.Errorf("ingest progress has wrong format. Expected n/n got %q", progress)
+		}
+		ingestSteps, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return errors.Trace(err)
+		}
+		ingestTotal, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return errors.Trace(err)
+		}
+	case <-timeout:
+		return errors.New("timed out waiting for ingest to start")
+	}
+
+	if !ingestComplete {
+		// ingest is not complete
+		if ingestSteps < ingestTotal {
+			return ingestBar(ingestSteps, ingestTotal, progressc)
+		}
+	}
+	return nil
+}
+
+func ingestBar(current, total int, progressc server.Ingestc) error {
+	ingestProgress := pb.StartNew(total)
+	var finished bool
+
+	// fast forward to where the ingest is up to.
+	for i := 0; i < current; i++ {
+		if ingestProgress.Increment() == total {
+			ingestProgress.Finish()
+			finished = true
+			break
+		}
+	}
+
+	if !finished {
+	l:
+		for {
+			timeout := time.After(time.Second * 600)
+			select {
+			case _, ok := <-progressc:
+				if ingestProgress.Increment() == total || !ok {
+					ingestProgress.Finish()
+					break l
+				}
+			case <-timeout:
+				return errors.New("timed out waiting for progress")
+			}
+		}
+	}
+	return nil
 }
 
 // TODO(waigani) use typed error
