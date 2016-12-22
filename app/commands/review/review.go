@@ -194,13 +194,14 @@ func ingestBar(current, total int, progressc server.Ingestc) error {
 	}
 
 	if !finished {
+	l:
 		for {
 			timeout := time.After(time.Second * 600)
 			select {
 			case _, ok := <-progressc:
 				if ingestProgress.Increment() == total || !ok {
 					ingestProgress.Finish()
-					break
+					break l
 				}
 			case <-timeout:
 				return errors.New("timed out waiting for progress")

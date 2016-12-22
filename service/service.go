@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -194,7 +193,6 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 	if err != nil {
 		return nil, nil, nil, errors.Trace(err)
 	}
-
 	messageSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-messages", "")
 	if err != nil {
 		return nil, nil, nil, errors.Trace(err)
@@ -233,29 +231,9 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 	go func() {
 		defer close(messagec)
 		defer messageSubscriber.Stop()
-	l:
-		for {
-			select {
-			case msg, ok := <-messageSubc:
-				byt, err := ioutil.ReadAll(msg)
-				if err != nil {
-					sendErrIfErr(err)
-				}
-				if !ok ||
-					isEnd(byt) {
-					// no more messages.
-					break l
-				}
-				fmt.Println(string(byt))
-			case <-time.After(time.Second * 5):
-				break
-			}
-		}
-	}()
-
-	go func() {
 		defer close(issuec)
 		defer issueSubscriber.Stop()
+
 		for {
 			ingestProgress, ok := <-ingestSubc
 			byt, err := ioutil.ReadAll(ingestProgress)
@@ -269,30 +247,47 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 				break
 			}
 		}
-	l:
+		finished := 0
 		for {
+			if finished >= 2 {
+				break
+			}
 			select {
 			case issueMsg, ok := <-issueSubc:
 				byt, err := ioutil.ReadAll(issueMsg)
-				if sendErrIfErr(err) {
-					break l
-				}
-				if !ok || isEnd(byt) {
+				if sendErrIfErr(err) || !ok || isEnd(byt) {
 					// no more issues.
-					break l
+					finished++
+					continue
 				}
 
 				issue := &codelingo.Issue{}
 				if sendErrIfErr(json.Unmarshal(byt, issue)) ||
 					sendErrIfErr(issuec.Send(issue)) ||
 					sendErrIfErr(issueMsg.Done()) {
-					break l
+					return
 				}
 
-			// TODO(waigani) DEMOWARE setting to 600
+			case msg, ok := <-messageSubc:
+				byt, err := ioutil.ReadAll(msg)
+				if sendErrIfErr(err) ||
+					!ok ||
+					isEnd(byt) {
+					// no more messages.
+					finished++
+					continue
+				}
+				// TODO: Process messages
+
+				err = userFacingErrs(errors.New(string(byt)))
+
+				sendErrIfErr(err)
+				sendErrIfErr(msg.Done())
+				// TODO(waigani) DEMOWARE setting to 600
+
 			case <-time.After(time.Second * 600):
 				sendErrIfErr(errors.New("timed out waiting for issues x"))
-				break l
+				return
 			}
 		}
 	}()
@@ -478,7 +473,9 @@ func userFacingErrs(err error) error {
 	// TODO this should be more specific parse error on platform:
 	//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
 	case strings.Contains(message, "expected one of: < ! var indent id"):
-		return errors.New("The match statement is probably ends in a colon")
+		return errors.New("Queries must not be terminated by colons.")
+	case strings.Contains(message, "missing yield"):
+		return errors.New("You must yield a result, put '<' before any fact or property.")
 	default:
 		return errors.Trace(err)
 	}
