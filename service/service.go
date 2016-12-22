@@ -189,7 +189,6 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
-
 	messageSubscriber, err := rabbitmq.NewSubscriber(mqAddress, prefix+"-messages", "")
 	if err != nil {
 		return nil, nil, errors.Trace(err)
@@ -219,26 +218,28 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 		defer close(issuec)
 		defer issueSubscriber.Stop()
 		defer messageSubscriber.Stop()
-	l:
+
+		finished := 0
 		for {
+			if finished >= 2 {
+				break
+			}
 			select {
 			case issueMsg, ok := <-issueSubc:
 				// TODO(waigani) !ok is never used and isEnd is a workarond. A
 				// proper pubsub should close the chan upstream.
 				byt, err := ioutil.ReadAll(issueMsg)
-				if sendErrIfErr(err) {
-					break l
-				}
-				if !ok || isEnd(byt) {
+				if sendErrIfErr(err) || !ok || isEnd(byt) {
 					// no more issues.
-					break l
+					finished++
+					continue
 				}
 
 				issue := &codelingo.Issue{}
 				if sendErrIfErr(json.Unmarshal(byt, issue)) ||
 					sendErrIfErr(issuec.Send(issue)) ||
 					sendErrIfErr(issueMsg.Done()) {
-					break l
+					return
 				}
 
 			case msg, ok := <-messageSubc:
@@ -247,16 +248,19 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 					!ok ||
 					isEnd(byt) {
 					// no more messages.
-					break l
+					finished++
+					continue
 				}
-
 				// TODO: Process messages
-				sendErrIfErr(messagec.Send(string(byt) + "\n"))
+
+				err = userFacingErrs(errors.New(string(byt)))
+
+				sendErrIfErr(err)
 				sendErrIfErr(msg.Done())
 				// TODO(waigani) DEMOWARE setting to 600
 			case <-time.After(time.Second * 600):
 				sendErrIfErr(errors.New("timed out waiting for issues x"))
-				break l
+				return
 			}
 		}
 	}()
@@ -442,7 +446,7 @@ func userFacingErrs(err error) error {
 	// TODO this should be more specific parse error on platform:
 	//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
 	case strings.Contains(message, "expected one of: < ! var indent id"):
-		return errors.New("The match statement is probably ends in a colon")
+		return errors.New("Queries must not be terminated by colons.")
 	default:
 		return errors.Trace(err)
 	}
