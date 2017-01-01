@@ -241,12 +241,14 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 				isEnd(byt) ||
 				sendErrIfErr(ingestc.Send(string(byt))) ||
 				!ok {
+
 				// no more ingestion updates.
 				close(ingestc)
 				ingestSubscriber.Stop()
 				break
 			}
 		}
+
 		finished := 0
 		for {
 			if finished >= 2 {
@@ -277,16 +279,21 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 					finished++
 					continue
 				}
-				// TODO: Process messages
 
-				err = userFacingErrs(errors.New(string(byt)))
+				if err := messagec.Send(string(byt)); err != nil {
+					// yes panic, this is a developer error
+					panic(err.Error())
+				}
 
-				sendErrIfErr(err)
-				sendErrIfErr(msg.Done())
+				// TODO(waigani) This needs refactoring. We don't we know this
+				// is an error at this point.
+				// err = userFacingErrs(errors.New(string(byt)))
+				// sendErrIfErr(err)
+				// sendErrIfErr(msg.Done())
+
 				// TODO(waigani) DEMOWARE setting to 600
-
 			case <-time.After(time.Second * 600):
-				sendErrIfErr(errors.New("timed out waiting for issues x"))
+				sendErrIfErr(errors.New("timed out waiting for issues"))
 				return
 			}
 		}
@@ -466,16 +473,16 @@ func userFacingErrs(err error) error {
 	// make err struct that can be reformed
 	message := err.Error()
 	switch {
-	case strings.Contains(message, "There is no language called:"):
-		lang := strings.Split(message, ":")[3]
+	case strings.Contains(message, "error: There is no language called:"):
+		lang := strings.Split(message, ":")[4]
 		lang = lang[1:]
-		return errors.Errorf("Lingo doesn't support \"%s\" yet", lang)
+		return errors.Errorf("error: Lingo doesn't support \"%s\" yet", lang)
 	// TODO this should be more specific parse error on platform:
 	//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
-	case strings.Contains(message, "expected one of: < ! var indent id"):
-		return errors.New("Queries must not be terminated by colons.")
-	case strings.Contains(message, "missing yield"):
-		return errors.New("You must yield a result, put '<' before any fact or property.")
+	case strings.Contains(message, "error: expected one of: < ! var indent id"):
+		return errors.New("error: Queries must not be terminated by colons.")
+	case strings.Contains(message, "error: missing yield"):
+		return errors.New("error: You must yield a result, put '<' before any fact or property.")
 	default:
 		return errors.Trace(err)
 	}

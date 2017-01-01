@@ -95,18 +95,10 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 		return nil, errors.Annotate(err, "\nbad request")
 	}
-	go func() {
-		for message := range messagec {
-			//  Currently, the message chan just prints while we're waiting
-			//  for issues. So we don't worry about closing it or timeouts
-			//  etc.
-			if message != "" {
-				fmt.Println(string(message))
-			}
-		}
-	}()
 
-	showIngestProgress(progressc)
+	if err := showIngestProgress(progressc, messagec); err != nil {
+		return nil, errors.Trace(err)
+	}
 
 	// TODO(waigani) these should both be chans - as per first MVP.
 	var confirmedIssues []*codelingo.Issue
@@ -133,6 +125,17 @@ l:
 			if cfm.Confirm(0, issue) {
 				confirmedIssues = append(confirmedIssues, issue)
 			}
+		case message := <-messagec:
+			msgStr := string(message)
+			// TODO(waigani) Currently, messagec is a mix of info and errors.
+			// Either create a separate errors channel or use log level constants.
+			if strings.HasPrefix(msgStr, "error") {
+				return nil, errors.New(msgStr)
+			}
+
+			if msgStr != "" {
+				fmt.Println(msgStr)
+			}
 		case <-timeout:
 			return nil, errors.New("timed out waiting for issue")
 		}
@@ -140,7 +143,7 @@ l:
 	return confirmedIssues, nil
 }
 
-func showIngestProgress(progressc server.Ingestc) error {
+func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) error {
 	timeout := time.After(time.Second * 30)
 	var ingestTotal int
 	var ingestComplete bool
@@ -149,6 +152,22 @@ func showIngestProgress(progressc server.Ingestc) error {
 	var ingestSteps int
 	var err error
 	select {
+	case message := <-messagec:
+
+		msgStr := string(message)
+		if msgStr == "queued for ingest" {
+			return errors.New("Queued for Ingest, try again later.")
+		}
+
+		// TODO(waigani) Currently, messagec is a mix of info and errors.
+		// Either create a separate errors channel or use log level constants.
+		if strings.HasPrefix(msgStr, "error") {
+			return errors.New(msgStr)
+		}
+
+		if msgStr != "" {
+			fmt.Println(msgStr)
+		}
 	case progress, ok := <-progressc:
 		if !ok {
 			ingestComplete = true
