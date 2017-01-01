@@ -95,16 +95,6 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 
 		return nil, errors.Annotate(err, "\nbad request")
 	}
-	go func() {
-		for message := range messagec {
-			//  Currently, the message chan just prints while we're waiting
-			//  for issues. So we don't worry about closing it or timeouts
-			//  etc.
-			if message != "" {
-				fmt.Println(string(message))
-			}
-		}
-	}()
 
 	timeout := time.After(time.Second * 30)
 	var ingestTotal int
@@ -113,6 +103,23 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	// ingestSteps is how far along the ingest process we are
 	var ingestSteps int
 	select {
+	case message := <-messagec:
+
+		msgStr := string(message)
+		if msgStr == "queued for ingest" {
+			return nil, errors.New("Queued for Ingest, try again later.")
+		}
+
+		// TODO(waigani) Currently, messagec is a mix of info and errors.
+		// Either create a separate errors channel or use log level constants.
+		if strings.HasPrefix(msgStr, "error") {
+			return nil, errors.New(msgStr)
+		}
+
+		if msgStr != "" {
+			fmt.Println(msgStr)
+		}
+
 	case ping, ok := <-ingestPingc:
 		if !ok {
 			ingestComplete = true
@@ -166,6 +173,17 @@ l:
 			}
 			if cfm.Confirm(0, issue) {
 				confirmedIssues = append(confirmedIssues, issue)
+			}
+		case message := <-messagec:
+			msgStr := string(message)
+			// TODO(waigani) Currently, messagec is a mix of info and errors.
+			// Either create a separate errors channel or use log level constants.
+			if strings.HasPrefix(msgStr, "error") {
+				return nil, errors.New(msgStr)
+			}
+
+			if msgStr != "" {
+				fmt.Println(msgStr)
 			}
 		case <-timeout:
 			return nil, errors.New("timed out waiting for issue")

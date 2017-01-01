@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -246,7 +245,10 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 					// no more messages.
 					break l
 				}
-				fmt.Println(string(byt))
+				if err := messagec.Send(string(byt)); err != nil {
+					// yes panic, this is a developer error
+					panic(err.Error())
+				}
 			case <-time.After(time.Second * 5):
 				break
 			}
@@ -291,7 +293,7 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 
 			// TODO(waigani) DEMOWARE setting to 600
 			case <-time.After(time.Second * 600):
-				sendErrIfErr(errors.New("timed out waiting for issues x"))
+				sendErrIfErr(errors.New("timed out waiting for issues"))
 				break l
 			}
 		}
