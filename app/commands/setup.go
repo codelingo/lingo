@@ -85,9 +85,9 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	authConfig, err := util.AuthConfig()
-	if err != nil {
-		return "", errors.Trace(err)
+	authConfig, authErr := util.AuthConfig()
+	if authErr != nil {
+		return "", errors.Trace(authErr)
 	}
 
 	// recieve generated token from server
@@ -102,20 +102,16 @@ func setupLingo(c *cli.Context) (string, error) {
 	// from authConfig
 	if c.Bool("keep-creds") {
 		if username == "" {
-			username, err = authConfig.Get(gitUsernameCfgPath)
-			if err != nil && !strings.Contains(err.Error(), `"username" not found`) {
-				// TODO(waigani) Check error type
-				errors.Annotate(err, "setup --keep-creds failed.")
-				return "", errors.Trace(err)
+			username, authErr = authConfig.Get(gitUsernameCfgPath)
+			if authErr != nil {
+				return "", errors.Trace(authErr)
 			}
 		}
 
 		if password == "" {
-			password, err = authConfig.Get(gitUserPasswordCfgPath)
-			if err != nil && !strings.Contains(err.Error(), `"password" not found`) {
-				// TODO(waigani) Check error type
-				errors.Annotate(err, "setup --keep-creds failed.")
-				return "", errors.Trace(err)
+			password, authErr = authConfig.Get(gitUserPasswordCfgPath)
+			if authErr != nil {
+				return "", errors.Trace(authErr)
 			}
 		}
 	}
