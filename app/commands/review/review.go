@@ -2,15 +2,14 @@ package review
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/cheggaaa/pb"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/lingo/vcs"
 	"github.com/codelingo/lingo/vcs/backing"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
@@ -87,6 +86,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+
 	issuesc, messagec, progressc, err := svc.Review(nil, reviewReq)
 	if err != nil {
 		if noCommitErr(err) {

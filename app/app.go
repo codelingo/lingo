@@ -2,11 +2,10 @@ package app
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands"
 	"github.com/codelingo/lingo/app/util/common"
+	"strings"
 )
 
 // TODO(waigani) have a global state that tenets can share. An issue may be
