@@ -39,7 +39,7 @@ func init() {
 func listLexiconsAction(ctx *cli.Context) {
 	err := listLexicons(ctx)
 	if err != nil {
-		util.OSErrf(err.Error())
+		util.OSErr(err)
 		return
 	}
 }

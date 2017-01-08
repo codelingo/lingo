@@ -460,30 +460,10 @@ func retry(max int, timeout time.Duration, endpoint endpoint.Endpoint) endpoint.
 			case response := <-responses:
 				return response, nil
 			case err := <-errs:
-				a = append(a, userFacingErrs(err).Error())
+				a = append(a, err.Error())
 				continue
 			}
 		}
 		return nil, errors.New(strings.Join(a, "\n"))
-	}
-}
-
-func userFacingErrs(err error) error {
-	// TODO type matching rather than string matching
-	// make err struct that can be reformed
-	message := err.Error()
-	switch {
-	case strings.Contains(message, "error: There is no language called:"):
-		lang := strings.Split(message, ":")[4]
-		lang = lang[1:]
-		return errors.Errorf("error: Lingo doesn't support \"%s\" yet", lang)
-	// TODO this should be more specific parse error on platform:
-	//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
-	case strings.Contains(message, "error: expected one of: < ! var indent id"):
-		return errors.New("error: Queries must not be terminated by colons.")
-	case strings.Contains(message, "error: missing yield"):
-		return errors.New("error: You must yield a result, put '<' before any fact or property.")
-	default:
-		return errors.Trace(err)
 	}
 }

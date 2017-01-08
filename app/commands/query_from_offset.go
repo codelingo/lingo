@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strconv"
+
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/juju/errors"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 // TODO(BlakeMScurr) usage info should be generated from cli
@@ -33,7 +34,7 @@ func init() {
 func pathFromOffsetAction(ctx *cli.Context) {
 	err := pathFromOffset(ctx)
 	if err != nil {
-		util.OSErrf(err.Error())
+		util.OSErr(err)
 		return
 	}
 }

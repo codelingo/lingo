@@ -2,6 +2,7 @@ package review
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -60,7 +61,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 			return nil, errors.Trace(err)
 		}
 
-		if err := repo.Sync(); err != nil {
+		if err := syncRepo(repo); err != nil {
 			return nil, errors.Trace(err)
 		}
 
@@ -141,6 +142,39 @@ l:
 		}
 	}
 	return confirmedIssues, nil
+}
+
+// sync the local repository with the remote, creating the remote if it does
+// not exist.
+func syncRepo(repo backing.Repo) error {
+
+	if syncErr := repo.Sync(); syncErr != nil {
+
+		// This case is triggered when a local remote has been added but
+		// the remote repo does not exist. In this case, we create the
+		// remote and try to sync again.
+		missingRemote, err := regexp.MatchString("fatal: repository '.*' not found.*", syncErr.Error())
+		if err != nil {
+			return errors.Trace(err)
+		}
+		if missingRemote {
+			_, repoName, err := repo.OwnerAndNameFromRemote()
+			if err != nil {
+				return errors.Trace(err)
+			}
+
+			// TODO(waigani) use typed errors
+			if err := repo.CreateRemote(repoName); err != nil && !strings.HasPrefix(err.Error(), "repository already exists") {
+				return errors.Trace(err)
+			}
+			if err := repo.Sync(); err != nil {
+				return errors.Trace(err)
+			}
+		}
+
+		return errors.Trace(syncErr)
+	}
+	return nil
 }
 
 func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) error {

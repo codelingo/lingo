@@ -33,7 +33,7 @@ var intro = `
 
 func newLingoAction(ctx *cli.Context) {
 	if err := newLingo(ctx); err != nil {
-		util.OSErrf(err.Error())
+		util.OSErr(err)
 		return
 	}
 	fmt.Println("Success! A .lingo file has been written in the current directory. Edit it with your editor of choice to get started writing Tenets.")
