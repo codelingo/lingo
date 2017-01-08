@@ -1,10 +1,12 @@
-hash: 9871d6de781d7d057822ca6334cbff44a4ba829c7d493fd301ff7efaf5ea2428
-updated: 2016-11-17T14:22:36.369276986+13:00
+hash: 49df98f3006295e52c3a10fbf61cf1c05c1b4f6d43781bbd26dbdb9c7a788cd1
+updated: 2017-01-09T12:07:56.131816205+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
+- name: github.com/cheggaaa/pb
+  version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/codegangsta/cli
-  version: a14d7d367bc02b1f57d88de97926727f2d936387
+  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: github.com/codelingo/kit
   version: 27b2194fb0398eb38d86f436cc375f48d32b2850
   subpackages:
@@ -15,17 +17,6 @@ imports:
   - sd
   - sd/lb
   - transport/grpc
-- name: github.com/coreos/go-systemd
-  version: b4a58d95188dd092ae20072bac14cece0e67c388
-  subpackages:
-  - activation
-  - dbus
-  - unit
-  - util
-- name: github.com/davecgh/go-spew
-  version: 6cf5744a041a0022271cefed95ba843f6d87fd51
-  subpackages:
-  - spew
 - name: github.com/docker/docker
   version: cc8b8ce0b3d2d6b3345687464d3a3b1c2c4971ef
   subpackages:
@@ -50,56 +41,25 @@ imports:
 - name: github.com/docker/go-units
   version: 9b001659dd36225e356b4467c465d732e745f53d
 - name: github.com/fatih/color
-  version: dea9d3a26a087187530244679c1cfb3a42937794
+  version: 34e4ee095d12986a2cef5ddb9aeb3b8cfcfea17c
 - name: github.com/fsouza/go-dockerclient
   version: 2ce05b8e04b7475b63ae21c1aeaf72b8a5b05eb5
-- name: github.com/gabriel-samfira/sys
-  version: 9ddc60d56b511544223adecea68da1e4f2153beb
-  subpackages:
-  - windows
-  - windows/registry
-  - windows/svc
-  - windows/svc/mgr
 - name: github.com/go-logfmt/logfmt
   version: d4327190ff838312623b09bfeb50d7c93c8d9c1d
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
-- name: github.com/godbus/dbus
-  version: c7fdd8b5cd55e87b4e1f4e372cdb1db61dd6c66f
 - name: github.com/gogits/go-gogs-client
   version: d8aff570fa22d4e38954c753ec8b21862239b31d
 - name: github.com/golang/protobuf
   version: 98fa357170587e470c5f27d3c3ea0947b71eb455
   subpackages:
   - proto
-  - protoc-gen-go
 - name: github.com/hashicorp/go-cleanhttp
   version: ad28ea4487f05916463e2423a55166280e8254b5
 - name: github.com/juju/errors
   version: 1b5e39b83d1835fa480e0c2ddefb040ee82d58b3
-- name: github.com/juju/juju
-  version: 11682c54646fbe625120c0368b41b3349f04df77
-  subpackages:
-  - agent/tools
-  - cert
-  - controller
-  - feature
-  - juju/osenv
-  - juju/paths
-  - mongo
-  - network
-  - service
-  - service/common
-  - service/systemd
-  - service/upstart
-  - service/windows
-  - tools
 - name: github.com/juju/loggo
   version: 0e0537f18a29c2f0a814dad75b1ccc577852538a
-- name: github.com/juju/replicaset
-  version: fb7294cf57a1e2f08a57691f1246d129a87ab7e8
-- name: github.com/juju/schema
-  version: 29dd021fc4b6a9358065c5a06fbdf66a50a87a95
 - name: github.com/juju/testing
   version: 321edad6b2d1ccac4af9ee05c25b8ad734d40546
   subpackages:
@@ -107,31 +67,15 @@ imports:
 - name: github.com/juju/utils
   version: bdb77b07e7e3f77463d10d2b554cd1b7a78009a2
   subpackages:
-  - arch
   - clock
-  - exec
-  - featureflag
-  - filepath
-  - os
-  - packaging
-  - packaging/commands
-  - packaging/config
-  - packaging/manager
-  - proxy
-  - series
-  - set
-  - shell
-  - symlink
-- name: github.com/juju/version
-  version: 4ae6172c00626779a5a462c3e3d22fc0e889431a
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
-- name: github.com/lightstep/lightstep-tracer-go
-  version: 42c31c53ad6e190563d3a733155a43f10f0691f8
 - name: github.com/mattn/go-colorable
   version: ed8eb9e318d7a84ce5915b495b7d35e0cfe7b5a8
 - name: github.com/mattn/go-isatty
   version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+- name: github.com/mattn/go-runewidth
+  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
 - name: github.com/mitchellh/go-homedir
   version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
 - name: github.com/opencontainers/runc
@@ -139,41 +83,18 @@ imports:
   subpackages:
   - libcontainer/system
   - libcontainer/user
-- name: github.com/opentracing/basictracer-go
-  version: 8d298b35c67ed83c7565d36bd2928b7be8c06ba8
 - name: github.com/opentracing/opentracing-go
   version: a3b886889ac213bb046a3214181207ee865f8f27
-- name: github.com/openzipkin/zipkin-go-opentracing
-  version: a20910139607957cf3a4c0903421e637feebb621
-- name: github.com/pkg/browser
-  version: 9302be274faad99162b9d48ec97b24306872ebb0
-- name: github.com/rogpeppe/fastuuid
-  version: 6724a57986aff9bff1a1770e9347036def7c89f6
 - name: github.com/Sirupsen/logrus
   version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
-- name: github.com/skratchdot/open-golang
-  version: 75fb7ed4208cf72d323d7d02fd1a5964a7a9073c
-  subpackages:
-  - open
-- name: github.com/sourcegraph/appdash
-  version: 26a631f9dd067865f87a885179204f4499a33de3
-  subpackages:
-  - opentracing
 - name: github.com/streadway/amqp
   version: 2e25825abdbd7752ff08b270d313b93519a0a232
 - name: github.com/waigani/diffparser
   version: 42ae6ebdde8d5414cb002ac435c1d6be3f926c32
-- name: github.com/waigani/xxx
-  version: 996d259109d1481f6cb397c495801602216175e2
 - name: golang.org/x/crypto
   version: c197bcf24cde29d3f73c7b4ac6fd41f4384e8af6
   subpackages:
-  - curve25519
-  - nacl/box
-  - nacl/secretbox
   - pbkdf2
-  - poly1305
-  - salsa20/salsa
   - ssh/terminal
 - name: golang.org/x/net
   version: 0d8126fc6144eb5257485c59148128691e8ff849
@@ -191,7 +112,7 @@ imports:
   subpackages:
   - unix
 - name: google.golang.org/grpc
-  version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
+  version: 708a7f9f3283aa2d4f6132d287d78683babe55c8
   subpackages:
   - codes
   - credentials
@@ -200,32 +121,19 @@ imports:
   - metadata
   - naming
   - peer
+  - stats
+  - tap
   - transport
 - name: gopkg.in/check.v1
   version: 4f90aeace3a26ad7021961c297b22c42160c7b25
-- name: gopkg.in/errgo.v1
-  version: 66cb46252b94c1f3d65646f54ee8043ab38d766c
-- name: gopkg.in/juju/names.v2
-  version: fa4c1959bef64b8f18569dc83a85b25d15204503
-- name: gopkg.in/macaroon-bakery.v1
-  version: 469b44e6f1f9479e115c8ae879ef80695be624d5
-  subpackages:
-  - bakery
-  - bakery/checkers
-- name: gopkg.in/macaroon.v1
-  version: d8fd13e6951f2ce46f0964a58149cf2f103cac9a
 - name: gopkg.in/mgo.v2
   version: 01ee097136da162d1dd3c9b44fbdf3abf4fd6552
   subpackages:
   - bson
   - internal/sasl
   - internal/scram
-- name: gopkg.in/tomb.v1
-  version: dd632973f1e7218eb1089048e0798ec9ae7dceb8
 - name: gopkg.in/yaml.v1
   version: 9f9df34309c04878acc86042b16630b0f696e1de
 - name: gopkg.in/yaml.v2
   version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
-- name: sourcegraph.com/sourcegraph/appdash
-  version: ca429ff5af815db4185bbc0ab3984a483eb37ee6
 testImports: []
