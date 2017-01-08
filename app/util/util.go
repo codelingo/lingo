@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/tabwriter"
 
@@ -51,11 +52,38 @@ func OpenFileCmd(editor, filename string, line int64) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func OSErrf(format string, a ...interface{}) {
-	format = fmt.Sprintf("error: %s\n", format)
-	errStr := fmt.Sprintf(format, a...)
-	Stderr.Write([]byte(errStr))
+func OSErr(err error) {
+	Stderr.Write([]byte(userFacingErrMsg(err) + "\n"))
 	Exiter(1)
+}
+
+func userFacingErrMsg(mainErr error) string {
+
+	repoNotFound, err := regexp.Compile("fatal: repository '.*' not found.*")
+	if err != nil {
+		// yes panic, this is a developer error.
+		panic(err)
+	}
+
+	// TODO type matching rather than string matching
+	// make err struct that can be reformed
+	message := mainErr.Error()
+	switch {
+	case repoNotFound.MatchString(message):
+		return "please run `lingo setup`"
+	case strings.Contains(message, "error: There is no language called:"):
+		// TODO(waigani) refactor to use regex
+		lang := strings.Split(message, ":")[4]
+		lang = lang[1:]
+		return fmt.Sprintf("error: Lingo doesn't support \"%s\" yet", lang)
+	// TODO this should be more specific parse error on platform:
+	//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
+	case strings.Contains(message, "error: expected one of: < ! var indent id"):
+		return "error: Queries must not be terminated by colons."
+	case strings.Contains(message, "error: missing yield"):
+		return "error: You must yield a result, put '<' before any fact or property."
+	}
+	return message
 }
 
 // MustLingoHome returns the path to the user's lingo config directory or

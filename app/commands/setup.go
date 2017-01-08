@@ -54,7 +54,7 @@ func init() {
 func setupLingoAction(c *cli.Context) {
 	username, err := setupLingo(c)
 	if err != nil {
-		util.OSErrf(err.Error())
+		util.OSErr(err)
 	}
 
 	fmt.Println("Success! CodeLingo user set to", username)

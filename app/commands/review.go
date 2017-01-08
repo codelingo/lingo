@@ -53,7 +53,10 @@ func init() {
 func reviewAction(ctx *cli.Context) {
 	msg, err := reviewCMD(ctx)
 	if err != nil {
-		util.OSErrf(err.Error())
+
+		// Debugging
+		// print(errors.ErrorStack(err))
+		util.OSErr(err)
 		return
 	}
 
