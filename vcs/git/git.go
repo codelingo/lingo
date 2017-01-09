@@ -195,7 +195,7 @@ func (r *Repo) CurrentCommitId() (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	return out, nil
+	return strings.TrimSpace(out), nil
 }
 
 // TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
@@ -204,7 +204,7 @@ func (r *Repo) CurrentCommitId() (string, error) {
 func gitCMD(args ...string) (out string, err error) {
 	cmd := exec.Command("git", args...)
 	b, err := cmd.CombinedOutput()
-	out = strings.TrimSpace(string(b))
+	out = string(b)
 	return out, errors.Annotate(err, out)
 
 	// TODO(waigani) stdout is empty?

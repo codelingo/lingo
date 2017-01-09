@@ -16,7 +16,11 @@ func (r *Repo) Patches() ([]string, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	patches = append(patches, diffPatch)
+	// Don't add a patch for empty diffs
+	if diffPatch != "" {
+		patches = append(patches, diffPatch)
+	}
+
 	files, err := newFiles()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -76,6 +80,5 @@ func stagedAndUnstagedPatch() (string, error) {
 func newFilePatch(filename string) (string, error) {
 	// TODO(waigani) handle errors.
 	out, _ := gitCMD("diff", "--no-index", "/dev/null", filename)
-	out = strings.TrimSuffix(out, "\n\\ No newline at end of file")
 	return out, nil
 }
