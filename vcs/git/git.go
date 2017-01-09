@@ -195,7 +195,7 @@ func (r *Repo) CurrentCommitId() (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	return out, nil
+	return strings.TrimSpace(out), nil
 }
 
 // TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
