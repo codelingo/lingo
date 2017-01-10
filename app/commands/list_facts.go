@@ -31,7 +31,7 @@ func init() {
 func listFactsAction(ctx *cli.Context) {
 	err := listFacts(ctx)
 	if err != nil {
-		util.OSErrf(err.Error())
+		util.OSErr(err)
 		return
 	}
 }

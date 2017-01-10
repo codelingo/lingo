@@ -478,7 +478,7 @@ func retry(max int, timeout time.Duration, endpoint endpoint.Endpoint) endpoint.
 			case response := <-responses:
 				return response, nil
 			case err := <-errs:
-				a = append(a, userFacingErrs(err).Error())
+				a = append(a, err.Error())
 				continue
 			}
 		}
