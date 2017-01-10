@@ -2,6 +2,7 @@ package review
 
 import (
 	"fmt"
+
 	"regexp"
 	"strconv"
 	"strings"
@@ -88,6 +89,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+
 	issuesc, messagec, progressc, err := svc.Review(nil, reviewReq)
 	if err != nil {
 		if noCommitErr(err) {
