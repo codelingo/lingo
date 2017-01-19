@@ -26,7 +26,7 @@ func init() {
 			},
 			cli.StringFlag{
 				Name:  util.VersionFlg.String(),
-				Usage: "The semantic version of the lexicon. Leave empty for the latest version.",
+				Usage: "The version of the lexicon. Leave empty for the latest version.",
 			},
 		},
 	}, false, versionRq)
@@ -49,8 +49,6 @@ func listFacts(ctx *cli.Context) error {
 	var owner, name, lexicon string
 	if len(ctx.Args()) > 0 {
 		lexicon = ctx.Args()[0]
-	} else {
-		return errors.New("Please specify a properly namespaced lexicon, ie,\nlingo list-facts codelingo/go")
 	}
 
 	if args := strings.Split(lexicon, "/"); len(args) == 2 {
