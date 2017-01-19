@@ -82,6 +82,8 @@ func userFacingErrMsg(mainErr error) string {
 		return "error: Queries must not be terminated by colons."
 	case strings.Contains(message, "error: missing yield"):
 		return "error: You must yield a result, put '<' before any fact or property."
+	case strings.Contains(message, "unknown language"):
+		return "error: Unknown Lexicon"
 	}
 	return message
 }
