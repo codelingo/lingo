@@ -54,9 +54,11 @@ func decodeReviewResponse(ctx context.Context, response interface{}) (interface{
 }
 
 func encodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	lexicon := req.(codelingo.ListFactsRequest).Lexicon
+	listFactsRequest := req.(codelingo.ListFactsRequest)
 	return &codelingo.ListFactsRequest{
-		Lexicon: lexicon,
+		Owner:   listFactsRequest.Owner,
+		Name:    listFactsRequest.Name,
+		Version: listFactsRequest.Version,
 	}, nil
 }
 

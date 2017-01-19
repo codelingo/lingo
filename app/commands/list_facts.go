@@ -3,11 +3,11 @@ package commands
 import (
 	"bytes"
 	"encoding/json"
-
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
+	"strings"
 )
 
 func init() {
@@ -23,6 +23,10 @@ func init() {
 			cli.StringFlag{
 				Name:  util.OutputFlg.String(),
 				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
+			},
+			cli.StringFlag{
+				Name:  util.VersionFlg.String(),
+				Usage: "The version of the lexicon. Leave empty for the latest version.",
 			},
 		},
 	}, false, versionRq)
@@ -42,14 +46,19 @@ func listFacts(ctx *cli.Context) error {
 		return errors.Trace(err)
 	}
 
-	var lexicon string
+	var owner, name, lexicon string
 	if len(ctx.Args()) > 0 {
 		lexicon = ctx.Args()[0]
-	} else {
-		lexicon = "codelingo/golang"
 	}
 
-	facts, err := svc.ListFacts(lexicon)
+	if args := strings.Split(lexicon, "/"); len(args) == 2 {
+		owner = args[0]
+		name = args[1]
+	} else {
+		return errors.New("Please specify a properly namespaced lexicon, ie,\nlingo list-facts codelingo/go")
+	}
+
+	facts, err := svc.ListFacts(owner, name, ctx.String("version"))
 	if err != nil {
 		return errors.Trace(err)
 	}

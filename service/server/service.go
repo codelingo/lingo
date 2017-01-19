@@ -22,7 +22,7 @@ type CodeLingoService interface {
 	Query(src string) (string, error)
 	Review(context.Context, *ReviewRequest) (Issuec, Messagec, Ingestc, error)
 	ListLexicons() ([]string, error)
-	ListFacts(lexicon string) (map[string][]string, error)
+	ListFacts(owner, name, version string) (map[string][]string, error)
 	PathsFromOffset(*PathsFromOffsetRequest) (*PathsFromOffsetResponse, error)
 }
 

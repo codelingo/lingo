@@ -80,6 +80,10 @@ var (
 		"format",
 		"f",
 	}
+	VersionFlg = flagName{
+		"version",
+		"v",
+	}
 )
 
 func (f *flagName) String() string {

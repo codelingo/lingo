@@ -33,9 +33,11 @@ func EncodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (inter
 }
 
 func DecodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	lexicon := req.(*codelingo.ListFactsRequest).Lexicon
+	listFactsRequest := req.(*codelingo.ListFactsRequest)
 	return &codelingo.ListFactsRequest{
-		Lexicon: lexicon,
+		Owner:   listFactsRequest.Owner,
+		Name:    listFactsRequest.Name,
+		Version: listFactsRequest.Version,
 	}, nil
 }
 

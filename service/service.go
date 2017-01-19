@@ -90,9 +90,11 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
-func (c client) ListFacts(lexicon string) (map[string][]string, error) {
+func (c client) ListFacts(owner, name, version string) (map[string][]string, error) {
 	request := codelingo.ListFactsRequest{
-		Lexicon: lexicon,
+		Owner:   owner,
+		Name:    name,
+		Version: version,
 	}
 	reply, err := c.endpoints["listfacts"](c.Context, request)
 	if err != nil {
