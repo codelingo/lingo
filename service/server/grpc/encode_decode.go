@@ -32,6 +32,18 @@ func EncodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (inter
 	return response, nil
 }
 
+func DecodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	return &codelingo.ListLexiconsRequest{}, nil
+}
+
+func EncodeListLexiconsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	lexicons := resp.(codelingo.ListLexiconsReply).Lexicons
+	return &codelingo.ListLexiconsReply{
+		Lexicons: lexicons,
+	}, nil
+	return &codelingo.ListLexiconsReply{}, nil
+}
+
 func DecodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	listFactsRequest := req.(*codelingo.ListFactsRequest)
 	return &codelingo.ListFactsRequest{
@@ -48,16 +60,32 @@ func EncodeListFactsResponse(ctx context.Context, resp interface{}) (interface{}
 	}, nil
 }
 
-func DecodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	return &codelingo.ListLexiconsRequest{}, nil
+func DecodeDescribeFactRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	request := req.(*codelingo.DescribeFactRequest)
+	return &server.DescribeFactRequest{
+		Owner:   request.Owner,
+		Name:    request.Name,
+		Version: request.Version,
+		Fact:    request.Fact,
+	}, nil
 }
 
-func EncodeListLexiconsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
-	lexicons := resp.(codelingo.ListLexiconsReply).Lexicons
-	return &codelingo.ListLexiconsReply{
-		Lexicons: lexicons,
+func EncodeDescribeFactResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	response := resp.(server.DescribeFactResponse)
+
+	properties := []*codelingo.Property{}
+	for _, prop := range response.Properties {
+		properties = append(properties, &codelingo.Property{
+			Name:        prop.Name,
+			Description: prop.Description,
+		})
+	}
+
+	return &codelingo.DescribeFactReply{
+		Examples:    response.Examples,
+		Description: response.Description,
+		Properties:  properties,
 	}, nil
-	return &codelingo.ListLexiconsReply{}, nil
 }
 
 func DecodeSessionRequest(ctx context.Context, req interface{}) (interface{}, error) {

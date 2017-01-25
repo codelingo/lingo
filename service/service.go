@@ -6,14 +6,15 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	endpointCtx "golang.org/x/net/context"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	endpointCtx "golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/codelingo/kit/sd"
 	"github.com/codelingo/lingo/app/util/common/config"
@@ -90,6 +91,16 @@ func (c client) Query(clql string) (string, error) {
 	return r.Result, nil
 }
 
+func (c client) ListLexicons() ([]string, error) {
+	request := codelingo.ListLexiconsRequest{}
+	reply, err := c.endpoints["listlexicons"](c.Context, request)
+	if err != nil {
+		return nil, err
+	}
+	r := reply.(*codelingo.ListLexiconsReply)
+	return r.Lexicons, nil
+}
+
 func (c client) ListFacts(owner, name, version string) (map[string][]string, error) {
 	request := codelingo.ListFactsRequest{
 		Owner:   owner,
@@ -107,14 +118,20 @@ func (c client) ListFacts(owner, name, version string) (map[string][]string, err
 
 }
 
-func (c client) ListLexicons() ([]string, error) {
-	request := codelingo.ListLexiconsRequest{}
-	reply, err := c.endpoints["listlexicons"](c.Context, request)
+func (c client) DescribeFact(owner, name, version, fact string) (*server.DescribeFactResponse, error) {
+	request := server.DescribeFactRequest{
+		Owner:   owner,
+		Name:    name,
+		Version: version,
+		Fact:    fact,
+	}
+
+	reply, err := c.endpoints["describefact"](c.Context, request)
 	if err != nil {
 		return nil, err
 	}
-	r := reply.(*codelingo.ListLexiconsReply)
-	return r.Lexicons, nil
+	response := reply.(*server.DescribeFactResponse)
+	return response, nil
 }
 
 func (c client) PathsFromOffset(request *server.PathsFromOffsetRequest) (*server.PathsFromOffsetResponse, error) {
@@ -403,6 +420,7 @@ func New() (server.CodeLingoService, error) {
 	listFactsFactory := grpcclient.MakeListFactsEndpointFactory(tracer, tracingLogger, tlsOpt)
 	listLexiconsFactory := grpcclient.MakeListLexiconsEndpointFactory(tracer, tracingLogger, tlsOpt)
 	pathsFromOffsetFactory := grpcclient.MakePathsFromOffsetEndpointFactory(tracer, tracingLogger, tlsOpt)
+	describeFactFactory := grpcclient.MakeDescribeFactEndpointFactory(tracer, tracingLogger, tlsOpt)
 
 	return client{
 		Context: context.Background(),
@@ -415,6 +433,7 @@ func New() (server.CodeLingoService, error) {
 			"listfacts":       buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
 			"listlexicons":    buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
 			"pathsfromoffset": buildEndpoint(tracer, "pathsfromoffset", instances, pathsFromOffsetFactory, randomSeed, logger),
+			"describefact":    buildEndpoint(tracer, "describefact", instances, describeFactFactory, randomSeed, logger),
 		},
 	}, nil
 }

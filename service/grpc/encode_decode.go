@@ -53,6 +53,17 @@ func decodeReviewResponse(ctx context.Context, response interface{}) (interface{
 	return server.ReviewResponse{}, nil
 }
 
+func encodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	return &codelingo.ListLexiconsRequest{}, nil
+}
+
+func decodeListLexiconsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	lexicons := resp.(*codelingo.ListLexiconsReply).Lexicons
+	return &codelingo.ListLexiconsReply{
+		Lexicons: lexicons,
+	}, nil
+}
+
 func encodeListFactsRequest(ctx context.Context, req interface{}) (interface{}, error) {
 	listFactsRequest := req.(codelingo.ListFactsRequest)
 	return &codelingo.ListFactsRequest{
@@ -76,16 +87,32 @@ func decodeListFactsResponse(ctx context.Context, resp interface{}) (interface{}
 	return factList, nil
 }
 
-func encodeListLexiconsRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	return &codelingo.ListLexiconsRequest{}, nil
+func encodeDescribeFactRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	request := req.(server.DescribeFactRequest)
+	return &codelingo.DescribeFactRequest{
+		Owner:   request.Owner,
+		Name:    request.Name,
+		Version: request.Version,
+		Fact:    request.Fact,
+	}, nil
 }
 
-func decodeListLexiconsResponse(ctx context.Context, resp interface{}) (interface{}, error) {
-	lexicons := resp.(*codelingo.ListLexiconsReply).Lexicons
-	return &codelingo.ListLexiconsReply{
-		Lexicons: lexicons,
+func decodeDescribeFactResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	response := resp.(*codelingo.DescribeFactReply)
+
+	properties := []server.Property{}
+	for _, prop := range response.Properties {
+		properties = append(properties, server.Property{
+			Name:        prop.Name,
+			Description: prop.Description,
+		})
+	}
+
+	return &server.DescribeFactResponse{
+		Examples:    response.Examples,
+		Description: response.Description,
+		Properties:  properties,
 	}, nil
-	return &codelingo.ListLexiconsReply{}, nil
 }
 
 func encodePathsFromOffsetRequest(ctx context.Context, req interface{}) (interface{}, error) {

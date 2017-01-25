@@ -62,6 +62,21 @@ func MakeReviewEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logg
 	}
 }
 
+func MakeListLexiconsEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger, opt grpc.DialOption) sd.Factory {
+	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
+		cc, err := grpc.Dial(instance, opt)
+		return grpctransport.NewClient(
+			cc,
+			"codelingo.CodeLingo",
+			"ListLexicons",
+			encodeListLexiconsRequest,
+			decodeListLexiconsResponse,
+			codelingo.ListLexiconsReply{},
+			// grpctransport.SetClientBefore(kitot.ToGRPCRequest(tracer, tracingLogger)),
+		).Endpoint(), cc, errors.Trace(err)
+	}
+}
+
 func MakeListFactsEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger, opt grpc.DialOption) sd.Factory {
 	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
 		cc, err := grpc.Dial(instance, opt)
@@ -77,16 +92,16 @@ func MakeListFactsEndpointFactory(tracer opentracing.Tracer, tracingLogger log.L
 	}
 }
 
-func MakeListLexiconsEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger, opt grpc.DialOption) sd.Factory {
+func MakeDescribeFactEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logger, opt grpc.DialOption) sd.Factory {
 	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
 		cc, err := grpc.Dial(instance, opt)
 		return grpctransport.NewClient(
 			cc,
 			"codelingo.CodeLingo",
-			"ListLexicons",
-			encodeListLexiconsRequest,
-			decodeListLexiconsResponse,
-			codelingo.ListLexiconsReply{},
+			"DescribeFact",
+			encodeDescribeFactRequest,
+			decodeDescribeFactResponse,
+			codelingo.DescribeFactReply{},
 			// grpctransport.SetClientBefore(kitot.ToGRPCRequest(tracer, tracingLogger)),
 		).Endpoint(), cc, errors.Trace(err)
 	}
