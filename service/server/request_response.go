@@ -76,3 +76,21 @@ type ReviewRequest struct {
 
 // ReviewResponse is the business domain type for a Review method response.
 type ReviewResponse struct{}
+
+type DescribeFactRequest struct {
+	Owner   string
+	Name    string
+	Version string
+	Fact    string
+}
+
+type DescribeFactResponse struct {
+	Examples    string
+	Description string
+	Properties  []Property
+}
+
+type Property struct {
+	Name        string
+	Description string
+}
