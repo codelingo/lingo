@@ -40,8 +40,14 @@ func (mc Messagec) Send(msgFmt string, vars ...interface{}) error {
 func (ingc Ingestc) Send(s string) error {
 	select {
 	case ingc <- s:
-	case <-time.After(time.Second * 5):
-		return errors.New("timeout Ingestc.Send")
+	default:
+		// TODO(waigani) DEMOWARE, when first ingest is diff, base ingest is
+		// ingested first then patch. The patch ingest times out trying to
+		// send ingestc. To avoid this, we make sending non-blocking. Correct
+		// fix is to combine ingest progress bar for both
+
+		// case <-time.After(time.Second * 5):
+		// 	return errors.New("timeout Ingestc.Send")
 	}
 	return nil
 }
