@@ -54,6 +54,26 @@ service CodeLingo {
 
   rpc PathsFromOffset (PathsFromOffsetRequest) returns (PathsFromOffsetReply) {}
 
+  rpc DescribeFact (DescribeFactRequest) returns (DescribeFactReply) {}
+
+}
+
+message DescribeFactRequest {
+  string owner = 1;
+  string name = 2;
+  string version = 3;
+  string fact = 4;
+}
+
+message DescribeFactReply {
+  string description = 1;
+  string examples = 2;
+  repeated Property properties = 3;
+}
+
+message Property {
+  string name = 1;
+  string description = 2;
 }
 
 message PathsFromOffsetRequest {

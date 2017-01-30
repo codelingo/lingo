@@ -24,6 +24,7 @@ type CodeLingoService interface {
 	ListLexicons() ([]string, error)
 	ListFacts(owner, name, version string) (map[string][]string, error)
 	PathsFromOffset(*PathsFromOffsetRequest) (*PathsFromOffsetResponse, error)
+	DescribeFact(owner, name, version, fact string) (*DescribeFactResponse, error)
 }
 
 func (mc Messagec) Send(msgFmt string, vars ...interface{}) error {
