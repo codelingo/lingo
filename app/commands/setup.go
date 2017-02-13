@@ -7,16 +7,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/crypto/ssh/terminal"
-
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
-
-	"github.com/codelingo/lingo/service/config"
-	"github.com/juju/errors"
 
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
+	"github.com/codelingo/lingo/service/config"
+	"github.com/howeyc/gopass"
+	"github.com/juju/errors"
 )
 
 // TODO(waigani) add a quick-start cmd with --dry-run flag that: inits git,
@@ -137,7 +135,7 @@ func setupLingo(c *cli.Context) (string, error) {
 
 	if password == "" {
 		fmt.Print("Enter User-Token:")
-		byt, err := terminal.ReadPassword(0)
+		byt, err := gopass.GetPasswd()
 		if err != nil {
 			return "", errors.Trace(err)
 		}
