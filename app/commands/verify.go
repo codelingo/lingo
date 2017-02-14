@@ -227,20 +227,20 @@ func verifyConfig() error {
 	return nil
 }
 
-func verifyClientVersion() error {
+const missingConfigError string = "Could not get %s config. Please run `lingo setup`."
 
+func verifyClientVersion() error {
 	updateNeededErr := errors.New("Update required. Please run `$ lingo update`.")
 	cfg, err := utilConfig.Version()
 	if err != nil {
 		// TODO(waigani) don't throw error away before checking type.
-		return updateNeededErr
+		return errors.New(fmt.Sprintf(missingConfigError, "version"))
 	}
 
 	version, err := cfg.ClientVersion()
 	if err != nil {
-
 		// TODO(waigani) don't throw error away before checking type.
-		return updateNeededErr
+		return errors.New(fmt.Sprintf(missingConfigError, "client version"))
 	}
 	// TODO: Use `hashicorp/go-version` package for comparing and setting semvers
 	// https://github.com/hashicorp/go-version

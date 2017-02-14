@@ -1,5 +1,5 @@
 hash: 49df98f3006295e52c3a10fbf61cf1c05c1b4f6d43781bbd26dbdb9c7a788cd1
-updated: 2017-01-25T17:18:40.412698768+13:00
+updated: 2017-01-31T14:50:13.408828888+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -76,6 +76,8 @@ imports:
   - proto
 - name: github.com/hashicorp/go-cleanhttp
   version: ad28ea4487f05916463e2423a55166280e8254b5
+- name: github.com/howeyc/gopass
+  version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
 - name: github.com/juju/errors
   version: 1b5e39b83d1835fa480e0c2ddefb040ee82d58b3
 - name: github.com/juju/juju

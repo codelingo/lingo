@@ -129,7 +129,7 @@ all:
   gitserver:
     remote:
       name: "codelingo"
-      protocol: "http"
+      protocol: "https"
       host: "codelingo.io"
       port: "3030"
   messagequeue:
