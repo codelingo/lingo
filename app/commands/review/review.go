@@ -100,7 +100,11 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	}
 
 	if err := showIngestProgress(progressc, messagec); err != nil {
-		return nil, errors.Trace(err)
+		if strings.Contains(err.Error(), "timed out waiting for ingest to start") {
+			fmt.Println("Queued for ingest")
+		} else {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	// TODO(waigani) these should both be chans - as per first MVP.
