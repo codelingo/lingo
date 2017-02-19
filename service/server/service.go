@@ -30,6 +30,7 @@ type CodeLingoService interface {
 func (mc Messagec) Send(msgFmt string, vars ...interface{}) error {
 	select {
 	case mc <- Message(fmt.Sprintf(msgFmt, vars...)):
+
 	case <-time.After(time.Second * 5):
 		// TODO(waigani) error type
 		return errors.New("timeout Messagec.Send: " + fmt.Sprintf(msgFmt, vars...))
