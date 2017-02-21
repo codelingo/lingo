@@ -117,6 +117,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if opts.KeepAll {
 		timeout = time.After(time.Second * 30)
 	}
+
 l:
 	for {
 		select {

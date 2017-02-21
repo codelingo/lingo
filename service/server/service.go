@@ -55,7 +55,7 @@ func (ingc Ingestc) Send(s string) error {
 func (issc Issuec) Send(issue *codelingo.Issue) error {
 	select {
 	case issc <- issue:
-	case <-time.After(time.Second * 30):
+	case <-time.After(time.Hour * 1):
 		// TODO(waigani) error type
 		return errors.New("timeout")
 	}
