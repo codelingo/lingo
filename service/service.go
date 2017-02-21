@@ -256,18 +256,34 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 		defer close(issuec)
 		defer issueSubscriber.Stop()
 
+	l:
 		for {
-			ingestProgress, ok := <-ingestSubc
-			byt, err := ioutil.ReadAll(ingestProgress)
-			if sendErrIfErr(err) ||
-				isEnd(byt) ||
-				sendErrIfErr(ingestc.Send(string(byt))) ||
-				!ok {
+			select {
+			case ingestProgress, ok := <-ingestSubc:
+				byt1, err := ioutil.ReadAll(ingestProgress)
+				if sendErrIfErr(err) ||
+					isEnd(byt1) ||
+					sendErrIfErr(ingestc.Send(string(byt1))) ||
+					!ok {
 
-				// no more ingestion updates.
-				close(ingestc)
-				ingestSubscriber.Stop()
-				break
+					// no more ingestion updates.
+					close(ingestc)
+					ingestSubscriber.Stop()
+					break l
+				}
+
+			case msg, ok := <-messageSubc:
+				byt, err := ioutil.ReadAll(msg)
+				if sendErrIfErr(err) ||
+					!ok || isEnd(byt) {
+					// no more messages.
+					continue
+				}
+
+				if err := messagec.Send(string(byt)); err != nil {
+					// yes panic, this is a developer error
+					panic(err.Error())
+				}
 			}
 		}
 

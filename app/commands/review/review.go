@@ -117,7 +117,6 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	if opts.KeepAll {
 		timeout = time.After(time.Second * 30)
 	}
-
 l:
 	for {
 		select {
@@ -189,9 +188,13 @@ func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) erro
 	var err error
 	select {
 	case message := <-messagec:
-
 		msgStr := string(message)
-		if msgStr == "queued for ingest" {
+
+		// TODO(junyu) Currently, we are receiving queue messages from
+		// message channel to inform user about the queue and let them
+		// wait in line. Ideally, we should allow parallel tree ingestion
+		// so that the process can start immediately.
+		if msgStr == "Queue not empty" {
 			return errors.New("Queued for Ingest, try again later.")
 		}
 
