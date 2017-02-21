@@ -131,6 +131,7 @@ func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, err
 		Vcs:           reviewRequest.Vcs,
 		Dotlingo:      reviewRequest.Dotlingo,
 		PullRequestID: int(reviewRequest.PullRequestID),
+		Dir:           reviewRequest.Dir,
 	}, nil
 }
 

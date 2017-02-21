@@ -144,6 +144,7 @@ message ReviewRequest {
   int64 pullRequestID = 9;
   string vcs = 10;
   string dotlingo = 11;
+  string dir = 13;
 }
 
 // Empty, we use the control queue once a review is started

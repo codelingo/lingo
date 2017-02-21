@@ -12,6 +12,7 @@ type Repo interface {
 	Exists(name string) (bool, error)
 	OwnerAndNameFromRemote() (string, string, error)
 	AssertNotTracked() error
+	WorkingDir() (string, error)
 }
 
 const (

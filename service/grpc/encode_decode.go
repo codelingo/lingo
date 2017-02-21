@@ -46,6 +46,7 @@ func encodeReviewRequest(ctx context.Context, request interface{}) (interface{},
 		PullRequestID: int64(req.PullRequestID),
 		Vcs:           req.Vcs,
 		Dotlingo:      req.Dotlingo,
+		Dir:           req.Dir,
 	}, nil
 }
 
