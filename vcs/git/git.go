@@ -198,6 +198,23 @@ func (r *Repo) CurrentCommitId() (string, error) {
 	return strings.TrimSpace(out), nil
 }
 
+// WorkingDir returns a string representing the user's current directory in the format of the
+// it will be represented in the store plus a trailing "/"
+func (r *Repo) WorkingDir() (string, error) {
+	dir, err := gitCMD("rev-parse", "--show-prefix")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	dir = strings.Replace(dir, "\n", "", -1)
+
+	if dir != "." {
+		dir = "./" + dir
+	}
+
+	return dir, nil
+}
+
 // TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
 // by any git command-line actions
 

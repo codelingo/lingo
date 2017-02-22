@@ -72,6 +72,8 @@ type ReviewRequest struct {
 	Vcs string
 
 	Dotlingo string
+
+	Dir string
 }
 
 // ReviewResponse is the business domain type for a Review method response.

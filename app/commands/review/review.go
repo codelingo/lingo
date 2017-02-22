@@ -71,6 +71,11 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 			return nil, errors.Trace(err)
 		}
 
+		dir, err := repo.WorkingDir()
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
 		reviewReq = &server.ReviewRequest{
 			Host:         "local",
 			Owner:        owner,
@@ -80,6 +85,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 			Patches:      patches,
 			// TODO(waigani) make this a CLI flag
 			Recursive: true,
+			Dir:       dir,
 		}
 	}
 
