@@ -15,9 +15,11 @@ import (
 	endpointCtx "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
 
 	"github.com/codelingo/kit/sd"
 	"github.com/codelingo/lingo/app/util/common/config"
+	"github.com/codelingo/lingo/service/serviceLogger"
 	"github.com/juju/errors"
 
 	"github.com/opentracing/opentracing-go"
@@ -417,6 +419,10 @@ func New() (server.CodeLingoService, error) {
 	// 		os.Exit(1)
 	// 	}
 	// }
+
+	// Setup a logger to catch the grpc disconnecting logs and replace with user friendly ones
+	grpclog.SetLogger(serviceLogger.New())
+
 	var tlsOpt grpc.DialOption
 	if os.Getenv("CODELINGO_ENV") == "dev" {
 		tlsOpt = grpc.WithInsecure()
@@ -464,7 +470,6 @@ type grpcOptions struct {
 // patterns.
 func buildEndpoint(tracer opentracing.Tracer, operationName string, instances []string, factory sd.Factory, seed int64, logger log.Logger) endpoint.Endpoint {
 	// publisher := static.NewPublisher(instances, factory, logger)
-
 	var endpoints []endpoint.Endpoint
 	for _, inst := range instances {
 		ep, closer, err := factory(inst)
@@ -503,8 +508,13 @@ func retry(max int, timeout time.Duration, endpoint endpoint.Endpoint) endpoint.
 			go func() {
 				response, err := endpoint(newctx, request)
 				if err != nil {
-					errs <- err
-					return
+					// TODO (junyu) this should use error type instead of string comparison
+					if strings.Contains(err.Error(), "grpc: the connection is unavailable") {
+						return
+					} else {
+						errs <- err
+						return
+					}
 				}
 				responses <- response
 			}()
