@@ -55,10 +55,17 @@ func checkPatch(patch string) error {
 }
 
 func newFiles() ([]string, error) {
-	out, err := gitCMD("ls-files", "--others", "--exclude-standard")
+	repoRoot, err := repoRoot()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+
+	out, err := gitCMD("-C", repoRoot, "ls-files", "--others", "--exclude-standard")
+	if err != nil {
+
+		return nil, errors.Trace(err)
+	}
+
 	var files []string
 	for _, file := range strings.Split(out, "\n") {
 		if file != "" {
@@ -78,7 +85,19 @@ func stagedAndUnstagedPatch() (string, error) {
 }
 
 func newFilePatch(filename string) (string, error) {
+	repoRoot, err := repoRoot()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
 	// TODO(waigani) handle errors.
-	out, _ := gitCMD("diff", "--no-index", "/dev/null", filename)
+	out, _ := gitCMD("-C", repoRoot, "diff", "--no-index", "/dev/null", filename)
 	return out, nil
+}
+
+func repoRoot() (string, error) {
+	repoRoot, err := gitCMD("rev-parse", "--show-toplevel")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return strings.TrimSuffix(repoRoot, "\n"), nil
 }

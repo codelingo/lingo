@@ -117,12 +117,12 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	format := ctx.String("format")
 	switch format {
 	case "json":
-		data, err = json.Marshal(issues) //json.Marshal(issues)
+		data, err = json.Marshal(issues)
 		if err != nil {
 			return "", errors.Trace(err)
 		}
 	case "json-pretty":
-		data, err = json.MarshalIndent(issues, " ", " ") //json.Marshal(issues)
+		data, err = json.MarshalIndent(issues, " ", " ")
 		if err != nil {
 			return "", errors.Trace(err)
 		}

@@ -51,3 +51,7 @@ func (mockrepo *Repo) OwnerAndNameFromRemote() (string, string, error) {
 func (mockrepo *Repo) AssertNotTracked() error {
 	return nil
 }
+
+func (mockrepo *Repo) WorkingDir() (string, error) {
+	return "", nil
+}
