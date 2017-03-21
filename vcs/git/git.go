@@ -66,7 +66,6 @@ func gogsClientForCurrentUser() (*gogs.Client, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-
 	return gogs.NewClient(addr, token), nil
 }
 
@@ -164,7 +163,6 @@ func (r *Repo) CreateRemote(name string) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-
 	_, err = gogsClient.CreateRepo(gogs.CreateRepoOption{
 		Name:     name,
 		Private:  true,

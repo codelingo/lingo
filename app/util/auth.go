@@ -33,6 +33,11 @@ func CreateAuthConfig() (*config.Config, error) {
 			return nil, errors.Trace(err)
 		}
 	}
+	if err := cfg.Set("onprem.gitserver.credentials_filename", "git-credentials-onprem"); err != nil {
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
 	if err := cfg.Set("test.gitserver.credentials_filename", "git-credentials-test"); err != nil {
 		if err != nil {
 			return nil, errors.Trace(err)
