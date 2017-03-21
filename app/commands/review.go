@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -24,13 +25,31 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:        "review",
-		Usage:       "review code following tenets in .lingo",
+		Usage:       "review code following tenets in .lingo.",
 		Subcommands: cli.Commands{*pullRequestCmd},
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  util.LingoFile.String(),
-				Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
+				Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed",
 			},
+			cli.StringFlag{
+				Name:  util.DiffFlg.String(),
+				Usage: "Review only unstaged changes in the working tree",
+			},
+			cli.StringFlag{
+				Name:  util.OutputFlg.String(),
+				Usage: "File to save found issues to",
+			},
+			cli.StringFlag{
+				Name:  util.FormatFlg.String(),
+				Value: "json-pretty",
+				Usage: "How to format the found issues. Possible values are: json, json-pretty",
+			},
+			cli.BoolFlag{
+				Name:  util.InteractiveFlg.String(),
+				Usage: "Be prompted to confirm each issue",
+			},
+
 			// cli.BoolFlag{
 			// 	Name:  "all",
 			// 	Usage: "review all files under all directories from pwd down",
@@ -80,8 +99,8 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	opts := review.Options{
 		FilesAndDirs: ctx.Args(),
 		Diff:         ctx.Bool("diff"),
-		SaveToFile:   ctx.String("save"),
-		KeepAll:      ctx.Bool("keep-all"),
+		SaveToFile:   ctx.String("output"),
+		KeepAll:      !ctx.Bool("interactive"),
 		DotLingo:     dotlingo,
 	}
 
@@ -90,7 +109,36 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	return fmt.Sprintf("Done! Found %d issues \n", len(issues)), nil
+	if len(issues) == 0 {
+		return fmt.Sprintf("Done! No issues found.\n"), nil
+	}
+
+	var data []byte
+	format := ctx.String("format")
+	switch format {
+	case "json":
+		data, err = json.Marshal(issues) //json.Marshal(issues)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+	case "json-pretty":
+		data, err = json.MarshalIndent(issues, " ", " ") //json.Marshal(issues)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+	default:
+		return "", errors.Errorf("Unknown format %q", format)
+	}
+
+	if outputFile := opts.SaveToFile; outputFile != "" {
+		err = ioutil.WriteFile(outputFile, data, 0775)
+		if err != nil {
+			return "", errors.Annotate(err, "Error writing issues to file")
+		}
+		return fmt.Sprintf("Done! %d issues written to %s \n", len(issues), outputFile), nil
+	}
+
+	return string(data), nil
 }
 
 func readDotLingo(ctx *cli.Context) (string, error) {

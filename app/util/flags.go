@@ -68,10 +68,6 @@ var (
 		"registry",
 		"r",
 	}
-	DriverFlg = flagName{
-		"driver",
-		"i",
-	}
 	LingoFile = flagName{
 		"lingo-file",
 		"lf",
@@ -83,6 +79,10 @@ var (
 	VersionFlg = flagName{
 		"version",
 		"v",
+	}
+	InteractiveFlg = flagName{
+		"interactive",
+		"i",
 	}
 )
 
