@@ -16,6 +16,7 @@ import (
 
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
+	"github.com/briandowns/spinner"
 )
 
 const noCommitErrMsg = "This looks like a new repository. Please make an initial commit before running `lingo review`. This is only required for the initial commit, subsequent changes to your repo will be picked up by lingo without committing."
@@ -109,6 +110,11 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		return nil, errors.Trace(err)
 	}
 
+	// Ingest complete; show query spinner
+	fmt.Println("Reviewing... ")
+	spnr := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	spnr.Start()
+
 	// TODO(waigani) these should both be chans - as per first MVP.
 	var confirmedIssues []*codelingo.Issue
 	output := opts.SaveToFile == ""
@@ -128,6 +134,9 @@ l:
 	for {
 		select {
 		case issue, ok := <-issuesc:
+			if !opts.KeepAll {
+				spnr.Stop()
+			}
 			if !ok {
 				break l
 			}
@@ -149,6 +158,12 @@ l:
 			return nil, errors.New("timed out waiting for issue")
 		}
 	}
+
+	// Stop spinner if it hasn't been stopped already
+	if opts.KeepAll {
+		spnr.Stop()
+	}
+
 	return confirmedIssues, nil
 }
 
