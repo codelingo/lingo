@@ -193,6 +193,8 @@ func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) erro
 	// ingestSteps is how far along the ingest process we are
 	var ingestSteps int
 	var err error
+	fmt.Println("Ingesting...")
+
 	select {
 	case message := <-messagec:
 		msgStr := string(message)
