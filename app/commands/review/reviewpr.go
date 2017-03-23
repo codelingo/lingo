@@ -28,7 +28,7 @@ func parseGithubPR(urlStr string) (*PROpts, error) {
 
 	parts := strings.Split(strings.Trim(result.Path, "/"), "/")
 	if l := len(parts); l != 4 {
-		return nil, errors.Errorf("pull request URL path should have four parts, found %d", l)
+		return nil, errors.Errorf("pull request URL needs to be in the following format: https://github.com/<username>/<repo_name>/pull/<pull_number>")
 	}
 
 	n, err := strconv.Atoi(parts[3])
