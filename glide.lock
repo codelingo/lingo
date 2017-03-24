@@ -1,10 +1,10 @@
-hash: 49df98f3006295e52c3a10fbf61cf1c05c1b4f6d43781bbd26dbdb9c7a788cd1
-updated: 2017-02-27T12:03:22.948621433+13:00
+hash: 018146e6596837aaed2f466be0e86ae80da0f51fef702315d7d02064e94c5601
+updated: 2017-03-23T17:01:50.189779226+13:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
 - name: github.com/briandowns/spinner
-  version: 2c70630b7d7509ebda5365704ee6bb25e69b64ec
+  version: ec599f41a86d9a71c359e224bd71a2df3e909a3d
 - name: github.com/cheggaaa/pb
   version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/codegangsta/cli
@@ -43,7 +43,7 @@ imports:
 - name: github.com/docker/go-units
   version: 9b001659dd36225e356b4467c465d732e745f53d
 - name: github.com/fatih/color
-  version: 7824417a424b65227be8ac9b14d545a7f3e6c3f0
+  version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
 - name: github.com/fsouza/go-dockerclient
   version: 2ce05b8e04b7475b63ae21c1aeaf72b8a5b05eb5
 - name: github.com/go-logfmt/logfmt
@@ -78,7 +78,7 @@ imports:
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
   repo: https://github.com/mattn/go-colorable
 - name: github.com/mattn/go-isatty
-  version: dda3de49cbfcec471bd7a70e6cc01fcc3ff90109
+  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
   repo: https://github.com/mattn/go-isatty
 - name: github.com/mattn/go-runewidth
   version: 737072b4e32b7a5018b4a7125da8d12de90e8045

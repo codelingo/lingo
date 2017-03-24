@@ -36,7 +36,6 @@ import (
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 
 	"github.com/codelingo/lingo/service/grpc/codelingo"
-
 	// kitot "github.com/codelingo/kit/tracing/opentracing"
 
 	"github.com/codelingo/lingo/service/server"
@@ -422,9 +421,16 @@ func New() (server.CodeLingoService, error) {
 
 	// Setup a logger to catch the grpc disconnecting logs and replace with user friendly ones
 	grpclog.SetLogger(serviceLogger.New())
-
 	var tlsOpt grpc.DialOption
-	if os.Getenv("CODELINGO_ENV") == "dev" {
+	platCfg, err := config.Platform()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	isTLS, err := platCfg.Get("gitserver.tls")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	if isTLS == "true" {
 		tlsOpt = grpc.WithInsecure()
 	} else {
 		cp := x509.NewCertPool()

@@ -210,7 +210,7 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	data := []byte(fmt.Sprintf("%s://%s:%s@%s:%s", gitprotocol, gitUsername, gitPassword, githost, gitport))
+	data := []byte(fmt.Sprintf("%s://%s:%s@%s%%3a%s", gitprotocol, gitUsername, gitPassword, githost, gitport))
 	// write creds to config file
 	if err := ioutil.WriteFile(gitCredFile, data, 0755); err != nil {
 		return "", errors.Trace(err)
@@ -243,8 +243,8 @@ func setLingoUser(username, password string) error {
 	}
 
 	// TODO(waigani) check if currentuser is already set and abort. Require a --reset flag to reset.
-	if err := cfg.Set("all."+gitUsernameCfgPath, username); err != nil {
+	if err := cfg.Set(config.ENV()+"."+gitUsernameCfgPath, username); err != nil {
 		return errors.Trace(err)
 	}
-	return cfg.Set("all."+gitUserPasswordCfgPath, password)
+	return cfg.Set(config.ENV()+"."+gitUserPasswordCfgPath, password)
 }

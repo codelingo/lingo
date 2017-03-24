@@ -17,6 +17,7 @@ import:
 - package: github.com/golang/protobuf
   subpackages:
   - proto
+- package: github.com/briandowns/spinner
 - package: github.com/juju/errors
 - package: github.com/juju/testing
   subpackages:
@@ -34,3 +35,4 @@ import:
 - package: gopkg.in/check.v1
 - package: gopkg.in/yaml.v1
 - package: gopkg.in/yaml.v2
+
