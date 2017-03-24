@@ -204,11 +204,11 @@ func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) erro
 	timeout := time.After(time.Second * 30)
 	var ingestTotal int
 	var ingestComplete bool
+	isIngesting := false
 
 	// ingestSteps is how far along the ingest process we are
 	var ingestSteps int
 	var err error
-	fmt.Println("Ingesting...")
 
 	select {
 	case message := <-messagec:
@@ -235,6 +235,11 @@ func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) erro
 		if !ok {
 			ingestComplete = true
 			break
+		}
+
+		if !isIngesting {
+			fmt.Println("Ingesting...")
+			isIngesting = true
 		}
 
 		parts := strings.Split(progress, "/")
