@@ -38,6 +38,10 @@ func whichEnv(ctx *cli.Context) error {
 
 	env, err := ioutil.ReadFile(envCfg)
 	if err != nil {
+		if strings.Contains(err.Error(), "open /home/dev/.codelingo/configs/lingo-current-env: no such file or directory") {
+			return errors.New("No lingo environment set. Please run `lingo use-env <env>` to set the environment.")
+		}
+
 		return errors.Trace(err)
 	}
 

@@ -12,6 +12,8 @@ import (
 
 	"os"
 	"path/filepath"
+	"github.com/juju/utils/set"
+	"github.com/docker/docker/integration-cli/environment"
 )
 
 // ENV will return environment
@@ -34,6 +36,10 @@ func ENV() (string, error) {
 
 	env, err := ioutil.ReadFile(envCfg)
 	if err != nil {
+		if strings.Contains(err.Error(), "open /home/dev/.codelingo/configs/lingo-current-env: no such file or directory") {
+			return "", errors.New("No lingo environment set. Please run `lingo use-env <env>` to set the environment.")
+		}
+
 		return "", errors.Trace(err)
 	}
 
