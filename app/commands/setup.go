@@ -242,9 +242,14 @@ func setLingoUser(username, password string) error {
 		return errors.Trace(err)
 	}
 
-	// TODO(waigani) check if currentuser is already set and abort. Require a --reset flag to reset.
-	if err := cfg.Set(config.ENV()+"."+gitUsernameCfgPath, username); err != nil {
+	env, err := config.ENV()
+	if err != nil {
 		return errors.Trace(err)
 	}
-	return cfg.Set(config.ENV()+"."+gitUserPasswordCfgPath, password)
+
+	// TODO(waigani) check if currentuser is already set and abort. Require a --reset flag to reset.
+	if err := cfg.Set(env+"."+gitUsernameCfgPath, username); err != nil {
+		return errors.Trace(err)
+	}
+	return cfg.Set(env+"."+gitUserPasswordCfgPath, password)
 }

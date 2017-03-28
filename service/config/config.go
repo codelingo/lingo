@@ -6,24 +6,37 @@ import (
 	"strings"
 
 	"github.com/juju/errors"
+	"github.com/mitchellh/go-homedir"
 
 	"gopkg.in/yaml.v2"
 
 	"os"
+	"path/filepath"
 )
 
 // ENV will return environment
-func ENV() string {
+func ENV() (string, error) {
 
 	// return test when running go test
 	if isTest, _ := regexp.MatchString("/_test/", os.Args[0]); isTest {
-		return "test"
+		return "test", nil
 	}
 
-	if env := os.Getenv("CODELINGO_ENV"); env != "" {
-		return env
+	home, err := homedir.Dir()
+	if err != nil {
+		return "", errors.Trace(err)
 	}
-	return "all"
+
+	// TODO: (emesonwood) don't use hard coded values
+	configsHome := filepath.Join(home, ".codelingo", "configs")
+
+	envCfg := filepath.Join(configsHome, "lingo-current-env")
+	if env, err := ioutil.ReadFile(envCfg); err != nil {
+		return "", errors.Trace(err)
+	} else {
+		trimmed_env := strings.TrimSpace(string(env))
+		return trimmed_env, nil
+	}
 }
 
 // TODO: switch Config to an interface type and refactor
@@ -154,7 +167,12 @@ func (c Config) Get(key string) (string, error) {
 	var infoBlocks []*cfgInfo
 
 	// first get info blocks
-	if env := ENV(); env != "all" && env != "" {
+	env, err := ENV()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	if env != "all" && env != "" {
 		infoM, err := newCfgInfo(c.data[env])
 		if err == nil {
 			// TODO(waigani) log

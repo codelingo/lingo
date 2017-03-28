@@ -185,6 +185,15 @@ func verifyConfig() error {
 		}
 	}
 
+	// TODO: Use constants?
+	envCfg := filepath.Join(configsHome, "lingo-current-env")
+	if _, err := os.Stat(envCfg); os.IsNotExist(err) {
+		err := ioutil.WriteFile(envCfg, []byte("all"), 0644)
+		if err != nil {
+			return errors.Annotate(err, "envConfig: Could not create env config")
+		}
+	}
+
 	authCfg := filepath.Join(configsHome, utilConfig.AuthCfgFile)
 	if _, err := os.Stat(authCfg); os.IsNotExist(err) {
 		err := ioutil.WriteFile(authCfg, []byte(utilConfig.AuthTmpl), 0644)
