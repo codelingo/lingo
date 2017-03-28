@@ -31,12 +31,14 @@ func ENV() (string, error) {
 	configsHome := filepath.Join(home, ".codelingo", "configs")
 
 	envCfg := filepath.Join(configsHome, "lingo-current-env")
-	if env, err := ioutil.ReadFile(envCfg); err != nil {
+
+	env, err := ioutil.ReadFile(envCfg)
+	if err != nil {
 		return "", errors.Trace(err)
-	} else {
-		trimmed_env := strings.TrimSpace(string(env))
-		return trimmed_env, nil
 	}
+
+	trimmedEnv := strings.TrimSpace(string(env))
+	return trimmedEnv, nil
 }
 
 // TODO: switch Config to an interface type and refactor
