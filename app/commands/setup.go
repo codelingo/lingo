@@ -23,20 +23,20 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "setup",
-		Usage:  "Configure the lingo tool for the current machine",
+		Usage:  "Configure the lingo tool for the current environment on this machine.",
 		Action: setupLingoAction,
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "username",
-				Usage: "Set the username of the lingo user",
+				Usage: "Set the username of the lingo user.",
 			},
 			cli.StringFlag{
 				Name:  "token",
-				Usage: "Set the token of the lingo user",
+				Usage: "Set the token of the lingo user.",
 			},
 			cli.BoolFlag{
 				Name:  "keep-creds",
-				Usage: "Preserves existing credentials (if present)",
+				Usage: "Preserves existing credentials (if present).",
 			},
 		},
 		// TODO(waigani) docs on username and token

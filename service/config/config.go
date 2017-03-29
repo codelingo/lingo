@@ -32,13 +32,13 @@ func (c *Config) GetEnv() (string, error) {
 	return trimmedEnv, nil
 }
 
-//func (c *Config) SetEnv(env string) error {
-//	err := ioutil.WriteFile(c.envFile, []byte(env), 0644)
-//	if err != nil {
-//		 return errors.Trace(err)
-//	}
-//	return nil
-//}
+func (c *Config) SetEnv(env string) error {
+	err := ioutil.WriteFile(c.envFile, []byte(env), 0644)
+	if err != nil {
+		 return errors.Trace(err)
+	}
+	return nil
+}
 
 // TODO: switch Config to an interface type and refactor
 type Config struct {

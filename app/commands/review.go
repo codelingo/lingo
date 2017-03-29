@@ -26,29 +26,29 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:        "review",
-		Usage:       "review code following tenets in .lingo.",
+		Usage:       "Review code following tenets in .lingo.",
 		Subcommands: cli.Commands{*pullRequestCmd},
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  util.LingoFile.String(),
-				Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed",
+				Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
 			},
 			cli.StringFlag{
 				Name:  util.DiffFlg.String(),
-				Usage: "Review only unstaged changes in the working tree",
+				Usage: "Review only unstaged changes in the working tree.",
 			},
 			cli.StringFlag{
 				Name:  util.OutputFlg.String(),
-				Usage: "File to save found issues to",
+				Usage: "File to save found issues to.",
 			},
 			cli.StringFlag{
 				Name:  util.FormatFlg.String(),
 				Value: "json-pretty",
-				Usage: "How to format the found issues. Possible values are: json, json-pretty",
+				Usage: "How to format the found issues. Possible values are: json, json-pretty.",
 			},
 			cli.BoolFlag{
 				Name:  util.InteractiveFlg.String(),
-				Usage: "Be prompted to confirm each issue",
+				Usage: "Be prompted to confirm each issue.",
 			},
 
 			// cli.BoolFlag{

@@ -21,7 +21,7 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "list-lexicons",
-		Usage:  "List available lexicons",
+		Usage:  "List available lexicons.",
 		Action: listLexiconsAction,
 		Flags: []cli.Flag{
 			cli.StringFlag{

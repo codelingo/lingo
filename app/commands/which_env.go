@@ -3,7 +3,8 @@ package commands
 import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/app/util/common/config"
+	commonConfig "github.com/codelingo/lingo/app/util/common/config"
+	serviceConfig "github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"io/ioutil"
 	"path/filepath"
@@ -15,10 +16,10 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "which-env",
-		Usage:  "Show the current environment",
+		Usage:  "Show the current environment.",
 		Action: whichEnvAction,
 
-	}, false)
+	}, false, homeRq, configRq)
 }
 
 func whichEnvAction(ctx *cli.Context) {
@@ -35,19 +36,15 @@ func whichEnv(ctx *cli.Context) error {
 		return errors.Trace(err)
 	}
 
-	envCfg := filepath.Join(configsHome, config.EnvCfgFile)
+	envFilepath := filepath.Join(configsHome, commonConfig.EnvCfgFile)
+	cfg := serviceConfig.New(envFilepath)
 
-	env, err := ioutil.ReadFile(envCfg)
+	env, err := cfg.GetEnv()
 	if err != nil {
-		if strings.Contains(err.Error(), "open /home/dev/.codelingo/configs/lingo-current-env: no such file or directory") {
-			return errors.New("No lingo environment set. Please run `lingo use-env <env>` to set the environment.")
-		}
-
 		return errors.Trace(err)
 	}
 
-	trimmedEnv := strings.TrimSpace(string(env))
-	err = outputString(ctx.String("output"), trimmedEnv)
+	err = outputString(ctx.String("output"), env)
 	if err != nil {
 		return errors.Trace(err)
 	}
