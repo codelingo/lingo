@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
 	"io/ioutil"
 	"path/filepath"
@@ -34,7 +35,7 @@ func whichEnv(ctx *cli.Context) error {
 		return errors.Trace(err)
 	}
 
-	envCfg := filepath.Join(configsHome, "lingo-current-env")
+	envCfg := filepath.Join(configsHome, config.EnvCfgFile)
 
 	env, err := ioutil.ReadFile(envCfg)
 	if err != nil {

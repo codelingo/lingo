@@ -12,18 +12,13 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
-	"github.com/codelingo/lingo/service/config"
+	commonConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/howeyc/gopass"
 	"github.com/juju/errors"
 )
 
 // TODO(waigani) add a quick-start cmd with --dry-run flag that: inits git,
 // inits lingo, sets up auth and register's repo with CodeLingo platform.
-
-const (
-	gitUsernameCfgPath     = "gitserver.user.username"
-	gitUserPasswordCfgPath = "gitserver.user.password"
-)
 
 func init() {
 	register(&cli.Command{
@@ -83,7 +78,7 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	authConfig, err := util.AuthConfig()
+	authConfig, err := commonConfig.Auth()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -100,7 +95,7 @@ func setupLingo(c *cli.Context) (string, error) {
 	// from authConfig
 	if c.Bool("keep-creds") {
 		if username == "" {
-			username, err = authConfig.Get(gitUsernameCfgPath)
+			username, err = authConfig.GetGitUserName()
 			if err != nil && !strings.Contains(err.Error(), `"username" not found`) {
 				// TODO(waigani) Check error type
 				errors.Annotate(err, "setup --keep-creds failed.")
@@ -109,7 +104,7 @@ func setupLingo(c *cli.Context) (string, error) {
 		}
 
 		if password == "" {
-			password, err = authConfig.Get(gitUserPasswordCfgPath)
+			password, err = authConfig.GetGitUserPassword()
 			if err != nil && !strings.Contains(err.Error(), `"password" not found`) {
 				// TODO(waigani) Check error type
 				errors.Annotate(err, "setup --keep-creds failed.")
@@ -130,7 +125,6 @@ func setupLingo(c *cli.Context) (string, error) {
 	}
 	if username == "" {
 		return "", errors.New("username cannot be empty")
-		//return "", errors.New("username not set")
 	}
 
 	if password == "" {
@@ -148,14 +142,21 @@ func setupLingo(c *cli.Context) (string, error) {
 	}
 
 	// TODO(waigani) check token matches again
-	// store username and password in config
 
-	// set creds in auth config
-	if err := setLingoUser(username, password); err != nil {
+	// Set username & password in auth.yaml
+	if err := authConfig.SetGitUserName(username); err != nil {
+		return "", errors.Trace(err)
+	}
+	if err := authConfig.SetGitUserPassword(password); err != nil {
 		return "", errors.Trace(err)
 	}
 
-	authConfig, err = getOrCreateAuthConfig()
+	credFilename, err := authConfig.GetGitCredentialsFilename()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	gitaddr, err := platConfig.GitServerAddr()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -165,16 +166,6 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	// TODO(waigani) don't use string lit here
-	credFilename, err := authConfig.Get("gitserver.credentials_filename")
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	gitaddr, err := platConfig.GitServerAddr()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
 	// Set creds in github.
 	// TODO(waigani) these should all be consts.
 	gitCredFile := filepath.Join(cfgDir, credFilename)
@@ -186,31 +177,21 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Annotate(err, out)
 	}
 
-	gitUsername, err := authConfig.Get(gitUsernameCfgPath)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-	gitPassword, err := authConfig.Get(gitUserPasswordCfgPath)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
+	// Get git server details
 	gitprotocol, err := platConfig.GitServerProtocol()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
 	githost, err := platConfig.GitServerHost()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
 	gitport, err := platConfig.GitServerPort()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	data := []byte(fmt.Sprintf("%s://%s:%s@%s%%3a%s", gitprotocol, gitUsername, gitPassword, githost, gitport))
+	data := []byte(fmt.Sprintf("%s://%s:%s@%s%%3a%s", gitprotocol, username, password, githost, gitport))
 	// write creds to config file
 	if err := ioutil.WriteFile(gitCredFile, data, 0755); err != nil {
 		return "", errors.Trace(err)
@@ -224,32 +205,4 @@ func gitCMD(args ...string) (out string, err error) {
 	b, err := cmd.CombinedOutput()
 	out = strings.TrimSpace(string(b))
 	return out, errors.Annotate(err, out)
-}
-
-// write auth config if it's missing
-func getOrCreateAuthConfig() (*config.Config, error) {
-	cfg, err := util.AuthConfig()
-	if err != nil {
-		// TODO(waigani) handle different errors
-		return util.CreateAuthConfig()
-	}
-	return cfg, nil
-}
-
-func setLingoUser(username, password string) error {
-	cfg, err := getOrCreateAuthConfig()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	env, err := config.ENV()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	// TODO(waigani) check if currentuser is already set and abort. Require a --reset flag to reset.
-	if err := cfg.Set(env+"."+gitUsernameCfgPath, username); err != nil {
-		return errors.Trace(err)
-	}
-	return cfg.Set(env+"."+gitUserPasswordCfgPath, password)
 }

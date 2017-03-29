@@ -4,25 +4,34 @@ import (
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
+	"path/filepath"
+	"github.com/codelingo/lingo/app/util"
 )
 
 type versionConfig struct {
-	*config.Config
+	*config.FileConfig
 }
 
 func Version() (*versionConfig, error) {
-	cfgPath, err := fullCfgPath(VersionCfgFile)
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	envFile := filepath.Join(configHome, EnvCfgFile)
+	cfg := config.New(envFile)
+
+	vCfgPath, err := fullCfgPath(VersionCfgFile)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	cfg, err := config.New(cfgPath)
+	vCfg, err := cfg.New(vCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	return &versionConfig{
-		Config: cfg,
+		vCfg,
 	}, nil
 }
 

@@ -8,6 +8,7 @@ import (
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
+	"github.com/codelingo/lingo/app/util/common/config"
 
 	"github.com/codelingo/lingo/app/util"
 
@@ -159,7 +160,7 @@ func readDotLingo(ctx *cli.Context) (string, error) {
 func initRepo(ctx *cli.Context) error {
 
 	repo := vcs.New(backing.Git)
-	authCfg, err := util.AuthConfig()
+	authCfg, err := config.Auth()
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -172,7 +173,7 @@ func initRepo(ctx *cli.Context) error {
 	// TODO(waigani) Try to get owner and name from origin remote first.
 
 	// get the repo owner name
-	repoOwner, err := authCfg.Get("gitserver.user.username")
+	repoOwner, err := authCfg.GetGitUserName()
 	if err != nil {
 		return errors.Trace(err)
 	}
