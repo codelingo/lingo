@@ -25,6 +25,7 @@ type CodeLingoService interface {
 	ListFacts(owner, name, version string) (map[string][]string, error)
 	PathsFromOffset(*PathsFromOffsetRequest) (*PathsFromOffsetResponse, error)
 	DescribeFact(owner, name, version, fact string) (*DescribeFactResponse, error)
+	LatestClientVersion() (string, error)
 }
 
 func (mc Messagec) Send(msgFmt string, vars ...interface{}) error {

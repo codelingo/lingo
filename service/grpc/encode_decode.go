@@ -138,3 +138,14 @@ func decodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (inter
 		Paths: paths,
 	}, nil
 }
+
+func encodeLatestClientVersionRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	return &server.LatestClientVersionRequest{}, nil
+}
+
+func decodeLatestClientVersionResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	version := resp.(codelingo.LatestClientVersionReply).Version
+	return &codelingo.LatestClientVersionReply{
+		Version: version,
+	}, nil
+}

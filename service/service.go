@@ -346,6 +346,16 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 	return issuec, messagec, ingestc, nil
 }
 
+func (c client) LatestClientVersion() (string, error) {
+	request := server.LatestClientVersionRequest{}
+	reply, err := c.endpoints["latestclientversion"](c.Context, request)
+	if err != nil {
+	return "", err
+	}
+	r := reply.(server.LatestClientVersionResponse)
+	return r.Key, nil
+}
+
 // TODO(waigani) construct logger separately and pass into New.
 // TODO(waigani) swap os.Exit(1) for return err
 
@@ -449,19 +459,21 @@ func New() (server.CodeLingoService, error) {
 	listLexiconsFactory := grpcclient.MakeListLexiconsEndpointFactory(tracer, tracingLogger, tlsOpt)
 	pathsFromOffsetFactory := grpcclient.MakePathsFromOffsetEndpointFactory(tracer, tracingLogger, tlsOpt)
 	describeFactFactory := grpcclient.MakeDescribeFactEndpointFactory(tracer, tracingLogger, tlsOpt)
+	latestClientVersionFactory := grpcclient.MakeLatestClientVersionFactory(tracer, tracingLogger, tlsOpt)
 
 	return client{
 		Context: context.Background(),
 		Logger:  logger,
 		endpoints: map[string]endpoint.Endpoint{
 			// TODO(waigani) this could be refactored further, a lot of dups
-			"session":         buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
-			"query":           buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
-			"review":          buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
-			"listfacts":       buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
-			"listlexicons":    buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
-			"pathsfromoffset": buildEndpoint(tracer, "pathsfromoffset", instances, pathsFromOffsetFactory, randomSeed, logger),
-			"describefact":    buildEndpoint(tracer, "describefact", instances, describeFactFactory, randomSeed, logger),
+			"session":         	buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
+			"query":           	buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
+			"review":          	buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
+			"listfacts":       	buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
+			"listlexicons":    	buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
+			"pathsfromoffset": 	buildEndpoint(tracer, "pathsfromoffset", instances, pathsFromOffsetFactory, randomSeed, logger),
+			"describefact":    	buildEndpoint(tracer, "describefact", instances, describeFactFactory, randomSeed, logger),
+			"latestclientversion": 	buildEndpoint(tracer, "latestclientversion", instances, latestClientVersionFactory, randomSeed, logger),
 		},
 	}, nil
 }

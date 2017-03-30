@@ -138,3 +138,14 @@ func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, err
 func EncodeReviewResponse(ctx context.Context, resp interface{}) (interface{}, error) {
 	return codelingo.ReviewReply{}, nil
 }
+
+func DecodeLatestClientVersionRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	return &server.LatestClientVersionRequest{}, nil
+}
+
+func EncodeLatestClientVersionResponse(ctx context.Context, resp interface{}) (interface{}, error) {
+	version := resp.(codelingo.LatestClientVersionReply).Version
+	return &codelingo.LatestClientVersionReply{
+		Version: version,
+	}, nil
+}
