@@ -12,6 +12,9 @@ import (
 	"github.com/codelingo/lingo/app/util/common"
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
+	"time"
+	"strings"
+	"strconv"
 )
 
 type require int
@@ -230,22 +233,86 @@ func verifyConfig() error {
 const missingConfigError string = "Could not get %s config. Please run `lingo setup`."
 
 func verifyClientVersion() error {
-	updateNeededErr := errors.New("Update required. Please run `$ lingo update`.")
-	cfg, err := utilConfig.Version()
+	vCfg, err := utilConfig.Version()
 	if err != nil {
 		// TODO(waigani) don't throw error away before checking type.
 		return errors.New(fmt.Sprintf(missingConfigError, "version"))
 	}
 
-	version, err := cfg.ClientVersion()
+	lastCheckedString, err := vCfg.ClientVersionLastChecked()
 	if err != nil {
-		// TODO(waigani) don't throw error away before checking type.
-		return errors.New(fmt.Sprintf(missingConfigError, "client version"))
+		return errors.Trace(err)
 	}
-	// TODO: Use `hashicorp/go-version` package for comparing and setting semvers
-	// https://github.com/hashicorp/go-version
-	if version != common.ClientVersion {
-		return updateNeededErr
+
+	layout := "2006-01-02 15:04:05.000000000 -0700 MST"
+	lastChecked, err := time.Parse(layout, lastCheckedString)
+	if err != nil {
+		return errors.Trace(err)
 	}
+
+	duration := time.Since(lastChecked)
+	if duration.Hours() >= 24 {
+		fmt.Println("TODO: Call platform version endpoint.")
+		// Call on the platform endpoint if need be
+		// Update version in config
+		// Print needs update
+	}
+
+	latestVersion, err := vCfg.ClientLatestVersion()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	compare, err := compareVersions(common.ClientVersion, latestVersion)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if compare < 0 {
+		fmt.Println("Warning: Your client is out of date. This may result in unexpected behaviour.")
+	} else if compare > 0 {
+		fmt.Println("Warning: Your client is newer than the platform. This may result in unexpected behaviour.")
+	} else {
+		// Versions are equal: OK.
+	}
+
 	return nil
+}
+
+func compareVersions(v1, v2 string) (int, error) {
+	v1Tokens := strings.Split(v1, ".")
+	v2Tokens := strings.Split(v2, ".")
+
+	var result int = 0
+
+	for index, v1Token := range v1Tokens {
+		if len(v2Tokens) > index {
+			v2Token := v2Tokens[index]
+
+			v1Int, err := strconv.Atoi(v1Token)
+			if err != nil {
+				return -1, errors.New("Could not convert all parts of the current version string to integers.")
+			}
+			v2Int, err := strconv.Atoi(v2Token)
+			if err != nil {
+				return 1, errors.New("Could not convert all parts of the latest version string to integers.")
+			}
+
+			if v1Int > v2Int {
+				return 1, nil
+			} else if v1Int < v2Int {
+				return -1, nil
+			} else {
+				continue
+			}
+		} else {
+			return 1, nil
+		}
+	}
+
+	if result == 0 && len(v1Tokens) < len(v2Tokens) {
+		result = -1
+	}
+
+	return result, nil
 }

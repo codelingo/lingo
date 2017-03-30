@@ -4,6 +4,8 @@ import (
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
+	"time"
+	"fmt"
 )
 
 type versionConfig struct {
@@ -26,6 +28,30 @@ func Version() (*versionConfig, error) {
 	}, nil
 }
 
+func (v *versionConfig) ClientLatestVersion() (string, error) {
+	return v.Get("client.version_latest")
+}
+
+func (v *versionConfig) SetClientLatestVersion(version string) error {
+	return v.Set("client.version_latest", version)
+}
+
+func(v *versionConfig) ClientVersionLastChecked() (string, error) {
+	return v.Get("client.version_last_checked")
+}
+
+func (v *versionConfig) SetClientVersionLastChecked(timeString string) error {
+	return v.Set("client.version_last_checked", timeString)
+}
+
+func (v *versionConfig) ClientVersionUpdated() (string, error) {
+	return v.Get("client.version_updated")
+}
+
+func (v *versionConfig) SetClientVersionUpdated(version string) error {
+	return v.Set("client.version_updated", version)
+}
+
 func (v *versionConfig) ClientVersion() (string, error) {
 	return v.Get("client.version")
 }
@@ -36,8 +62,10 @@ func (v *versionConfig) SetClientVersion(cv string) error {
 	return v.Set("all.client.version", cv)
 }
 
-var VersionTmpl = `
+var VersionTmpl = fmt.Sprintf(`
 all:
   client:
-    version: `[1:] + common.ClientVersion + `
-`
+    version_latest: %v
+    version_last_checked: %v
+    version_updated: %v
+`, common.ClientVersion, time.Now().UTC().AddDate(0, 0, -1), common.ClientVersion)[1:]
