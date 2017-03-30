@@ -347,13 +347,13 @@ func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Iss
 }
 
 func (c client) LatestClientVersion() (string, error) {
-	request := server.LatestClientVersionRequest{}
+	request := codelingo.LatestClientVersionRequest{}
 	reply, err := c.endpoints["latestclientversion"](c.Context, request)
 	if err != nil {
-	return "", err
+		return "", err
 	}
-	r := reply.(server.LatestClientVersionResponse)
-	return r.Key, nil
+	r := reply.(*codelingo.LatestClientVersionReply)
+	return r.Version, nil
 }
 
 // TODO(waigani) construct logger separately and pass into New.

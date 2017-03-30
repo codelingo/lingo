@@ -140,7 +140,7 @@ func EncodeReviewResponse(ctx context.Context, resp interface{}) (interface{}, e
 }
 
 func DecodeLatestClientVersionRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	return &server.LatestClientVersionRequest{}, nil
+	return &codelingo.LatestClientVersionRequest{}, nil
 }
 
 func EncodeLatestClientVersionResponse(ctx context.Context, resp interface{}) (interface{}, error) {
