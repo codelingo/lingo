@@ -6,11 +6,8 @@ import (
 	commonConfig "github.com/codelingo/lingo/app/util/common/config"
 	serviceConfig "github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
-	"io/ioutil"
 	"path/filepath"
-	"strings"
 	"fmt"
-	"os"
 )
 
 func init() {
@@ -43,35 +40,7 @@ func whichEnv(ctx *cli.Context) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-
-	err = outputString(ctx.String("output"), env)
-	if err != nil {
-		return errors.Trace(err)
-	}
+	fmt.Println(env)
 
 	return nil
 }
-
-func outputString(output string, content string) error {
-	if !strings.HasSuffix(content, "\n") {
-		content = content+"\n"
-	}
-
-	if output == "" {
-		fmt.Print(content)
-		return nil
-	}
-
-	outputPath, err := getFilePath(output)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	if _, err := os.Stat(outputPath); err == nil {
-		return errors.Trace(err)
-	}
-
-	return errors.Trace(ioutil.WriteFile(outputPath, []byte(content), 0644))
-}
-
-

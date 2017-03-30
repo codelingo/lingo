@@ -54,12 +54,8 @@ func useEnv(ctx *cli.Context) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	fmt.Printf("Success! Environment set to '%v'.\n", newEnv)
 
-	success := fmt.Sprintf("Success! Environment set to '%v'.", newEnv)
-	err = outputString(ctx.String("output"), success)
-	if err != nil {
-		return errors.Trace(err)
-	}
 
 	return nil
 }
