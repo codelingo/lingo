@@ -130,7 +130,7 @@ func MakeLatestClientVersionFactory(tracer opentracing.Tracer, tracingLogger log
 			"LatestClientVersion",
 			encodeLatestClientVersionRequest,
 			decodeLatestClientVersionResponse,
-			codelingo.ListLexiconsReply{},
+			codelingo.LatestClientVersionReply{},
 		).Endpoint(), cc, errors.Trace(err)
 	}
 }
