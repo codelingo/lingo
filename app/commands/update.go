@@ -14,7 +14,7 @@ func init() {
 	// NOTE: temporary solution – `lingo update` ⟼ `lingo setup --keed-creds`
 	register(&cli.Command{
 		Name:   "update",
-		Usage:  "update the lingo client to the latest release",
+		Usage:  "Update the lingo client to the latest release.",
 		Flags:  []cli.Flag{},
 		Action: updateAction,
 	},

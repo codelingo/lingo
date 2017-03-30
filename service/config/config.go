@@ -10,36 +10,61 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"os"
+	"fmt"
 )
 
-// ENV will return environment
-func ENV() string {
-
+func (c *Config) GetEnv() (string, error) {
 	// return test when running go test
 	if isTest, _ := regexp.MatchString("/_test/", os.Args[0]); isTest {
-		return "test"
+		return "test", nil
 	}
 
-	if env := os.Getenv("CODELINGO_ENV"); env != "" {
-		return env
+	env, err := ioutil.ReadFile(c.envFile)
+	if err != nil {
+		if strings.Contains(err.Error(), "open /home/dev/.codelingo/configs/lingo-current-env: no such file or directory") {
+			return "", errors.New("No lingo environment set. Please run `lingo use-env <env>` to set the environment.")
+		}
+
+		return "", errors.Trace(err)
 	}
-	return "all"
+
+	trimmedEnv := strings.TrimSpace(string(env))
+	return trimmedEnv, nil
+}
+
+func (c *Config) SetEnv(env string) error {
+	err := ioutil.WriteFile(c.envFile, []byte(env), 0644)
+	if err != nil {
+		 return errors.Trace(err)
+	}
+	return nil
 }
 
 // TODO: switch Config to an interface type and refactor
-
 type Config struct {
+	envFile string
+}
+
+type FileConfig struct {
+	config   *Config
 	data     map[string]interface{}
 	filename string
 }
 
-func New(cfgFile string) (*Config, error) {
+func New(envFile string) *Config {
+	return &Config{
+		envFile,
+	}
+}
 
+func (c *Config) New(cfgFile string) (*FileConfig, error) {
 	data, err := readYaml(cfgFile)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return &Config{
+
+	return &FileConfig{
+		config:   c,
 		data:     data,
 		filename: cfgFile,
 	}, nil
@@ -58,7 +83,7 @@ func readYaml(cfgFile string) (map[string]interface{}, error) {
 	return mapData, nil
 }
 
-func Create(cfgFile string, data interface{}, perm os.FileMode) (*Config, error) {
+func (c *Config) Create(cfgFile string, data interface{}, perm os.FileMode) (*FileConfig, error) {
 	var out []byte
 	var err error
 	if data != nil {
@@ -72,7 +97,8 @@ func Create(cfgFile string, data interface{}, perm os.FileMode) (*Config, error)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return &Config{
+	return &FileConfig{
+		config:   c,
 		data:     make(map[string]interface{}),
 		filename: cfgFile,
 	}, nil
@@ -149,19 +175,28 @@ func newCfgInfo(infoMap interface{}) (*cfgInfo, error) {
 	}, nil
 }
 
-func (c Config) Get(key string) (string, error) {
+func (fc *FileConfig) GetEnv() (string, error) {
+	return fc.config.GetEnv()
+}
+
+func (fc *FileConfig) Get(key string) (string, error) {
 	keys := strings.Split(key, ".")
 	var infoBlocks []*cfgInfo
 
 	// first get info blocks
-	if env := ENV(); env != "all" && env != "" {
-		infoM, err := newCfgInfo(c.data[env])
+	env, err := fc.config.GetEnv()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	if env != "all" && env != "" {
+		infoM, err := newCfgInfo(fc.data[env])
 		if err == nil {
 			// TODO(waigani) log
 			infoBlocks = append(infoBlocks, infoM)
 		}
 	}
-	infoM, err := newCfgInfo(c.data["all"])
+	 infoM, err := newCfgInfo(fc.data["all"])
 	if err == nil {
 		// TODO(waigani) log
 		infoBlocks = append(infoBlocks, infoM)
@@ -180,8 +215,16 @@ func (c Config) Get(key string) (string, error) {
 	return "", errors.Errorf("config %q not found", key)
 }
 
-func (c Config) Set(key string, value interface{}) error {
-	mapData, err := readYaml(c.filename)
+func (fc *FileConfig) Set(key string, value interface{}) error {
+	env, err := fc.config.GetEnv()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	// Prepend the env to the given key
+	key = env+"."+key
+
+	mapData, err := readYaml(fc.filename)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -201,9 +244,22 @@ func (c Config) Set(key string, value interface{}) error {
 		return errors.Trace(err)
 	}
 
-	c.data = convertMapType(infoM.info)
+	fc.data = convertMapType(infoM.info)
 
-	return ioutil.WriteFile(c.filename, data, 0755)
+	return ioutil.WriteFile(fc.filename, data, 0755)
+}
+
+func (fc *FileConfig) Dump() {
+	fmt.Printf("filename=%v\n", fc.filename)
+}
+
+func (fc *FileConfig) Refresh() error {
+	newFc, err := fc.config.New(fc.filename)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	fc.data = newFc.data
+	return nil
 }
 
 func convertMapType(m map[interface{}]interface{}) map[string]interface{} {

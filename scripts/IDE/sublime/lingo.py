@@ -36,7 +36,7 @@ class Lingo(sublime_plugin.EventListener):
 		vs = view.settings()
 		setting = get_setting('codelingo_env')
 		if setting:
-			os.environ['CODELINGO_ENV'] = setting
+			set_env(setting)
 
 		path = get_setting('path')
 		if path and path not in os.environ['PATH']:
@@ -249,3 +249,11 @@ def ensure_dir(path):
 
 def bytes_to_json(byte):
 	return json.loads(byte.decode("utf-8"))
+
+def set_env(env):
+	home = os.path.expanduser("~")
+	env_filepath = os.path.join(home, ".codelingo", "configs", "lingo-current-env")
+
+	if os.path.isfile(env_filepath):
+		with open(env_filepath, "w") as env_file:
+			env_file.write(env)
