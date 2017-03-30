@@ -13,7 +13,7 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "list-facts",
-		Usage:  "List available facts for a given lexicon",
+		Usage:  "List available facts for a given lexicon.",
 		Action: listFactsAction,
 		Flags: []cli.Flag{
 			cli.StringFlag{

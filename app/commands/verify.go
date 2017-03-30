@@ -103,12 +103,12 @@ func verifyVCS() error {
 func verifyAuth() error {
 
 	errMsg := "Authentication failed. Please run `lingo setup`."
-	cfg, err := util.AuthConfig()
+	authCfg, err := utilConfig.Auth()
 	if err != nil {
 		return errors.Annotate(err, errMsg)
 	}
 
-	authFile, err := cfg.Get("gitserver.credentials_filename")
+	authFile, err := authCfg.GetGitCredentialsFilename()
 	if err != nil {
 		return errors.Annotate(err, errMsg)
 	} else if authFile == "" {
@@ -185,6 +185,14 @@ func verifyConfig() error {
 		err := os.MkdirAll(configsHome, 0775)
 		if err != nil {
 			return errors.Annotate(err, "verifyConfig: Could not create configs directory")
+		}
+	}
+
+	envCfg := filepath.Join(configsHome, utilConfig.EnvCfgFile)
+	if _, err := os.Stat(envCfg); os.IsNotExist(err) {
+		err := ioutil.WriteFile(envCfg, []byte("all"), 0644)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create env config")
 		}
 	}
 

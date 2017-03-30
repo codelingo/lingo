@@ -5,25 +5,34 @@ import (
 
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
+	"github.com/codelingo/lingo/app/util"
+	"path/filepath"
 )
 
 type platformConfig struct {
-	*config.Config
+	*config.FileConfig
 }
 
 func Platform() (*platformConfig, error) {
-	cfgPath, err := fullCfgPath(PlatformCfgFile)
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	envFile := filepath.Join(configHome, EnvCfgFile)
+	cfg := config.New(envFile)
+
+	pCfgPath, err := fullCfgPath(PlatformCfgFile)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	cfg, err := config.New(cfgPath)
+	pCfg, err := cfg.New(pCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	return &platformConfig{
-		Config: cfg,
+		pCfg,
 	}, nil
 }
 

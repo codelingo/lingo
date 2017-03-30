@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/codelingo/lingo/app/util"
 	"github.com/gogits/go-gogs-client"
 
 	"github.com/juju/errors"
@@ -56,13 +55,13 @@ func gogsClientForCurrentUser() (*gogs.Client, error) {
 		return nil, errors.Trace(err)
 	}
 
-	authCfg, err := util.AuthConfig()
+	authCfg, err := config.Auth()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	// TODO(waigani) change "password" to "token"
-	token, err := authCfg.Get("gitserver.user.password")
+	token, err := authCfg.GetGitUserPassword()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
