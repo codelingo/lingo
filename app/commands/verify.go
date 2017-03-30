@@ -13,8 +13,7 @@ import (
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
 	"time"
-	"strings"
-	"strconv"
+	"github.com/blang/semver"
 )
 
 type require int
@@ -260,10 +259,19 @@ func verifyClientVersion() error {
 
 	duration := time.Since(lastChecked)
 	if duration.Hours() >= 24 {
-		fmt.Println("TODO: Call platform version endpoint.")
-		// Call on the platform endpoint if need be
-		// Update version in config
-		// Print needs update
+		latestVersion, err := latestVersion()
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		err = vCfg.SetClientLatestVersion(latestVersion.String())
+		if err != nil {
+			return errors.Trace(err)
+		}
+		err = vCfg.SetClientVersionLastChecked(time.Now().UTC().String())
+		if err != nil {
+			return errors.Trace(err)
+		}
 	}
 
 	latestVersion, err := vCfg.ClientLatestVersion()
@@ -287,40 +295,16 @@ func verifyClientVersion() error {
 	return nil
 }
 
-func compareVersions(v1, v2 string) (int, error) {
-	v1Tokens := strings.Split(v1, ".")
-	v2Tokens := strings.Split(v2, ".")
-
-	var result int = 0
-
-	for index, v1Token := range v1Tokens {
-		if len(v2Tokens) > index {
-			v2Token := v2Tokens[index]
-
-			v1Int, err := strconv.Atoi(v1Token)
-			if err != nil {
-				return -1, errors.New("Could not convert all parts of the current version string to integers.")
-			}
-			v2Int, err := strconv.Atoi(v2Token)
-			if err != nil {
-				return 1, errors.New("Could not convert all parts of the latest version string to integers.")
-			}
-
-			if v1Int > v2Int {
-				return 1, nil
-			} else if v1Int < v2Int {
-				return -1, nil
-			} else {
-				continue
-			}
-		} else {
-			return 1, nil
-		}
+func compareVersions(current, latest string) (int, error) {
+	cv, err := semver.Make(current)
+	if err != nil {
+		return -1, errors.Trace(err)
 	}
 
-	if result == 0 && len(v1Tokens) < len(v2Tokens) {
-		result = -1
+	lv, err := semver.Make(latest)
+	if err != nil {
+		return 1, errors.Trace(err)
 	}
 
-	return result, nil
+	return cv.Compare(lv), nil
 }

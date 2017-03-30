@@ -5,6 +5,8 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/service"
+	"github.com/juju/errors"
 )
 
 func init() {
@@ -84,8 +86,16 @@ func updateAction(ctx *cli.Context) {
 	// 3. run upgrade steps from new binary
 }
 
-// TODO(waigani) once repo is public, check github API for latest release:
-// https://api.github.com/repos/codelingo/lingo/releases/latest
-func latestVersion() (semver.Version, error) {
-	return semver.Make("1.2.3")
+func latestVersion() (*semver.Version, error) {
+	svc, err := service.New()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	versionString, err := svc.LatestClientVersion()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return semver.New(versionString)
 }
