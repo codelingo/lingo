@@ -14,6 +14,8 @@ import (
 	"github.com/juju/errors"
 	"time"
 	"github.com/blang/semver"
+	"github.com/codelingo/lingo/service"
+	"strings"
 )
 
 type require int
@@ -51,7 +53,17 @@ func (r require) Verify() error {
 	case baseRq:
 		return nil
 	case versionRq:
-		return verifyClientVersion()
+		outdated, err := VersionIsOutdated()
+		if err != nil {
+			if outdated {
+				// Don't error, just warn
+				fmt.Println("Warning: " + err.Error())
+				return nil
+			} else {
+				return errors.Trace(err)
+			}
+		}
+		return nil
 	case vcsRq:
 		return verifyVCS()
 	case dotLingoRq:
@@ -285,14 +297,27 @@ func verifyClientVersion() error {
 	}
 
 	if compare < 0 {
-		fmt.Println("Warning: Your client is out of date. This may result in unexpected behaviour.")
+		return errors.New("Your client is out of date. This may result in unexpected behaviour.")
 	} else if compare > 0 {
-		fmt.Println("Warning: Your client is newer than the platform. This may result in unexpected behaviour.")
+		return errors.New("Your client is newer than the platform. This may result in unexpected behaviour.")
 	} else {
 		// Versions are equal: OK.
+		return nil
+	}
+}
+
+func latestVersion() (*semver.Version, error) {
+	svc, err := service.New()
+	if err != nil {
+		return nil, errors.Trace(err)
 	}
 
-	return nil
+	versionString, err := svc.LatestClientVersion()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return semver.New(versionString)
 }
 
 func compareVersions(current, latest string) (int, error) {
@@ -307,4 +332,16 @@ func compareVersions(current, latest string) (int, error) {
 	}
 
 	return cv.Compare(lv), nil
+}
+
+func VersionIsOutdated() (bool, error) {
+	err := verifyClientVersion()
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "This may result in unexpected behaviour.") {
+			return true, err
+		} else {
+			return false, errors.Trace(err)
+		}
+	}
+	return false, err
 }

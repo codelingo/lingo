@@ -1,23 +1,30 @@
 package commands
 
 import (
-	"flag"
-
-	"github.com/blang/semver"
 	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/service"
+	"github.com/codelingo/lingo/app/util/common"
+	"github.com/codelingo/lingo/app/util/common/config"
+	"fmt"
+	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
+	"strings"
 )
 
 func init() {
-	// TODO(waigani) support upgrades
-	// TODO(waigani) support specific versions
 
-	// NOTE: temporary solution – `lingo update` ⟼ `lingo setup --keed-creds`
 	register(&cli.Command{
 		Name:   "update",
 		Usage:  "Update the lingo client to the latest release.",
-		Flags:  []cli.Flag{},
+		Flags:  []cli.Flag{
+			cli.BoolFlag{
+				Name: "reset",
+				Usage: "Replace client configs with defaults.",
+			},
+			cli.BoolFlag{
+				Name: "no-prompt",
+				Usage: "Won't prompt to update client configs.",
+			},
+		},
 		Action: updateAction,
 	},
 		false,
@@ -47,16 +54,64 @@ func init() {
 
 func updateAction(ctx *cli.Context) {
 
-	// NOTE: temporary solution – `lingo update` ⟼ `lingo setup --keep-creds`
-	fset := flag.NewFlagSet("update aliased to setup keep-creds", flag.ContinueOnError)
-	f := cli.BoolFlag{
-		Name:  "keep-creds",
-		Usage: "Preserves existing credentials (if present)",
+	// Check version against endpoint
+	outdated, err := VersionIsOutdated()
+	if err != nil {
+		if outdated {
+			fmt.Println("Your client is out of date. Please download and install the latest binary.")
+			return
+		} else {
+			util.OSErr(err)
+			return
+		}
 	}
-	f.Apply(fset)
-	ctx = cli.NewContext(ctx.App, fset, ctx.Parent())
-	ctx.Set("keep-creds", "true")
-	setupLingoAction(ctx)
+
+	// Check version updated
+	vCfg, err := config.Version()
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+
+	verUpdtd, err := vCfg.ClientVersionUpdated()
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+
+	compare, err := compareVersions(common.ClientVersion, verUpdtd)
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+
+	reset := ctx.Bool("reset")
+	if compare != 0 || reset {
+		err := updateClientConfigs(reset)
+		if err != nil {
+			util.OSErr(err)
+			return
+		}
+	} else {
+		noPrompt := ctx.Bool("no-prompt")
+		if !noPrompt {
+			shouldUpdate := ""
+			fmt.Print("Are you sure you want to update your client configs? (y/n): ")
+			fmt.Scanln(&shouldUpdate)
+
+			shouldUpdate = strings.ToLower(shouldUpdate)
+			if shouldUpdate != "y" && shouldUpdate != "yes" {
+				fmt.Println("Update aborted.")
+				return
+			}
+		}
+
+		err := updateClientConfigs(false)
+		if err != nil {
+			util.OSErr(err)
+			return
+		}
+	}
 
 	// fmt.Println("DISABLED: the update command will be enabled once the codelingo/lingo repository is public")
 
@@ -86,16 +141,27 @@ func updateAction(ctx *cli.Context) {
 	// 3. run upgrade steps from new binary
 }
 
-func latestVersion() (*semver.Version, error) {
-	svc, err := service.New()
+func updateClientConfigs(reset bool) error {
+	vCfg, err := config.Version()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return errors.Trace(err)
 	}
 
-	versionString, err := svc.LatestClientVersion()
+	if reset {
+		fmt.Println("Resetting configs to defaults.")
+	} else {
+		fmt.Println("Updating configs.")
+	}
+	fmt.Println("Update complete... Setting version updated.")
+
+
+
+	err = vCfg.SetClientVersionUpdated(common.ClientVersion)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return errors.Trace(err)
 	}
 
-	return semver.New(versionString)
+	fmt.Println("Update success!")
+
+	return nil
 }
