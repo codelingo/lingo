@@ -58,7 +58,7 @@ func (v *versionConfig) ClientVersionUpdated() (string, error) {
 }
 
 func (v *versionConfig) SetClientVersionUpdated(version string) error {
-	return v.Set("client.version_updated", version)
+	return v.SetForEnv("client.version_updated", version, "all")
 }
 
 func (v *versionConfig) ClientVersion() (string, error) {

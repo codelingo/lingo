@@ -10,7 +10,6 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"os"
-	"fmt"
 )
 
 func (c *Config) GetEnv() (string, error) {
@@ -215,12 +214,7 @@ func (fc *FileConfig) Get(key string) (string, error) {
 	return "", errors.Errorf("config %q not found", key)
 }
 
-func (fc *FileConfig) Set(key string, value interface{}) error {
-	env, err := fc.config.GetEnv()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
+func (fc *FileConfig) SetForEnv(key string, value interface{}, env string) error {
 	// Prepend the env to the given key
 	key = env+"."+key
 
@@ -249,8 +243,13 @@ func (fc *FileConfig) Set(key string, value interface{}) error {
 	return ioutil.WriteFile(fc.filename, data, 0755)
 }
 
-func (fc *FileConfig) Dump() {
-	fmt.Printf("filename=%v\n", fc.filename)
+func (fc *FileConfig) Set(key string, value interface{}) error {
+	env, err := fc.config.GetEnv()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return fc.SetForEnv(key, value, env)
 }
 
 func (fc *FileConfig) Refresh() error {
