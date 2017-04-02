@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"github.com/codelingo/lingo/app/util"
+	"io/ioutil"
+	"os"
 )
 
 type versionConfig struct {
@@ -35,6 +37,23 @@ func Version() (*versionConfig, error) {
 	return &versionConfig{
 		vCfg,
 	}, nil
+}
+
+func CreateVersion(overwrite bool) error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	vCfgFilePath := filepath.Join(configHome, VersionCfgFile)
+	if _, err := os.Stat(vCfgFilePath); os.IsNotExist(err) || overwrite {
+		err := ioutil.WriteFile(vCfgFilePath, []byte(VersionTmpl), 0644)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create version config")
+		}
+	}
+
+	return nil
 }
 
 func (v *versionConfig) ClientLatestVersion() (string, error) {

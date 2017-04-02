@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
-	"strings"
 )
 
 func init() {
@@ -17,12 +16,8 @@ func init() {
 		Usage:  "Update the lingo client to the latest release.",
 		Flags:  []cli.Flag{
 			cli.BoolFlag{
-				Name: "reset",
+				Name: "reset-configs",
 				Usage: "Replace client configs with defaults.",
-			},
-			cli.BoolFlag{
-				Name: "no-prompt",
-				Usage: "Won't prompt to update client configs.",
 			},
 		},
 		Action: updateAction,
@@ -58,7 +53,7 @@ func updateAction(ctx *cli.Context) {
 	outdated, err := VersionIsOutdated()
 	if err != nil {
 		if outdated {
-			fmt.Println("Your client is out of date. Please download and install the latest binary.")
+			fmt.Println("Your client is out of date. Please download and install the latest binary from https://github.com/codelingo/lingo/releases")
 			return
 		} else {
 			util.OSErr(err)
@@ -66,51 +61,11 @@ func updateAction(ctx *cli.Context) {
 		}
 	}
 
-	// Check version updated
-	vCfg, err := config.Version()
+	reset := ctx.Bool("reset-configs")
+	err = updateClientConfigs(reset)
 	if err != nil {
 		util.OSErr(err)
 		return
-	}
-
-	verUpdtd, err := vCfg.ClientVersionUpdated()
-	if err != nil {
-		util.OSErr(err)
-		return
-	}
-
-	compare, err := compareVersions(common.ClientVersion, verUpdtd)
-	if err != nil {
-		util.OSErr(err)
-		return
-	}
-
-	reset := ctx.Bool("reset")
-	if compare != 0 || reset {
-		err := updateClientConfigs(reset)
-		if err != nil {
-			util.OSErr(err)
-			return
-		}
-	} else {
-		noPrompt := ctx.Bool("no-prompt")
-		if !noPrompt {
-			shouldUpdate := ""
-			fmt.Print("Are you sure you want to update your client configs? (y/n): ")
-			fmt.Scanln(&shouldUpdate)
-
-			shouldUpdate = strings.ToLower(shouldUpdate)
-			if shouldUpdate != "y" && shouldUpdate != "yes" {
-				fmt.Println("Update aborted.")
-				return
-			}
-		}
-
-		err := updateClientConfigs(false)
-		if err != nil {
-			util.OSErr(err)
-			return
-		}
 	}
 
 	// fmt.Println("DISABLED: the update command will be enabled once the codelingo/lingo repository is public")
@@ -142,26 +97,53 @@ func updateAction(ctx *cli.Context) {
 }
 
 func updateClientConfigs(reset bool) error {
+
 	vCfg, err := config.Version()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	if reset {
-		fmt.Println("Resetting configs to defaults.")
-	} else {
-		fmt.Println("Updating configs.")
+	vrsnUpdtd, err := vCfg.ClientVersionUpdated()
+	if err != nil {
+		return errors.Trace(err)
 	}
-	fmt.Println("Update complete... Setting version updated.")
 
+	if vrsnUpdtd == common.ClientVersion {
+		fmt.Printf("Your client & configs have already been updated to the latest version (%v).\n", common.ClientVersion)
+		// TODO:(emersonwood) Does anything more need to happen here? ie. should the user be prompted to update anyway or made aware of `lingo update --reset-configs`?
+		return nil
+	}
 
+	// TODO:(emersonwood) Store old configs in a struct here
+
+	// Overwrite existing configs with store templates
+	err = config.CreateAuth(true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	err = config.CreatePlatform(true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	err = config.CreateVersion(true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if !reset {
+		// TODO:(emersonwood) Restore values from old configs; discuss with Jesse
+	}
 
 	err = vCfg.SetClientVersionUpdated(common.ClientVersion)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	fmt.Println("Update success!")
+	if reset {
+		fmt.Println("Configs reset successfully.")
+	} else {
+		fmt.Println("Configs updated successfully.")
+	}
 
 	return nil
 }

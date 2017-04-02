@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
-
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"github.com/codelingo/lingo/app/util"
 	"path/filepath"
+	"io/ioutil"
+	"os"
 )
 
 type platformConfig struct {
@@ -34,6 +35,23 @@ func Platform() (*platformConfig, error) {
 	return &platformConfig{
 		pCfg,
 	}, nil
+}
+
+func CreatePlatform(overwrite bool) error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	pCfgFilePath := filepath.Join(configHome, PlatformCfgFile)
+	if _, err := os.Stat(pCfgFilePath); os.IsNotExist(err) || overwrite {
+		err := ioutil.WriteFile(pCfgFilePath, []byte(PlatformTmpl), 0644)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create platform config")
+		}
+	}
+
+	return nil
 }
 
 func (p *platformConfig) GitRemoteName() (string, error) {

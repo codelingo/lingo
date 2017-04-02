@@ -207,28 +207,19 @@ func verifyConfig() error {
 		}
 	}
 
-	authCfg := filepath.Join(configsHome, utilConfig.AuthCfgFile)
-	if _, err := os.Stat(authCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(authCfg, []byte(utilConfig.AuthTmpl), 0644)
-		if err != nil {
-			return errors.Annotate(err, "verifyConfig: Could not create auth config")
-		}
+	err = utilConfig.CreateAuth(false)
+	if err != nil {
+		return errors.Trace(err)
 	}
 
-	platformCfg := filepath.Join(configsHome, utilConfig.PlatformCfgFile)
-	if _, err := os.Stat(platformCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(platformCfg, []byte(utilConfig.PlatformTmpl), 0644)
-		if err != nil {
-			return errors.Annotate(err, "verifyConfig: Could not create platform config")
-		}
+	err = utilConfig.CreatePlatform(false)
+	if err != nil {
+		return errors.Trace(err)
 	}
 
-	versionCfg := filepath.Join(configsHome, utilConfig.VersionCfgFile)
-	if _, err := os.Stat(versionCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(versionCfg, []byte(utilConfig.VersionTmpl), 0644)
-		if err != nil {
-			return errors.Annotate(err, "verifyConfig: Could not create version config")
-		}
+	err = utilConfig.CreateVersion(false)
+	if err != nil {
+		return errors.Trace(err)
 	}
 
 	// servicesCfg := filepath.Join(configsHome, utilConfig.ServicesCfgFile)

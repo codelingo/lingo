@@ -240,7 +240,17 @@ func (fc *FileConfig) SetForEnv(key string, value interface{}, env string) error
 
 	fc.data = convertMapType(infoM.info)
 
-	return ioutil.WriteFile(fc.filename, data, 0755)
+	err = ioutil.WriteFile(fc.filename, data, 0755)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = fc.refresh()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return nil
 }
 
 func (fc *FileConfig) Set(key string, value interface{}) error {
@@ -252,7 +262,7 @@ func (fc *FileConfig) Set(key string, value interface{}) error {
 	return fc.SetForEnv(key, value, env)
 }
 
-func (fc *FileConfig) Refresh() error {
+func (fc *FileConfig) refresh() error {
 	newFc, err := fc.config.New(fc.filename)
 	if err != nil {
 		return errors.Trace(err)
