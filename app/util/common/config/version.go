@@ -12,6 +12,12 @@ import (
 	"os"
 )
 
+const (
+	clientVerLatest = "client.version_latest"
+	clientVerLastChecked = "client.version_last_checked"
+	clientVerUpdated = "client.version_updated"
+)
+
 type versionConfig struct {
 	*config.FileConfig
 }
@@ -39,55 +45,55 @@ func Version() (*versionConfig, error) {
 	}, nil
 }
 
-func CreateVersion(overwrite bool) error {
-	configHome, err := util.ConfigHome()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	vCfgFilePath := filepath.Join(configHome, VersionCfgFile)
+func createVersionFile(basepath string, overwrite bool) error {
+	vCfgFilePath := filepath.Join(basepath, VersionCfgFile)
 	if _, err := os.Stat(vCfgFilePath); os.IsNotExist(err) || overwrite {
 		err := ioutil.WriteFile(vCfgFilePath, []byte(VersionTmpl), 0644)
 		if err != nil {
 			return errors.Annotate(err, "verifyConfig: Could not create version config")
 		}
 	}
-
 	return nil
 }
 
+func CreateVersionFile(overwrite bool) error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return createVersionFile(configHome, overwrite)
+}
+
+func CreateVersionDefaultFile() error {
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return createVersionFile(configDefaults, true)
+}
+
 func (v *versionConfig) ClientLatestVersion() (string, error) {
-	return v.Get("client.version_latest")
+	return v.Get(clientVerLatest)
 }
 
 func (v *versionConfig) SetClientLatestVersion(version string) error {
-	return v.Set("client.version_latest", version)
+	return v.Set(clientVerLatest, version)
 }
 
 func(v *versionConfig) ClientVersionLastChecked() (string, error) {
-	return v.Get("client.version_last_checked")
+	return v.Get(clientVerLastChecked)
 }
 
 func (v *versionConfig) SetClientVersionLastChecked(timeString string) error {
-	return v.Set("client.version_last_checked", timeString)
+	return v.Set(clientVerLastChecked, timeString)
 }
 
 func (v *versionConfig) ClientVersionUpdated() (string, error) {
-	return v.Get("client.version_updated")
+	return v.Get(clientVerUpdated)
 }
 
 func (v *versionConfig) SetClientVersionUpdated(version string) error {
-	return v.SetForEnv("client.version_updated", version, "all")
-}
-
-func (v *versionConfig) ClientVersion() (string, error) {
-	return v.Get("client.version")
-}
-
-func (v *versionConfig) SetClientVersion(cv string) error {
-	// TODO: Use `hashicorp/go-version` package for comparing and setting semvers
-	// https://github.com/hashicorp/go-version
-	return v.Set("all.client.version", cv)
+	return v.SetForEnv(clientVerUpdated, version, "all")
 }
 
 var VersionTmpl = fmt.Sprintf(`

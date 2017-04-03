@@ -9,6 +9,12 @@ import (
 	"os"
 )
 
+const(
+	gitCredentialFilename = "gitserver.credentials_filename"
+	gitUserName = "gitserver.user.username"
+	gitPassword = "gitserver.user.password"
+)
+
 type authConfig struct {
 	*config.FileConfig
 }
@@ -36,41 +42,51 @@ func Auth() (*authConfig, error) {
 	}, nil
 }
 
-func CreateAuth(overwrite bool) error {
-	configHome, err := util.ConfigHome()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	aCfgFilePath := filepath.Join(configHome, AuthCfgFile)
+func createAuthFile(basepath string, overwrite bool) error {
+	aCfgFilePath := filepath.Join(basepath, AuthCfgFile)
 	if _, err := os.Stat(aCfgFilePath); os.IsNotExist(err) || overwrite {
 		err := ioutil.WriteFile(aCfgFilePath, []byte(AuthTmpl), 0644)
 		if err != nil {
 			return errors.Annotate(err, "verifyConfig: Could not create auth config")
 		}
 	}
-
 	return nil
 }
 
+func CreateAuthFile(overwrite bool) error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return createAuthFile(configHome, overwrite)
+}
+
+func CreateAuthDefaultFile() error {
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return createAuthFile(configDefaults, true)
+}
+
 func (a *authConfig) GetGitCredentialsFilename() (string, error) {
-	return a.Get("gitserver.credentials_filename")
+	return a.Get(gitCredentialFilename)
 }
 
 func (a *authConfig) GetGitUserName() (string, error) {
-	return a.Get("gitserver.user.username")
+	return a.Get(gitUserName)
 }
 
 func (a *authConfig) SetGitUserName(userName string) error {
-	return a.Set("gitserver.user.username", userName)
+	return a.Set(gitUserName, userName)
 }
 
 func (a *authConfig) GetGitUserPassword() (string, error) {
-	return a.Get("gitserver.user.password")
+	return a.Get(gitPassword)
 }
 
 func (a *authConfig) SetGitUserPassword(userPassword string) error {
-	return a.Set("gitserver.user.password", userPassword)
+	return a.Set(gitPassword, userPassword)
 }
 
 

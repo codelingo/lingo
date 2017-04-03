@@ -10,6 +10,21 @@ import (
 	"os"
 )
 
+const (
+	gitRemoteName = "gitserver.remote.name"
+	gitServerHost = "gitserver.remote.host"
+	gitServerPort = "gitserver.remote.port"
+	gitServerProtocol = "gitserver.remote.protocol"
+	platformServerAddr = "addr"
+	platformServerPort = "port"
+	platformServerGrpcPort = "grpc_port"
+	mqAddrProtocol = "messagequeue.address.protocol"
+	mqAddrUsername = "messagequeue.address.username"
+	mqAddrPassword = "messagequeue.address.password"
+	mqAddrHost = "messagequeue.address.host"
+	mqAddrPort = "messagequeue.address.port"
+)
+
 type platformConfig struct {
 	*config.FileConfig
 }
@@ -37,53 +52,64 @@ func Platform() (*platformConfig, error) {
 	}, nil
 }
 
-func CreatePlatform(overwrite bool) error {
-	configHome, err := util.ConfigHome()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	pCfgFilePath := filepath.Join(configHome, PlatformCfgFile)
+func createPlatformFile(basepath string, overwrite bool) error {
+	pCfgFilePath := filepath.Join(basepath, PlatformCfgFile)
 	if _, err := os.Stat(pCfgFilePath); os.IsNotExist(err) || overwrite {
 		err := ioutil.WriteFile(pCfgFilePath, []byte(PlatformTmpl), 0644)
 		if err != nil {
 			return errors.Annotate(err, "verifyConfig: Could not create platform config")
 		}
 	}
-
 	return nil
 }
 
+func CreatePlatformFile(overwrite bool) error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return createPlatformFile(configHome, overwrite)
+}
+
+func CreatePlatformDefaultFile() error {
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return createPlatformFile(configDefaults, true)
+}
+
+
 func (p *platformConfig) GitRemoteName() (string, error) {
-	return p.Get("gitserver.remote.name")
+	return p.Get(gitRemoteName)
 }
 
 func (p *platformConfig) GitServerHost() (string, error) {
-	return p.Get("gitserver.remote.host")
+	return p.Get(gitServerHost)
 }
 
 func (p *platformConfig) GitServerPort() (string, error) {
-	return p.Get("gitserver.remote.port")
+	return p.Get(gitServerPort)
 }
 
 func (p *platformConfig) GitServerProtocol() (string, error) {
-	return p.Get("gitserver.remote.protocol")
+	return p.Get(gitServerProtocol)
 }
 
 func (p *platformConfig) GitServerAddr() (string, error) {
 
-	protocol, err := p.Get("gitserver.remote.protocol")
+	protocol, err := p.GitServerProtocol()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	host, err := p.Get("gitserver.remote.host")
+	host, err := p.GitServerHost()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
 	addr := protocol + "://" + host
-	port, err := p.Get("gitserver.remote.port")
+	port, err := p.GitServerPort()
 	if err != nil || port == "" {
 		return addr, nil
 	}
@@ -91,12 +117,12 @@ func (p *platformConfig) GitServerAddr() (string, error) {
 }
 
 func (p *platformConfig) Address() (string, error) {
-	addr, err := p.Get("addr")
+	addr, err := p.Get(platformServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get("port")
+	port, err := p.Get(platformServerPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -106,12 +132,12 @@ func (p *platformConfig) Address() (string, error) {
 
 func (p *platformConfig) GrpcAddress() (string, error) {
 
-	addr, err := p.Get("addr")
+	addr, err := p.Get(platformServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get("grpc_port")
+	port, err := p.Get(platformServerGrpcPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -120,27 +146,27 @@ func (p *platformConfig) GrpcAddress() (string, error) {
 }
 
 func (p *platformConfig) MessageQueueAddr() (string, error) {
-	protocol, err := p.Get("messagequeue.address.protocol")
+	protocol, err := p.Get(mqAddrProtocol)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	username, err := p.Get("messagequeue.address.username")
+	username, err := p.Get(mqAddrUsername)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	password, err := p.Get("messagequeue.address.password")
+	password, err := p.Get(mqAddrPassword)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	host, err := p.Get("messagequeue.address.host")
+	host, err := p.Get(mqAddrHost)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get("messagequeue.address.port")
+	port, err := p.Get(mqAddrPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}

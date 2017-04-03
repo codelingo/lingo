@@ -18,6 +18,7 @@ import (
 
 	goDocker "github.com/fsouza/go-dockerclient"
 	"github.com/juju/errors"
+	"github.com/codelingo/lingo/app/util/common"
 )
 
 // TODO(anyone): Change this back to '.lingo' after making config loader check if
@@ -131,6 +132,15 @@ func ConfigHome() (string, error) {
 	}
 
 	return filepath.Join(home, defaultHome, "configs"), nil
+}
+
+func ConfigDefaults() (string, error) {
+	configHome, err := ConfigHome()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return filepath.Join(configHome, "defaults", common.ClientVersion), nil
 }
 
 // UserHome returns the user's OS home directory.

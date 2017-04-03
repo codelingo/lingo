@@ -25,29 +25,18 @@ func init() {
 		false,
 		homeRq,
 		authRq,
+		configRq,
 	)
-
-	// 	register(&cli.Command{
-	// 	Name:  "update",
-	// 	Usage: "update the lingo client to the latest release",
-	// 	Flags: []cli.Flag{
-	// 		cli.BoolFlag{
-	// 			Name:  "dry-run",
-	// 			Usage: "prints the update steps without preforming them",
-	// 		},
-	// 		cli.BoolFlag{
-	// 			Name:  "check",
-	// 			Usage: "checks if a newer version is available",
-	// 		},
-	// 	},
-	// 	Action: updateAction,
-	// },
-	// 	false,
-	// 	homeRq,
-	// )
 }
 
 func updateAction(ctx *cli.Context) {
+
+	// Write pre-update client defaults to CLHOME/configs/defaults/<version>/*.yaml
+	err := writeConfigDefaults()
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
 
 	// Check version against endpoint
 	outdated, err := VersionIsOutdated()
@@ -61,39 +50,38 @@ func updateAction(ctx *cli.Context) {
 		}
 	}
 
+	// Write post-update client defaults to CLHOME/configs/defaults/<version>/*.yaml
+	err = writeConfigDefaults()
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+
 	reset := ctx.Bool("reset-configs")
 	err = updateClientConfigs(reset)
 	if err != nil {
 		util.OSErr(err)
 		return
 	}
+}
 
-	// fmt.Println("DISABLED: the update command will be enabled once the codelingo/lingo repository is public")
+func writeConfigDefaults() error {
+	err := config.CreateAuthDefaultFile()
+	if err != nil {
+		return errors.Trace(err)
+	}
 
-	// // first check if an update is avaliable
-	// v, err := semver.Make(common.ClientVersion)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	return
-	// 	// errors.ErrorStack(err)
-	// }
+	err = config.CreatePlatformDefaultFile()
+	if err != nil {
+		return errors.Trace(err)
+	}
 
-	// latest, err := latestVersion()
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	return
-	// 	// errors.ErrorStack(err)
-	// }
+	err = config.CreateVersionDefaultFile()
+	if err != nil {
+		return errors.Trace(err)
+	}
 
-	// if v.GT(latest) {
-	// 	// no new versions available
-	// 	return
-	// }
-
-	// CONTINUE HERE:
-	// 1. detect local OS
-	// 2. download new binary
-	// 3. run upgrade steps from new binary
+	return nil
 }
 
 func updateClientConfigs(reset bool) error {
@@ -109,23 +97,23 @@ func updateClientConfigs(reset bool) error {
 	}
 
 	if vrsnUpdtd == common.ClientVersion {
-		fmt.Printf("Your client & configs have already been updated to the latest version (%v).\n", common.ClientVersion)
+		fmt.Printf("Your client & configs are already on the latest version (%v).\n", common.ClientVersion)
 		// TODO:(emersonwood) Does anything more need to happen here? ie. should the user be prompted to update anyway or made aware of `lingo update --reset-configs`?
 		return nil
 	}
 
 	// TODO:(emersonwood) Store old configs in a struct here
 
-	// Overwrite existing configs with store templates
-	err = config.CreateAuth(true)
+	// Overwrite existing configs with new client config templates
+	err = config.CreateAuthFile(true)
 	if err != nil {
 		return errors.Trace(err)
 	}
-	err = config.CreatePlatform(true)
+	err = config.CreatePlatformFile(true)
 	if err != nil {
 		return errors.Trace(err)
 	}
-	err = config.CreateVersion(true)
+	err = config.CreateVersionFile(true)
 	if err != nil {
 		return errors.Trace(err)
 	}

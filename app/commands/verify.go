@@ -199,6 +199,17 @@ func verifyConfig() error {
 		}
 	}
 
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	if _, err := os.Stat(configDefaults); os.IsNotExist(err) {
+		err := os.MkdirAll(configDefaults, 0775)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create default configs directory")
+		}
+	}
+
 	envCfg := filepath.Join(configsHome, utilConfig.EnvCfgFile)
 	if _, err := os.Stat(envCfg); os.IsNotExist(err) {
 		err := ioutil.WriteFile(envCfg, []byte("all"), 0644)
@@ -207,17 +218,22 @@ func verifyConfig() error {
 		}
 	}
 
-	err = utilConfig.CreateAuth(false)
+	err = writeConfigDefaults()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = utilConfig.CreatePlatform(false)
+	err = utilConfig.CreateAuthFile(false)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = utilConfig.CreateVersion(false)
+	err = utilConfig.CreatePlatformFile(false)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = utilConfig.CreateVersionFile(false)
 	if err != nil {
 		return errors.Trace(err)
 	}
