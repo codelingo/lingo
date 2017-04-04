@@ -7,7 +7,6 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	"io/ioutil"
 	"os"
-	"github.com/codelingo/lingo/app/util/common"
 )
 
 const(
@@ -26,11 +25,15 @@ type authConfig struct {
 	*config.FileConfig
 }
 
-func auth(basepath string) (*authConfig, error) {
-	envFile := filepath.Join(basepath, EnvCfgFile)
+func AuthInDir(dir string) (*authConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	envFile := filepath.Join(configHome, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	aCfgPath := filepath.Join(basepath, AuthCfgFile)
+	aCfgPath := filepath.Join(dir, AuthCfgFile)
 	aCfg, err := cfg.New(aCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -46,20 +49,11 @@ func Auth() (*authConfig, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return auth(configHome)
+	return AuthInDir(configHome)
 }
 
-func AuthDefault(ver string) (*authConfig, error) {
-	configDefaults, err := util.ConfigDefaults()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	dir := filepath.Join(configDefaults, ver)
-	return auth(dir)
-}
-
-func createAuthFile(basepath string, overwrite bool) error {
-	aCfgFilePath := filepath.Join(basepath, AuthCfgFile)
+func CreateAuthFileInDir(dir string, overwrite bool) error {
+	aCfgFilePath := filepath.Join(dir, AuthCfgFile)
 	if _, err := os.Stat(aCfgFilePath); os.IsNotExist(err) || overwrite {
 		err := ioutil.WriteFile(aCfgFilePath, []byte(AuthTmpl), 0644)
 		if err != nil {
@@ -69,21 +63,12 @@ func createAuthFile(basepath string, overwrite bool) error {
 	return nil
 }
 
-func CreateAuthFile(overwrite bool) error {
+func CreateAuthFile() error {
 	configHome, err := util.ConfigHome()
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return createAuthFile(configHome, overwrite)
-}
-
-func CreateAuthDefaultFile() error {
-	configDefaults, err := util.ConfigDefaults()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	dir := filepath.Join(configDefaults, common.ClientVersion)
-	return createAuthFile(dir, true)
+	return CreateAuthFileInDir(configHome, false)
 }
 
 func (a *authConfig) Dump() (map[string]interface{}, error) {

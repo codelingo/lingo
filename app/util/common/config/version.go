@@ -28,11 +28,15 @@ type versionConfig struct {
 	*config.FileConfig
 }
 
-func version(basepath string) (*versionConfig, error) {
-	envFile := filepath.Join(basepath, EnvCfgFile)
+func VersionInDir(dir string) (*versionConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	envFile := filepath.Join(configHome, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	vCfgPath := filepath.Join(basepath, VersionCfgFile)
+	vCfgPath := filepath.Join(dir, VersionCfgFile)
 	vCfg, err := cfg.New(vCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -48,20 +52,12 @@ func Version() (*versionConfig, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return version(configHome)
+	return VersionInDir(configHome)
 }
 
-func VersionDefault(ver string) (*versionConfig, error) {
-	configDefaults, err := util.ConfigDefaults()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	dir := filepath.Join(configDefaults, ver)
-	return version(dir)
-}
 
-func createVersionFile(basepath string, overwrite bool) error {
-	vCfgFilePath := filepath.Join(basepath, VersionCfgFile)
+func CreateVersionFileInDir(dir string, overwrite bool) error {
+	vCfgFilePath := filepath.Join(dir, VersionCfgFile)
 	if _, err := os.Stat(vCfgFilePath); os.IsNotExist(err) || overwrite {
 		err := ioutil.WriteFile(vCfgFilePath, []byte(VersionTmpl), 0644)
 		if err != nil {
@@ -71,21 +67,12 @@ func createVersionFile(basepath string, overwrite bool) error {
 	return nil
 }
 
-func CreateVersionFile(overwrite bool) error {
+func CreateVersionFile() error {
 	configHome, err := util.ConfigHome()
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return createVersionFile(configHome, overwrite)
-}
-
-func CreateVersionDefaultFile() error {
-	configDefaults, err := util.ConfigDefaults()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	dir := filepath.Join(configDefaults, common.ClientVersion)
-	return createVersionFile(dir, true)
+	return CreateVersionFileInDir(configHome, false)
 }
 
 func (v *versionConfig) Dump() (map[string]interface{}, error) {

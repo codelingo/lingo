@@ -9,6 +9,8 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
 	"strings"
+	"os"
+	"path/filepath"
 )
 
 func init() {
@@ -32,8 +34,15 @@ func init() {
 }
 
 func updateAction(ctx *cli.Context) {
-	// Write pre-update client defaults to CLHOME/configs/defaults/<version>/*.yaml
-	err := writeConfigDefaults()
+
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+	configDefaults = filepath.Join(configDefaults, common.ClientVersion)
+
+	err = createConfigDefaultFiles(configDefaults)
 	if err != nil {
 		util.OSErr(err)
 		return
@@ -60,40 +69,21 @@ func updateAction(ctx *cli.Context) {
 	}
 
 	// Write post-update client defaults to CLHOME/configs/defaults/<version>/*.yaml
-	err = writeConfigDefaults()
+	err = createConfigDefaultFiles(configDefaults)
 	if err != nil {
 		util.OSErr(err)
 		return
 	}
 
 	reset := ctx.Bool("reset-configs")
-	err = updateClientConfigs(reset)
+	err = updateClientConfigs(configDefaults, reset)
 	if err != nil {
 		util.OSErr(err)
 		return
 	}
 }
 
-func writeConfigDefaults() error {
-	err := config.CreateAuthDefaultFile()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	err = config.CreatePlatformDefaultFile()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	err = config.CreateVersionDefaultFile()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	return nil
-}
-
-func updateClientConfigs(reset bool) error {
+func updateClientConfigs(configDefaults string, reset bool) error {
 
 	versCfg, err := config.Version()
 	if err != nil {
@@ -111,87 +101,63 @@ func updateClientConfigs(reset bool) error {
 		return nil
 	}
 
-	// Dump the configs
-	authCfg, err := config.Auth()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	authDump, err := authCfg.Dump()
+	configUpdates, err := util.ConfigUpdates()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	platCfg, err := config.Platform()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	platDump, err := platCfg.Dump()
+	err = createConfigUpdateFiles(configUpdates)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	versDump, err := versCfg.Dump()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	/*
-	TODO: Either store these dumps in a temp place or don't overwrite the base config files until merging is complete.
-	If any errors occur before merging is complete then this will leave the configs in a semi-merged state
-	that can't be recovered from since the original dumps above will be lost.
-	*/
-
-	// Overwrite existing configs with new client config templates
-	err = config.CreateAuthFile(true)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	err = config.CreatePlatformFile(true)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	err = config.CreateVersionFile(true)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	// Reload old client configs where possible
+	// Add all valid user key:values to update configs
 	if !reset {
-		currAuthCfg, err := config.Auth()
-		if err != nil {
-			return errors.Trace(err)
-		}
-		oldAuthCfg, err := config.AuthDefault(versionUpdated)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		err = mergeConfigs(currAuthCfg.FileConfig, oldAuthCfg.FileConfig, authDump)
+		authDump, platDump, versDump, err := dumpCurrentConfigs()
 		if err != nil {
 			return errors.Trace(err)
 		}
 
-		currPlatCfg, err := config.Platform()
+		authUpdateCfg, err := config.AuthInDir(configUpdates)
 		if err != nil {
 			return errors.Trace(err)
 		}
-		oldPlatCfg, err := config.PlatformDefault(versionUpdated)
+		authDefaultCfg, err := config.AuthInDir(configDefaults)
 		if err != nil {
 			return errors.Trace(err)
 		}
-		err = mergeConfigs(currPlatCfg.FileConfig, oldPlatCfg.FileConfig, platDump)
+		err = mergeConfigs(authUpdateCfg.FileConfig, authDefaultCfg.FileConfig, authDump)
 		if err != nil {
 			return errors.Trace(err)
 		}
 
-		currVerCfg, err := config.Version()
+		platUpdateCfg, err := config.PlatformInDir(configUpdates)
 		if err != nil {
 			return errors.Trace(err)
 		}
-		oldVerCfg, err := config.VersionDefault(versionUpdated)
-		err = mergeConfigs(currVerCfg.FileConfig, oldVerCfg.FileConfig, versDump)
+		platDefaultCfg, err := config.PlatformInDir(configDefaults)
 		if err != nil {
 			return errors.Trace(err)
 		}
+		err = mergeConfigs(platUpdateCfg.FileConfig, platDefaultCfg.FileConfig, platDump)
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		versUpdateCfg, err := config.VersionInDir(configUpdates)
+		if err != nil {
+			return errors.Trace(err)
+		}
+		versDefaultCfg, err := config.VersionInDir(configDefaults)
+		err = mergeConfigs(versUpdateCfg.FileConfig, versDefaultCfg.FileConfig, versDump)
+		if err != nil {
+			return errors.Trace(err)
+		}
+	}
+
+	err = replaceConfigFiles(configUpdates)
+	if err != nil {
+		return errors.Trace(err)
 	}
 
 	err = versCfg.SetClientVersionUpdated(common.ClientVersion)
@@ -203,6 +169,80 @@ func updateClientConfigs(reset bool) error {
 		fmt.Println("Configs reset successfully.")
 	} else {
 		fmt.Println("Configs updated successfully.")
+	}
+
+	return nil
+}
+
+func dumpCurrentConfigs() (map[string]interface{}, map[string]interface{}, map[string]interface{}, error) {
+	authCfg, err := config.Auth()
+	if err != nil {
+		return nil, nil, nil, errors.Trace(err)
+	}
+	authDump, err := authCfg.Dump()
+	if err != nil {
+		return nil, nil, nil, errors.Trace(err)
+	}
+
+	platCfg, err := config.Platform()
+	if err != nil {
+		return nil, nil, nil, errors.Trace(err)
+	}
+	platDump, err := platCfg.Dump()
+	if err != nil {
+		return nil, nil, nil, errors.Trace(err)
+	}
+
+	versCfg, err := config.Version()
+	if err != nil {
+		return nil, nil, nil, errors.Trace(err)
+	}
+	versDump, err := versCfg.Dump()
+	if err != nil {
+		return nil, nil, nil, errors.Trace(err)
+	}
+
+	return authDump, platDump, versDump, nil
+}
+
+func createConfigDefaultFiles(dir string) error {
+	err := config.CreateAuthFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = config.CreatePlatformFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = config.CreateVersionFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return nil
+}
+
+func createConfigUpdateFiles(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, 0775)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create update configs directory")
+		}
+	}
+
+	err := config.CreateAuthFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	err = config.CreatePlatformFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	err = config.CreateVersionFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
 	}
 
 	return nil
@@ -233,5 +273,40 @@ func mergeConfigs(currCfg, oldDefCfg *servConf.FileConfig, keyMap map[string]int
 		}
 
 	}
+	return nil
+}
+
+func replaceConfigFiles(configUpdates string) error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	authUpdate := filepath.Join(configUpdates, config.AuthCfgFile)
+	authHome := filepath.Join(configHome, config.AuthCfgFile)
+	err = os.Rename(authUpdate, authHome)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	platUpdate := filepath.Join(configUpdates, config.PlatformCfgFile)
+	platHome := filepath.Join(configHome, config.PlatformCfgFile)
+	err = os.Rename(platUpdate, platHome)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	versUpdate := filepath.Join(configUpdates, config.VersionCfgFile)
+	versHome := filepath.Join(configHome, config.VersionCfgFile)
+	err = os.Rename(versUpdate, versHome)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = os.Remove(configUpdates)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
 	return nil
 }

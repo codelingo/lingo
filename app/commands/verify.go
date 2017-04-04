@@ -219,22 +219,22 @@ func verifyConfig() error {
 		}
 	}
 
-	err = writeConfigDefaults()
+	err = createConfigDefaultFiles(configDefaults)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = utilConfig.CreateAuthFile(false)
+	err = utilConfig.CreateAuthFile()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = utilConfig.CreatePlatformFile(false)
+	err = utilConfig.CreatePlatformFile()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = utilConfig.CreateVersionFile(false)
+	err = utilConfig.CreateVersionFile()
 	if err != nil {
 		return errors.Trace(err)
 	}

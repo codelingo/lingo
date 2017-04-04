@@ -5,7 +5,6 @@ import (
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/app/util/common"
 	"path/filepath"
 	"io/ioutil"
 	"os"
@@ -46,11 +45,15 @@ type platformConfig struct {
 	*config.FileConfig
 }
 
-func platform(basepath string) (*platformConfig, error) {
-	envFile := filepath.Join(basepath, EnvCfgFile)
+func PlatformInDir(dir string) (*platformConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	envFile := filepath.Join(configHome, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	pCfgPath := filepath.Join(basepath, PlatformCfgFile)
+	pCfgPath := filepath.Join(dir, PlatformCfgFile)
 	pCfg, err := cfg.New(pCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -66,20 +69,11 @@ func Platform() (*platformConfig, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return platform(configHome)
+	return PlatformInDir(configHome)
 }
 
-func PlatformDefault(ver string) (*platformConfig, error) {
-	configDefaults, err := util.ConfigDefaults()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	dir := filepath.Join(configDefaults, ver)
-	return platform(dir)
-}
-
-func createPlatformFile(basepath string, overwrite bool) error {
-	pCfgFilePath := filepath.Join(basepath, PlatformCfgFile)
+func CreatePlatformFileInDir(dir string, overwrite bool) error {
+	pCfgFilePath := filepath.Join(dir, PlatformCfgFile)
 	if _, err := os.Stat(pCfgFilePath); os.IsNotExist(err) || overwrite {
 		err := ioutil.WriteFile(pCfgFilePath, []byte(PlatformTmpl), 0644)
 		if err != nil {
@@ -89,21 +83,12 @@ func createPlatformFile(basepath string, overwrite bool) error {
 	return nil
 }
 
-func CreatePlatformFile(overwrite bool) error {
+func CreatePlatformFile() error {
 	configHome, err := util.ConfigHome()
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return createPlatformFile(configHome, overwrite)
-}
-
-func CreatePlatformDefaultFile() error {
-	configDefaults, err := util.ConfigDefaults()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	dir := filepath.Join(configDefaults, common.ClientVersion)
-	return createPlatformFile(dir, true)
+	return CreatePlatformFileInDir(configHome, false)
 }
 
 func (p *platformConfig) Dump() (map[string]interface{}, error) {

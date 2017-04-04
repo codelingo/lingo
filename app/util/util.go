@@ -141,6 +141,14 @@ func ConfigDefaults() (string, error) {
 	return filepath.Join(configHome, "defaults"), nil
 }
 
+func ConfigUpdates() (string, error) {
+	configHome, err := ConfigHome()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return filepath.Join(configHome, "updates"), nil
+}
+
 // UserHome returns the user's OS home directory.
 func UserHome() (string, error) {
 	return homedir.Dir()
