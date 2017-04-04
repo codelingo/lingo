@@ -270,7 +270,7 @@ func verifyClientVersion() error {
 		return errors.Trace(err)
 	}
 
-	layout := "2006-01-02 15:04:05.000000000 -0700 MST"
+	layout := "2006-01-02 15:04:05.999999999 -0700 MST"
 	lastChecked, err := time.Parse(layout, lastCheckedString)
 	if err != nil {
 		return errors.Trace(err)
