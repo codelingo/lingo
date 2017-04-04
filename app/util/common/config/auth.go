@@ -19,19 +19,11 @@ type authConfig struct {
 	*config.FileConfig
 }
 
-func Auth() (*authConfig, error) {
-	configHome, err := util.ConfigHome()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	envFile := filepath.Join(configHome, EnvCfgFile)
+func auth(basepath string) (*authConfig, error) {
+	envFile := filepath.Join(basepath, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	aCfgPath, err := fullCfgPath(AuthCfgFile)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+	aCfgPath := filepath.Join(basepath, AuthCfgFile)
 	aCfg, err := cfg.New(aCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -40,6 +32,23 @@ func Auth() (*authConfig, error) {
 	return &authConfig{
 		aCfg,
 	}, nil
+}
+
+func Auth() (*authConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return auth(configHome)
+}
+
+func AuthDefault(ver string) (*authConfig, error) {
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	dir := filepath.Join(configDefaults, ver)
+	return auth(dir)
 }
 
 func createAuthFile(basepath string, overwrite bool) error {
@@ -67,6 +76,12 @@ func CreateAuthDefaultFile() error {
 		return errors.Trace(err)
 	}
 	return createAuthFile(configDefaults, true)
+}
+
+func (a *authConfig) Dump() (map[string]interface{}, error) {
+	keyMap := make(map[string]interface{})
+	// TODO: Implement
+	return keyMap, nil
 }
 
 func (a *authConfig) GetGitCredentialsFilename() (string, error) {

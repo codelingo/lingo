@@ -22,19 +22,11 @@ type versionConfig struct {
 	*config.FileConfig
 }
 
-func Version() (*versionConfig, error) {
-	configHome, err := util.ConfigHome()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	envFile := filepath.Join(configHome, EnvCfgFile)
+func version(basepath string) (*versionConfig, error) {
+	envFile := filepath.Join(basepath, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	vCfgPath, err := fullCfgPath(VersionCfgFile)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+	vCfgPath := filepath.Join(basepath, VersionCfgFile)
 	vCfg, err := cfg.New(vCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -43,6 +35,23 @@ func Version() (*versionConfig, error) {
 	return &versionConfig{
 		vCfg,
 	}, nil
+}
+
+func Version() (*versionConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return version(configHome)
+}
+
+func VersionDefault(ver string) (*versionConfig, error) {
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	dir := filepath.Join(configDefaults, ver)
+	return version(dir)
 }
 
 func createVersionFile(basepath string, overwrite bool) error {
@@ -72,6 +81,12 @@ func CreateVersionDefaultFile() error {
 	return createVersionFile(configDefaults, true)
 }
 
+func (v *versionConfig) Dump() (map[string]interface{}, error) {
+	keyMap := make(map[string]interface{})
+	// TODO: Implement
+	return keyMap, nil
+}
+
 func (v *versionConfig) ClientLatestVersion() (string, error) {
 	return v.Get(clientVerLatest)
 }
@@ -93,7 +108,7 @@ func (v *versionConfig) ClientVersionUpdated() (string, error) {
 }
 
 func (v *versionConfig) SetClientVersionUpdated(version string) error {
-	return v.SetForEnv(clientVerUpdated, version, "all")
+	return v.SetForEnv("all", clientVerUpdated, version)
 }
 
 var VersionTmpl = fmt.Sprintf(`

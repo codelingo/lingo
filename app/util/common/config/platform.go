@@ -29,19 +29,11 @@ type platformConfig struct {
 	*config.FileConfig
 }
 
-func Platform() (*platformConfig, error) {
-	configHome, err := util.ConfigHome()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	envFile := filepath.Join(configHome, EnvCfgFile)
+func platform(basepath string) (*platformConfig, error) {
+	envFile := filepath.Join(basepath, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	pCfgPath, err := fullCfgPath(PlatformCfgFile)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+	pCfgPath := filepath.Join(basepath, PlatformCfgFile)
 	pCfg, err := cfg.New(pCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -50,6 +42,23 @@ func Platform() (*platformConfig, error) {
 	return &platformConfig{
 		pCfg,
 	}, nil
+}
+
+func Platform() (*platformConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return platform(configHome)
+}
+
+func PlatformDefault(ver string) (*platformConfig, error) {
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	dir := filepath.Join(configDefaults, ver)
+	return platform(dir)
 }
 
 func createPlatformFile(basepath string, overwrite bool) error {
@@ -79,6 +88,11 @@ func CreatePlatformDefaultFile() error {
 	return createPlatformFile(configDefaults, true)
 }
 
+func (p *platformConfig) Dump() (map[string]interface{}, error) {
+	keyMap := make(map[string]interface{})
+	// TODO: Implement
+	return keyMap, nil
+}
 
 func (p *platformConfig) GitRemoteName() (string, error) {
 	return p.Get(gitRemoteName)

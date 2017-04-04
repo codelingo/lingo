@@ -4,6 +4,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/app/util/common/config"
+	servConf "github.com/codelingo/lingo/service/config"
 	"fmt"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
@@ -30,7 +31,6 @@ func init() {
 }
 
 func updateAction(ctx *cli.Context) {
-
 	// Write pre-update client defaults to CLHOME/configs/defaults/<version>/*.yaml
 	err := writeConfigDefaults()
 	if err != nil {
@@ -43,6 +43,14 @@ func updateAction(ctx *cli.Context) {
 	if err != nil {
 		if outdated {
 			fmt.Println("Your client is out of date. Please download and install the latest binary from https://github.com/codelingo/lingo/releases")
+			/*
+			TODO: Implement automatic download & install when client release becomes public.
+			1. Prompt user to auto download / install.
+			2. Download latest binary into temp folder.
+			3. Install binary whilst this client is still running.
+			4. Exit this client so new client can be loaded.
+			5. Either prompt user to run `lingo update` or do it automatically somehow?
+			*/
 			return
 		} else {
 			util.OSErr(err)
@@ -86,23 +94,51 @@ func writeConfigDefaults() error {
 
 func updateClientConfigs(reset bool) error {
 
-	vCfg, err := config.Version()
+	versCfg, err := config.Version()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	vrsnUpdtd, err := vCfg.ClientVersionUpdated()
+	versionUpdated, err := vCfg.ClientVersionUpdated()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	if vrsnUpdtd == common.ClientVersion {
+	if versionUpdated == common.ClientVersion {
 		fmt.Printf("Your client & configs are already on the latest version (%v).\n", common.ClientVersion)
 		// TODO:(emersonwood) Does anything more need to happen here? ie. should the user be prompted to update anyway or made aware of `lingo update --reset-configs`?
 		return nil
 	}
 
-	// TODO:(emersonwood) Store old configs in a struct here
+	// Dump the configs
+	authCfg, err := config.Auth()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	authDump, err := authCfg.Dump()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	platCfg, err := config.Platform()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	platDump, err := platCfg.Dump()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	versDump, err := versCfg.Dump()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	/*
+	TODO: Either store these dumps in a temp place or don't overwrite the base config files until merging is complete.
+	If any errors occur before merging is complete then this will leave the configs in a semi-merged state
+	that can't be recovered from since the original dumps above will be lost.
+	*/
 
 	// Overwrite existing configs with new client config templates
 	err = config.CreateAuthFile(true)
@@ -119,10 +155,44 @@ func updateClientConfigs(reset bool) error {
 	}
 
 	if !reset {
-		// TODO:(emersonwood) Restore values from old configs; discuss with Jesse
+		currAuthCfg, err := config.Auth()
+		if err != nil {
+			return errors.Trace(err)
+		}
+		oldAuthCfg, err := config.AuthDefault(versionUpdated)
+		if err != nil {
+			return errors.Trace(err)
+		}
+		err = mergeConfigs(currAuthCfg.FileConfig, oldAuthCfg.FileConfig, authDump)
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		currPlatCfg, err := config.Platform()
+		if err != nil {
+			return errors.Trace(err)
+		}
+		oldPlatCfg, err := config.PlatformDefault(versionUpdated)
+		if err != nil {
+			return errors.Trace(err)
+		}
+		err = mergeConfigs(currPlatCfg.FileConfig, oldPlatCfg.FileConfig, platDump)
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		currVerCfg, err := config.Version()
+		if err != nil {
+			return errors.Trace(err)
+		}
+		oldVerCfg, err := config.VersionDefault(versionUpdated)
+		err = mergeConfigs(currVerCfg.FileConfig, oldVerCfg.FileConfig, versDump)
+		if err != nil {
+			return errors.Trace(err)
+		}
 	}
 
-	err = vCfg.SetClientVersionUpdated(common.ClientVersion)
+	err = versCfg.SetClientVersionUpdated(common.ClientVersion)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -133,5 +203,21 @@ func updateClientConfigs(reset bool) error {
 		fmt.Println("Configs updated successfully.")
 	}
 
+	return nil
+}
+
+func mergeConfigs(currCfg, oldCfg *servConf.FileConfig, keyMap map[string]interface{}) error {
+	// TODO: Implement
+	//for k, v := range keyMap {
+	//	kList := strings.Split(k, ".")
+	//	if len(kList) < 2 {
+	//		// Not useful.. ignore
+	//		continue
+	//	}
+	//	env := kList[0]
+	//	key := strings.Join(kList[1:], ".")
+	//
+	//
+	//}
 	return nil
 }

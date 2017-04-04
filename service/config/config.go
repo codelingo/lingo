@@ -214,7 +214,7 @@ func (fc *FileConfig) Get(key string) (string, error) {
 	return "", errors.Errorf("config %q not found", key)
 }
 
-func (fc *FileConfig) SetForEnv(key string, value interface{}, env string) error {
+func (fc *FileConfig) SetForEnv(env string, key string, value interface{}) error {
 	// Prepend the env to the given key
 	key = env+"."+key
 
@@ -245,7 +245,7 @@ func (fc *FileConfig) SetForEnv(key string, value interface{}, env string) error
 		return errors.Trace(err)
 	}
 
-	err = fc.refresh()
+	err = fc.Reload()
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -259,10 +259,10 @@ func (fc *FileConfig) Set(key string, value interface{}) error {
 		return errors.Trace(err)
 	}
 
-	return fc.SetForEnv(key, value, env)
+	return fc.SetForEnv(env, key, value)
 }
 
-func (fc *FileConfig) refresh() error {
+func (fc *FileConfig) Reload() error {
 	newFc, err := fc.config.New(fc.filename)
 	if err != nil {
 		return errors.Trace(err)
