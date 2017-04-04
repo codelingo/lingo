@@ -31,7 +31,7 @@ func (s *suite) TestGetCfg(c *C) {
 	testCfg, err := cfg.New("test_cfg.yaml")
 	c.Assert(err, jc.ErrorIsNil)
 
-	addr, err := testCfg.Get("gitserver.remote.name")
+	addr, err := testCfg.GetValue("gitserver.remote.name")
 	c.Assert(err, jc.ErrorIsNil)
 	c.Assert(addr, DeepEquals, "")
 }

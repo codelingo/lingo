@@ -99,7 +99,7 @@ func updateClientConfigs(reset bool) error {
 		return errors.Trace(err)
 	}
 
-	versionUpdated, err := vCfg.ClientVersionUpdated()
+	versionUpdated, err := versCfg.ClientVersionUpdated()
 	if err != nil {
 		return errors.Trace(err)
 	}

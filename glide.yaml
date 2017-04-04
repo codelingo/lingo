@@ -35,4 +35,4 @@ import:
 - package: gopkg.in/check.v1
 - package: gopkg.in/yaml.v1
 - package: gopkg.in/yaml.v2
-
+- package: github.com/hishboy/gocommons

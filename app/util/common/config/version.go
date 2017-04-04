@@ -88,7 +88,7 @@ func (v *versionConfig) Dump() (map[string]interface{}, error) {
 }
 
 func (v *versionConfig) ClientLatestVersion() (string, error) {
-	return v.Get(clientVerLatest)
+	return v.GetValue(clientVerLatest)
 }
 
 func (v *versionConfig) SetClientLatestVersion(version string) error {
@@ -96,7 +96,7 @@ func (v *versionConfig) SetClientLatestVersion(version string) error {
 }
 
 func(v *versionConfig) ClientVersionLastChecked() (string, error) {
-	return v.Get(clientVerLastChecked)
+	return v.GetValue(clientVerLastChecked)
 }
 
 func (v *versionConfig) SetClientVersionLastChecked(timeString string) error {
@@ -104,7 +104,7 @@ func (v *versionConfig) SetClientVersionLastChecked(timeString string) error {
 }
 
 func (v *versionConfig) ClientVersionUpdated() (string, error) {
-	return v.Get(clientVerUpdated)
+	return v.GetValue(clientVerUpdated)
 }
 
 func (v *versionConfig) SetClientVersionUpdated(version string) error {

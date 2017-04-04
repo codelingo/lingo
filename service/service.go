@@ -436,7 +436,7 @@ func New() (server.CodeLingoService, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	isTLS, err := platCfg.Get("gitserver.tls")
+	isTLS, err := platCfg.GetValue("gitserver.tls")
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

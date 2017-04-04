@@ -85,11 +85,11 @@ func (a *authConfig) Dump() (map[string]interface{}, error) {
 }
 
 func (a *authConfig) GetGitCredentialsFilename() (string, error) {
-	return a.Get(gitCredentialFilename)
+	return a.GetValue(gitCredentialFilename)
 }
 
 func (a *authConfig) GetGitUserName() (string, error) {
-	return a.Get(gitUserName)
+	return a.GetValue(gitUserName)
 }
 
 func (a *authConfig) SetGitUserName(userName string) error {
@@ -97,7 +97,7 @@ func (a *authConfig) SetGitUserName(userName string) error {
 }
 
 func (a *authConfig) GetGitUserPassword() (string, error) {
-	return a.Get(gitPassword)
+	return a.GetValue(gitPassword)
 }
 
 func (a *authConfig) SetGitUserPassword(userPassword string) error {

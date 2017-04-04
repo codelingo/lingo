@@ -95,19 +95,19 @@ func (p *platformConfig) Dump() (map[string]interface{}, error) {
 }
 
 func (p *platformConfig) GitRemoteName() (string, error) {
-	return p.Get(gitRemoteName)
+	return p.GetValue(gitRemoteName)
 }
 
 func (p *platformConfig) GitServerHost() (string, error) {
-	return p.Get(gitServerHost)
+	return p.GetValue(gitServerHost)
 }
 
 func (p *platformConfig) GitServerPort() (string, error) {
-	return p.Get(gitServerPort)
+	return p.GetValue(gitServerPort)
 }
 
 func (p *platformConfig) GitServerProtocol() (string, error) {
-	return p.Get(gitServerProtocol)
+	return p.GetValue(gitServerProtocol)
 }
 
 func (p *platformConfig) GitServerAddr() (string, error) {
@@ -131,12 +131,12 @@ func (p *platformConfig) GitServerAddr() (string, error) {
 }
 
 func (p *platformConfig) Address() (string, error) {
-	addr, err := p.Get(platformServerAddr)
+	addr, err := p.GetValue(platformServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get(platformServerPort)
+	port, err := p.GetValue(platformServerPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -146,12 +146,12 @@ func (p *platformConfig) Address() (string, error) {
 
 func (p *platformConfig) GrpcAddress() (string, error) {
 
-	addr, err := p.Get(platformServerAddr)
+	addr, err := p.GetValue(platformServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get(platformServerGrpcPort)
+	port, err := p.GetValue(platformServerGrpcPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -160,27 +160,27 @@ func (p *platformConfig) GrpcAddress() (string, error) {
 }
 
 func (p *platformConfig) MessageQueueAddr() (string, error) {
-	protocol, err := p.Get(mqAddrProtocol)
+	protocol, err := p.GetValue(mqAddrProtocol)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	username, err := p.Get(mqAddrUsername)
+	username, err := p.GetValue(mqAddrUsername)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	password, err := p.Get(mqAddrPassword)
+	password, err := p.GetValue(mqAddrPassword)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	host, err := p.Get(mqAddrHost)
+	host, err := p.GetValue(mqAddrHost)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get(mqAddrPort)
+	port, err := p.GetValue(mqAddrPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
