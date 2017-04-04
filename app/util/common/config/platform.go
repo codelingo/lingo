@@ -168,7 +168,7 @@ dev:
       port: "5672"
 onprem:
   addr: 192.168.99.100
-  port: "30300"
+  // port: "30300"
   grpc_port: "30082"
   gitserver:
     tls: "true"
