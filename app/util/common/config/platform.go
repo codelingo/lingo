@@ -5,6 +5,7 @@ import (
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/app/util/common"
 	"path/filepath"
 	"io/ioutil"
 	"os"
@@ -24,6 +25,22 @@ const (
 	mqAddrHost = "messagequeue.address.host"
 	mqAddrPort = "messagequeue.address.port"
 )
+
+var platDumpConsts = []string{
+	gitRemoteName,
+	gitServerHost,
+	gitServerPort,
+	gitServerProtocol,
+	platformServerAddr,
+	platformServerPort,
+	platformServerGrpcPort,
+	mqAddrProtocol,
+	mqAddrUsername,
+	mqAddrPassword,
+	mqAddrHost,
+	mqAddrPort,
+
+}
 
 type platformConfig struct {
 	*config.FileConfig
@@ -85,12 +102,23 @@ func CreatePlatformDefaultFile() error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return createPlatformFile(configDefaults, true)
+	dir := filepath.Join(configDefaults, common.ClientVersion)
+	return createPlatformFile(dir, true)
 }
 
 func (p *platformConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
-	// TODO: Implement
+
+	for _, pCon := range platDumpConsts {
+		newMap, err := p.GetAll(pCon)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		for k, v := range newMap {
+			keyMap[k] = v
+		}
+	}
+
 	return keyMap, nil
 }
 

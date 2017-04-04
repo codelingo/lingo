@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
+	"strings"
 )
 
 func init() {
@@ -104,7 +105,7 @@ func updateClientConfigs(reset bool) error {
 		return errors.Trace(err)
 	}
 
-	if versionUpdated == common.ClientVersion {
+	if versionUpdated == common.ClientVersion && !reset {
 		fmt.Printf("Your client & configs are already on the latest version (%v).\n", common.ClientVersion)
 		// TODO:(emersonwood) Does anything more need to happen here? ie. should the user be prompted to update anyway or made aware of `lingo update --reset-configs`?
 		return nil
@@ -154,6 +155,7 @@ func updateClientConfigs(reset bool) error {
 		return errors.Trace(err)
 	}
 
+	// Reload old client configs where possible
 	if !reset {
 		currAuthCfg, err := config.Auth()
 		if err != nil {
@@ -206,18 +208,30 @@ func updateClientConfigs(reset bool) error {
 	return nil
 }
 
-func mergeConfigs(currCfg, oldCfg *servConf.FileConfig, keyMap map[string]interface{}) error {
-	// TODO: Implement
-	//for k, v := range keyMap {
-	//	kList := strings.Split(k, ".")
-	//	if len(kList) < 2 {
-	//		// Not useful.. ignore
-	//		continue
-	//	}
-	//	env := kList[0]
-	//	key := strings.Join(kList[1:], ".")
-	//
-	//
-	//}
+func mergeConfigs(currCfg, oldDefCfg *servConf.FileConfig, keyMap map[string]interface{}) error {
+	for k, v := range keyMap {
+		keyList := strings.Split(k, ".")
+		if len(keyList) < 2 {
+			// Not useful.. ignore
+			continue
+		}
+		env := keyList[0]
+		key := strings.Join(keyList[1:], ".")
+
+		defVal, err := oldDefCfg.GetForEnv(env, key)
+		if err != nil && !strings.HasPrefix(err.Error(), "Could not find value") {
+			fmt.Println(err)
+			continue
+		}
+
+		if v != defVal {
+			err = currCfg.SetForEnv(env, key, v)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+		}
+
+	}
 	return nil
 }

@@ -200,11 +200,12 @@ func verifyConfig() error {
 	}
 
 	configDefaults, err := util.ConfigDefaults()
+	dir := filepath.Join(configDefaults, common.ClientVersion)
 	if err != nil {
 		return errors.Trace(err)
 	}
-	if _, err := os.Stat(configDefaults); os.IsNotExist(err) {
-		err := os.MkdirAll(configDefaults, 0775)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, 0775)
 		if err != nil {
 			return errors.Annotate(err, "verifyConfig: Could not create default configs directory")
 		}

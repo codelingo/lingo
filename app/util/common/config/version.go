@@ -18,6 +18,12 @@ const (
 	clientVerUpdated = "client.version_updated"
 )
 
+var versDumpConsts = []string {
+	clientVerLatest,
+	clientVerLastChecked,
+	clientVerUpdated,
+}
+
 type versionConfig struct {
 	*config.FileConfig
 }
@@ -78,12 +84,23 @@ func CreateVersionDefaultFile() error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return createVersionFile(configDefaults, true)
+	dir := filepath.Join(configDefaults, common.ClientVersion)
+	return createVersionFile(dir, true)
 }
 
 func (v *versionConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
-	// TODO: Implement
+
+	for _, vCon := range versDumpConsts {
+		newMap, err := v.GetAll(vCon)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		for k, v := range newMap {
+			keyMap[k] = v
+		}
+	}
+
 	return keyMap, nil
 }
 

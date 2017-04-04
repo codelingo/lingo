@@ -7,6 +7,7 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	"io/ioutil"
 	"os"
+	"github.com/codelingo/lingo/app/util/common"
 )
 
 const(
@@ -14,6 +15,12 @@ const(
 	gitUserName = "gitserver.user.username"
 	gitPassword = "gitserver.user.password"
 )
+
+var authDumpConsts = []string{
+	gitCredentialFilename,
+	gitUserName,
+	gitPassword,
+}
 
 type authConfig struct {
 	*config.FileConfig
@@ -75,12 +82,23 @@ func CreateAuthDefaultFile() error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return createAuthFile(configDefaults, true)
+	dir := filepath.Join(configDefaults, common.ClientVersion)
+	return createAuthFile(dir, true)
 }
 
 func (a *authConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
-	// TODO: Implement
+
+	for _, aCon := range authDumpConsts {
+		newMap, err := a.GetAll(aCon)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		for k, v := range newMap {
+			keyMap[k] = v
+		}
+	}
+
 	return keyMap, nil
 }
 

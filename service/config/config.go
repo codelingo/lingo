@@ -268,7 +268,7 @@ func (fc *FileConfig) GetValue(key string) (string, error) {
 	}
 }
 
-func (fc *FileConfig) GetForEnv(env, key string) (string, error) {
+func (fc *FileConfig) GetForEnv(env, key string) (interface{}, error) {
 	keysMap, err := fc.GetAll(key)
 	if err != nil {
 		return "", errors.Trace(err)
@@ -278,13 +278,13 @@ func (fc *FileConfig) GetForEnv(env, key string) (string, error) {
 		keyEnv := strings.Split(k, ".")[0]
 		switch keyEnv {
 		case env:
-			return v.(string), nil
+			return v, nil
 		default:
 			continue
 		}
 	}
 
-	return "", errors.Errorf("config %q not found", key)
+	return "", errors.Errorf("Could not find value for config %q", key)
 }
 
 func (fc *FileConfig) SetForEnv(env string, key string, value interface{}) error {
