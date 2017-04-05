@@ -248,7 +248,7 @@ func createConfigUpdateFiles(dir string) error {
 	return nil
 }
 
-func mergeConfigs(currCfg, oldDefCfg *servConf.FileConfig, keyMap map[string]interface{}) error {
+func mergeConfigs(updateCfg, defaultCfg *servConf.FileConfig, keyMap map[string]interface{}) error {
 	for k, v := range keyMap {
 		keyList := strings.Split(k, ".")
 		if len(keyList) < 2 {
@@ -258,14 +258,14 @@ func mergeConfigs(currCfg, oldDefCfg *servConf.FileConfig, keyMap map[string]int
 		env := keyList[0]
 		key := strings.Join(keyList[1:], ".")
 
-		defVal, err := oldDefCfg.GetForEnv(env, key)
+		defVal, err := defaultCfg.GetForEnv(env, key)
 		if err != nil && !strings.HasPrefix(err.Error(), "Could not find value") {
 			fmt.Println(err)
 			continue
 		}
 
 		if v != defVal {
-			err = currCfg.SetForEnv(env, key, v)
+			err = updateCfg.SetForEnv(env, key, v)
 			if err != nil {
 				fmt.Println(err)
 				continue
