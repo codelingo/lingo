@@ -25,22 +25,6 @@ const (
 	mqAddrPort = "messagequeue.address.port"
 )
 
-var platDumpConsts = []string{
-	gitRemoteName,
-	gitServerHost,
-	gitServerPort,
-	gitServerProtocol,
-	platformServerAddr,
-	platformServerPort,
-	platformServerGrpcPort,
-	mqAddrProtocol,
-	mqAddrUsername,
-	mqAddrPassword,
-	mqAddrHost,
-	mqAddrPort,
-
-}
-
 type platformConfig struct {
 	*config.FileConfig
 }
@@ -93,6 +77,21 @@ func CreatePlatformFile() error {
 
 func (p *platformConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
+
+	var platDumpConsts = []string{
+		gitRemoteName,
+		gitServerHost,
+		gitServerPort,
+		gitServerProtocol,
+		platformServerAddr,
+		platformServerPort,
+		platformServerGrpcPort,
+		mqAddrProtocol,
+		mqAddrUsername,
+		mqAddrPassword,
+		mqAddrHost,
+		mqAddrPort,
+	}
 
 	for _, pCon := range platDumpConsts {
 		newMap, err := p.GetAll(pCon)

@@ -18,12 +18,6 @@ const (
 	clientVerUpdated = "client.version_updated"
 )
 
-var versDumpConsts = []string {
-	clientVerLatest,
-	clientVerLastChecked,
-	clientVerUpdated,
-}
-
 type versionConfig struct {
 	*config.FileConfig
 }
@@ -77,6 +71,12 @@ func CreateVersionFile() error {
 
 func (v *versionConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
+
+	var versDumpConsts = []string {
+		clientVerLatest,
+		clientVerLastChecked,
+		clientVerUpdated,
+	}
 
 	for _, vCon := range versDumpConsts {
 		newMap, err := v.GetAll(vCon)

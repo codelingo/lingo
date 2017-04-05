@@ -15,12 +15,6 @@ const(
 	gitPassword = "gitserver.user.password"
 )
 
-var authDumpConsts = []string{
-	gitCredentialFilename,
-	gitUserName,
-	gitPassword,
-}
-
 type authConfig struct {
 	*config.FileConfig
 }
@@ -73,6 +67,12 @@ func CreateAuthFile() error {
 
 func (a *authConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
+
+	var authDumpConsts = []string{
+		gitCredentialFilename,
+		gitUserName,
+		gitPassword,
+	}
 
 	for _, aCon := range authDumpConsts {
 		newMap, err := a.GetAll(aCon)
