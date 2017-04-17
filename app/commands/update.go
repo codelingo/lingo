@@ -18,12 +18,6 @@ func init() {
 	register(&cli.Command{
 		Name:   "update",
 		Usage:  "Update the lingo client to the latest release.",
-		Flags:  []cli.Flag{
-			cli.BoolFlag{
-				Name: "reset-configs",
-				Usage: "Replace client configs with defaults.",
-			},
-		},
 		Action: updateAction,
 	},
 		false,
@@ -75,15 +69,14 @@ func updateAction(ctx *cli.Context) {
 		return
 	}
 
-	reset := ctx.Bool("reset-configs")
-	err = updateClientConfigs(configDefaults, reset)
+	err = updateClientConfigs(configDefaults)
 	if err != nil {
 		util.OSErr(err)
 		return
 	}
 }
 
-func updateClientConfigs(configDefaults string, reset bool) error {
+func updateClientConfigs(configDefaults string) error {
 
 	versCfg, err := config.Version()
 	if err != nil {
@@ -95,7 +88,7 @@ func updateClientConfigs(configDefaults string, reset bool) error {
 		return errors.Trace(err)
 	}
 
-	if versionUpdated == common.ClientVersion && !reset {
+	if versionUpdated == common.ClientVersion {
 		fmt.Printf("Your client & configs are already on the latest version (%v).\n", common.ClientVersion)
 		// TODO:(emersonwood) Does anything more need to happen here? ie. should the user be prompted to update anyway or made aware of `lingo update --reset-configs`?
 		return nil
@@ -112,48 +105,47 @@ func updateClientConfigs(configDefaults string, reset bool) error {
 	}
 
 	// Add all valid user key:values to update configs
-	if !reset {
-		authDump, platDump, versDump, err := dumpCurrentConfigs()
-		if err != nil {
-			return errors.Trace(err)
-		}
-
-		authUpdateCfg, err := config.AuthInDir(configUpdates)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		authDefaultCfg, err := config.AuthInDir(configDefaults)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		err = mergeConfigs(authUpdateCfg.FileConfig, authDefaultCfg.FileConfig, authDump)
-		if err != nil {
-			return errors.Trace(err)
-		}
-
-		platUpdateCfg, err := config.PlatformInDir(configUpdates)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		platDefaultCfg, err := config.PlatformInDir(configDefaults)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		err = mergeConfigs(platUpdateCfg.FileConfig, platDefaultCfg.FileConfig, platDump)
-		if err != nil {
-			return errors.Trace(err)
-		}
-
-		versUpdateCfg, err := config.VersionInDir(configUpdates)
-		if err != nil {
-			return errors.Trace(err)
-		}
-		versDefaultCfg, err := config.VersionInDir(configDefaults)
-		err = mergeConfigs(versUpdateCfg.FileConfig, versDefaultCfg.FileConfig, versDump)
-		if err != nil {
-			return errors.Trace(err)
-		}
+	authDump, platDump, versDump, err := dumpCurrentConfigs()
+	if err != nil {
+		return errors.Trace(err)
 	}
+
+	authUpdateCfg, err := config.AuthInDir(configUpdates)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	authDefaultCfg, err := config.AuthInDir(configDefaults)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	err = mergeConfigs(authUpdateCfg.FileConfig, authDefaultCfg.FileConfig, authDump)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	platUpdateCfg, err := config.PlatformInDir(configUpdates)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	platDefaultCfg, err := config.PlatformInDir(configDefaults)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	err = mergeConfigs(platUpdateCfg.FileConfig, platDefaultCfg.FileConfig, platDump)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	versUpdateCfg, err := config.VersionInDir(configUpdates)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	versDefaultCfg, err := config.VersionInDir(configDefaults)
+	err = mergeConfigs(versUpdateCfg.FileConfig, versDefaultCfg.FileConfig, versDump)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
 
 	err = replaceConfigFiles(configUpdates)
 	if err != nil {
@@ -165,11 +157,7 @@ func updateClientConfigs(configDefaults string, reset bool) error {
 		return errors.Trace(err)
 	}
 
-	if reset {
-		fmt.Println("Configs reset successfully.")
-	} else {
-		fmt.Println("Configs updated successfully.")
-	}
+	fmt.Println("Configs updated successfully.")
 
 	return nil
 }
