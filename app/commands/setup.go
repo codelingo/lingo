@@ -11,7 +11,6 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/app/util/common"
 	commonConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/howeyc/gopass"
 	"github.com/juju/errors"
@@ -57,14 +56,6 @@ func setupLingoAction(c *cli.Context) {
 func setupLingo(c *cli.Context) (string, error) {
 
 	if err := util.MaxArgs(c, 0); err != nil {
-		return "", errors.Trace(err)
-	}
-
-	versionConfig, err := utilConfig.Version()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-	if err := versionConfig.SetClientVersion(common.ClientVersion); err != nil {
 		return "", errors.Trace(err)
 	}
 

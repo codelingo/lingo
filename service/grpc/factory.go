@@ -120,3 +120,17 @@ func MakePathsFromOffsetEndpointFactory(tracer opentracing.Tracer, tracingLogger
 		).Endpoint(), cc, errors.Trace(err)
 	}
 }
+
+func MakeLatestClientVersionFactory(tracer opentracing.Tracer, tracingLogger log.Logger, opt grpc.DialOption) sd.Factory {
+	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
+		cc, err := grpc.Dial(instance, opt)
+		return grpctransport.NewClient(
+			cc,
+			"codelingo.CodeLingo",
+			"LatestClientVersion",
+			encodeLatestClientVersionRequest,
+			decodeLatestClientVersionResponse,
+			codelingo.LatestClientVersionReply{},
+		).Endpoint(), cc, errors.Trace(err)
+	}
+}

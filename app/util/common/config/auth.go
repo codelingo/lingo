@@ -1,19 +1,25 @@
 package config
 
 import (
-"path/filepath"
-
-"github.com/juju/errors"
-
-"github.com/codelingo/lingo/service/config"
+	"path/filepath"
+	"github.com/juju/errors"
+	"github.com/codelingo/lingo/service/config"
 	"github.com/codelingo/lingo/app/util"
+	"io/ioutil"
+	"os"
+)
+
+const(
+	gitCredentialFilename = "gitserver.credentials_filename"
+	gitUserName = "gitserver.user.username"
+	gitPassword = "gitserver.user.password"
 )
 
 type authConfig struct {
 	*config.FileConfig
 }
 
-func Auth() (*authConfig, error) {
+func AuthInDir(dir string) (*authConfig, error) {
 	configHome, err := util.ConfigHome()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -21,11 +27,7 @@ func Auth() (*authConfig, error) {
 	envFile := filepath.Join(configHome, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	aCfgPath, err := fullCfgPath(AuthCfgFile)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+	aCfgPath := filepath.Join(dir, AuthCfgFile)
 	aCfg, err := cfg.New(aCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -36,24 +38,73 @@ func Auth() (*authConfig, error) {
 	}, nil
 }
 
+func Auth() (*authConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return AuthInDir(configHome)
+}
+
+func CreateAuthFileInDir(dir string, overwrite bool) error {
+	aCfgFilePath := filepath.Join(dir, AuthCfgFile)
+	if _, err := os.Stat(aCfgFilePath); os.IsNotExist(err) || overwrite {
+		err := ioutil.WriteFile(aCfgFilePath, []byte(AuthTmpl), 0644)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create auth config")
+		}
+	}
+	return nil
+}
+
+func CreateAuthFile() error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return CreateAuthFileInDir(configHome, false)
+}
+
+func (a *authConfig) Dump() (map[string]interface{}, error) {
+	keyMap := make(map[string]interface{})
+
+	var authDumpConsts = []string{
+		gitCredentialFilename,
+		gitUserName,
+		gitPassword,
+	}
+
+	for _, aCon := range authDumpConsts {
+		newMap, err := a.GetAll(aCon)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		for k, v := range newMap {
+			keyMap[k] = v
+		}
+	}
+
+	return keyMap, nil
+}
+
 func (a *authConfig) GetGitCredentialsFilename() (string, error) {
-	return a.Get("gitserver.credentials_filename")
+	return a.GetValue(gitCredentialFilename)
 }
 
 func (a *authConfig) GetGitUserName() (string, error) {
-	return a.Get("gitserver.user.username")
+	return a.GetValue(gitUserName)
 }
 
 func (a *authConfig) SetGitUserName(userName string) error {
-	return a.Set("gitserver.user.username", userName)
+	return a.Set(gitUserName, userName)
 }
 
 func (a *authConfig) GetGitUserPassword() (string, error) {
-	return a.Get("gitserver.user.password")
+	return a.GetValue(gitPassword)
 }
 
 func (a *authConfig) SetGitUserPassword(userPassword string) error {
-	return a.Set("gitserver.user.password", userPassword)
+	return a.Set(gitPassword, userPassword)
 }
 
 

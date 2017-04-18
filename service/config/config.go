@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"os"
-	"fmt"
+	"github.com/hishboy/gocommons/lang"
 )
 
 func (c *Config) GetEnv() (string, error) {
@@ -108,30 +108,65 @@ type cfgInfo struct {
 	info map[interface{}]interface{}
 }
 
+type yamlNode struct {
+	depth int
+	key string
+	value interface{}
+}
+
 // TODO(waigani) err handling
-// TODO(waigani) not concurrently safe
-func (c cfgInfo) walk(keyPath []string) (string, error) {
-	if l := len(keyPath); l > 1 {
-		if c.info[keyPath[0]] == nil {
-			return "", errors.Errorf("config %q not found", strings.Join(keyPath, "."))
-		}
+func (c cfgInfo) walk(keyPath []string) map[string]interface{} {
+	keyMap := make(map[string]interface{})
+	stack := lang.NewStack()
 
-		var ok bool
-		c.info, ok = c.info[keyPath[0]].(map[interface{}]interface{})
+	for k, v := range c.info {
+		kString, ok := k.(string)
 		if !ok {
-			return "", errors.Errorf("malformed config file. Expected map[interface{}]interface{}, got %T", c.info[keyPath[0]])
+			continue
 		}
-		return c.walk(keyPath[1:])
+		newNode := &yamlNode{
+			0,
+			kString,
+			v,
+		}
+		stack.Push(newNode)
 	}
 
-	if result := c.info[keyPath[0]]; result != nil {
-		if r, ok := result.(string); ok {
-			return r, nil
+	for stack.Len() > 0 {
+		node, ok := stack.Pop().(*yamlNode)
+		if !ok {
+			continue
 		}
-		return "", errors.Errorf("config %q is not a string", strings.Join(keyPath, "."))
+
+		if node.depth == len(keyPath) {
+			keyMap[node.key] = node.value
+			continue
+		}
+
+		value, ok := node.value.(map[interface{}]interface{})
+		if !ok {
+			continue
+		}
+
+		for k, v := range value {
+			kString, ok := k.(string)
+			if !ok {
+				continue
+			}
+
+			if kString == keyPath[node.depth] {
+				newNode := &yamlNode{
+					node.depth + 1,
+					node.key + "." + kString,
+					v,
+				}
+				stack.Push(newNode)
+			}
+		}
+
 	}
 
-	return "", errors.Errorf("config %q not found", strings.Join(keyPath, "."))
+	return keyMap
 }
 
 func (c cfgInfo) walkSet(keyPath []string, value interface{}) error {
@@ -175,52 +210,84 @@ func newCfgInfo(infoMap interface{}) (*cfgInfo, error) {
 	}, nil
 }
 
-func (fc *FileConfig) GetEnv() (string, error) {
-	return fc.config.GetEnv()
-}
-
-func (fc *FileConfig) Get(key string) (string, error) {
+func (fc *FileConfig) GetAll(key string) (map[string]interface{}, error) {
 	keys := strings.Split(key, ".")
-	var infoBlocks []*cfgInfo
 
-	// first get info blocks
-	env, err := fc.config.GetEnv()
+	infoM, err := newCfgInfo(fc.data)
 	if err != nil {
-		return "", errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
 
-	if env != "all" && env != "" {
-		infoM, err := newCfgInfo(fc.data[env])
-		if err == nil {
-			// TODO(waigani) log
-			infoBlocks = append(infoBlocks, infoM)
-		}
-	}
-	 infoM, err := newCfgInfo(fc.data["all"])
-	if err == nil {
-		// TODO(waigani) log
-		infoBlocks = append(infoBlocks, infoM)
-	}
+	keysMap := infoM.walk(keys)
 
-	var val string
-	for _, inf := range infoBlocks {
-		val, err = inf.walk(keys)
-		if err == nil && val != "" {
-			return val, nil
-		}
-	}
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-	return "", errors.Errorf("config %q not found", key)
+	return keysMap, nil
 }
 
-func (fc *FileConfig) Set(key string, value interface{}) error {
+func (fc *FileConfig) GetValue(key string) (string, error) {
 	env, err := fc.config.GetEnv()
 	if err != nil {
-		return errors.Trace(err)
+		return "", errors.Trace(err)
 	}
 
+	keysMap, err := fc.GetAll(key)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	var allVal string = ""
+	var valErr error
+	for k, v := range keysMap {
+		keyEnv := strings.Split(k, ".")[0]
+		switch keyEnv {
+		case env:
+			kString, ok := v.(string)
+			if !ok {
+				return "", errors.Errorf("Invalid value found for config %q, expected `string` but got `%T`", key, v)
+			}
+			return kString, nil
+		case "all":
+			kString, ok := v.(string)
+			if !ok {
+				valErr = errors.Errorf("Invalid value found for config %q, expected `string` but got `%T`", key, v)
+			} else {
+				allVal = kString
+			}
+		default:
+			continue
+		}
+	}
+
+	if allVal == "" {
+		if valErr != nil {
+			return "", valErr
+		} else {
+			return "", errors.Errorf("Could not find value for config %q", key)
+		}
+	} else {
+		return allVal, nil
+	}
+}
+
+func (fc *FileConfig) GetForEnv(env, key string) (interface{}, error) {
+	keysMap, err := fc.GetAll(key)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	for k, v := range keysMap {
+		keyEnv := strings.Split(k, ".")[0]
+		switch keyEnv {
+		case env:
+			return v, nil
+		default:
+			continue
+		}
+	}
+
+	return "", errors.Errorf("Could not find value for config %q", key)
+}
+
+func (fc *FileConfig) SetForEnv(env string, key string, value interface{}) error {
 	// Prepend the env to the given key
 	key = env+"."+key
 
@@ -246,14 +313,29 @@ func (fc *FileConfig) Set(key string, value interface{}) error {
 
 	fc.data = convertMapType(infoM.info)
 
-	return ioutil.WriteFile(fc.filename, data, 0755)
+	err = ioutil.WriteFile(fc.filename, data, 0755)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = fc.Reload()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return nil
 }
 
-func (fc *FileConfig) Dump() {
-	fmt.Printf("filename=%v\n", fc.filename)
+func (fc *FileConfig) Set(key string, value interface{}) error {
+	env, err := fc.config.GetEnv()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return fc.SetForEnv(env, key, value)
 }
 
-func (fc *FileConfig) Refresh() error {
+func (fc *FileConfig) Reload() error {
 	newFc, err := fc.config.New(fc.filename)
 	if err != nil {
 		return errors.Trace(err)

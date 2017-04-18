@@ -96,3 +96,9 @@ type Property struct {
 	Name        string
 	Description string
 }
+
+type LatestClientVersionRequest struct{}
+
+type LatestClientVersionResponse struct {
+	Key string `json:"version"`
+}

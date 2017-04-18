@@ -38,113 +38,115 @@ package codelingo;
 
 // The query service definition.
 service CodeLingo {
-  // Initialise session
-  rpc Session (SessionRequest) returns (SessionReply) {}
+    // Initialise session
+    rpc Session (SessionRequest) returns (SessionReply) {}
 
-  // Reviews files
-  rpc Review (ReviewRequest) returns (ReviewReply) {}
+    // Reviews files
+    rpc Review (ReviewRequest) returns (ReviewReply) {}
 
-  // Queries source code
-  rpc Query (QueryRequest) returns (QueryReply) {}
+    // Queries source code
+    rpc Query (QueryRequest) returns (QueryReply) {}
 
-  // Lists available lexicons
-  rpc ListLexicons (ListLexiconsRequest) returns (ListLexiconsReply) {}
+    // Lists available lexicons
+    rpc ListLexicons (ListLexiconsRequest) returns (ListLexiconsReply) {}
 
-  rpc ListFacts (ListFactsRequest) returns (FactList) {}
+    rpc ListFacts (ListFactsRequest) returns (FactList) {}
 
-  rpc PathsFromOffset (PathsFromOffsetRequest) returns (PathsFromOffsetReply) {}
+    rpc PathsFromOffset (PathsFromOffsetRequest) returns (PathsFromOffsetReply) {}
 
-  rpc DescribeFact (DescribeFactRequest) returns (DescribeFactReply) {}
+    rpc DescribeFact (DescribeFactRequest) returns (DescribeFactReply) {}
 
+    // Return the latest client version for this platform
+    rpc LatestClientVersion (LatestClientVersionRequest) returns (LatestClientVersionReply) {}
 }
 
 message DescribeFactRequest {
-  string owner = 1;
-  string name = 2;
-  string version = 3;
-  string fact = 4;
+    string owner = 1;
+    string name = 2;
+    string version = 3;
+    string fact = 4;
 }
 
 message DescribeFactReply {
-  string description = 1;
-  string examples = 2;
-  repeated Property properties = 3;
+    string description = 1;
+    string examples = 2;
+    repeated Property properties = 3;
 }
 
 message Property {
-  string name = 1;
-  string description = 2;
+    string name = 1;
+    string description = 2;
 }
 
 message PathsFromOffsetRequest {
-  string lang = 1;
-  string dir = 2;
-  string filename = 3;
-  string src = 4;
-  int64 start = 5;
-  int64 end = 6;
+    string lang = 1;
+    string dir = 2;
+    string filename = 3;
+    string src = 4;
+    int64 start = 5;
+    int64 end = 6;
 
 }
 
 message PathsFromOffsetReply {
-  repeated Path paths = 1;
+    repeated Path paths = 1;
 }
 
 message Path {
-  repeated string nodes = 1;
+    repeated string nodes = 1;
 }
 
 message ListFactsRequest {
- string owner = 1;
- string name = 2;
- string version = 3;
+    string owner = 1;
+    string name = 2;
+    string version = 3;
 }
 
 message FactList {
-  map<string, Children> facts = 1;
+    map<string, Children> facts = 1;
 }
 
 message Children {
-  repeated string child = 1;
+    repeated string child = 1;
 }
 
 message ListLexiconsRequest {}
 
 message ListLexiconsReply {
-  repeated string lexicons = 1;
+    repeated string lexicons = 1;
 }
 
 message SessionRequest {}
 
 message SessionReply {
-  string key = 1;
+    string key = 1;
 }
 
 // The request message containing the CLQL source code.
 message QueryRequest {
-  string clql = 1;
+    string clql = 1;
 }
 
 // The query response.
 message QueryReply {
-  string result = 1;
+    string result = 1;
 }
 
 // The request message containing the files or directories to review.
 message ReviewRequest {
-  string key = 12;
-  string host = 1;
-  string owner = 2;
-  string repo= 3;
-  string sha = 4;
-  repeated string filesAndDirs = 5;
-  bool recursive = 6;
-  repeated string Patches = 7;
-  bool isPullRequest = 8;
-  int64 pullRequestID = 9;
-  string vcs = 10;
-  string dotlingo = 11;
-  string dir = 13;
+    string key = 12;
+    string host = 1;
+    string owner = 2;
+    string repo= 3;
+    string sha = 4;
+    repeated string filesAndDirs = 5;
+    bool recursive = 6;
+    repeated string Patches = 7;
+    bool isPullRequest = 8;
+    int64 pullRequestID = 9;
+    string vcs = 10;
+    string dotlingo = 11;
+    string dir = 13;
 }
 
 // Empty, we use the control queue once a review is started
@@ -152,31 +154,37 @@ message ReviewReply {}
 
 // Issue returned from a review.
 message Issue {
-  // The name of the issue.
+    // The name of the issue.
     string name         =1; // Name is the the name of the checker that added the issue
-	IssueRange position =2;    // position in source file
-	string comment      =3;        // The rendered comment for this issue.
-	string ctxBefore    =4;      // source lines before the problem line(s)
-	string lineText     =5;    // the source line(s)
-	string ctxAfter     =6;   // source lines after the problem line(s)
-	map<string, string> metrics = 7; // metrics set when the issue was raised.
-	repeated string tags =8; // tags added when the issue was raised.
-	string link         =9; // (optional) the link to the style guide for the problem
-	bool newCode        =10; // When checking a diff, this indicates if the issue was found in existing or new code.
-	string patch        =11; // A diff patch resolving the issue.
-	string err          =12; // Any err encounted while building the issue.
-	bool discard        =13; // TODO(waigani) discard is only used by client and shouldn't be on wire format.
-	string discardReason=14; // TODO(waigani) also should not be on wire format.
+    IssueRange position =2;    // position in source file
+    string comment      =3;        // The rendered comment for this issue.
+    string ctxBefore    =4;      // source lines before the problem line(s)
+    string lineText     =5;    // the source line(s)
+    string ctxAfter     =6;   // source lines after the problem line(s)
+    map<string, string> metrics = 7; // metrics set when the issue was raised.
+    repeated string tags =8; // tags added when the issue was raised.
+    string link         =9; // (optional) the link to the style guide for the problem
+    bool newCode        =10; // When checking a diff, this indicates if the issue was found in existing or new code.
+    string patch        =11; // A diff patch resolving the issue.
+    string err          =12; // Any err encounted while building the issue.
+    bool discard        =13; // TODO(waigani) discard is only used by client and shouldn't be on wire format.
+    string discardReason=14; // TODO(waigani) also should not be on wire format.
 }
 
 message IssueRange {
- Position start =1;
- Position end =2;
+    Position start =1;
+    Position end =2;
 }
 
 message Position  {
-	string filename =1; // filename, if any
-	int64 Offset     =2;  // offset, starting at 0
-	int64 Line       =3;  // line number, starting at 1
-	int64 Column     =4;  // column number, starting at 1 (byte count)
+    string filename =1; // filename, if any
+    int64 Offset     =2;  // offset, starting at 0
+    int64 Line       =3;  // line number, starting at 1
+    int64 Column     =4;  // column number, starting at 1 (byte count)
+}
+
+message LatestClientVersionRequest {}
+
+message LatestClientVersionReply {
+    string version  =1;  // Version string, ie. 1.0.4
 }

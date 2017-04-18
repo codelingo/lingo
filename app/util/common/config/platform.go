@@ -2,18 +2,34 @@ package config
 
 import (
 	"fmt"
-
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"github.com/codelingo/lingo/app/util"
 	"path/filepath"
+	"io/ioutil"
+	"os"
+)
+
+const (
+	gitRemoteName = "gitserver.remote.name"
+	gitServerHost = "gitserver.remote.host"
+	gitServerPort = "gitserver.remote.port"
+	gitServerProtocol = "gitserver.remote.protocol"
+	platformServerAddr = "addr"
+	platformServerPort = "port"
+	platformServerGrpcPort = "grpc_port"
+	mqAddrProtocol = "messagequeue.address.protocol"
+	mqAddrUsername = "messagequeue.address.username"
+	mqAddrPassword = "messagequeue.address.password"
+	mqAddrHost = "messagequeue.address.host"
+	mqAddrPort = "messagequeue.address.port"
 )
 
 type platformConfig struct {
 	*config.FileConfig
 }
 
-func Platform() (*platformConfig, error) {
+func PlatformInDir(dir string) (*platformConfig, error) {
 	configHome, err := util.ConfigHome()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -21,11 +37,7 @@ func Platform() (*platformConfig, error) {
 	envFile := filepath.Join(configHome, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	pCfgPath, err := fullCfgPath(PlatformCfgFile)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+	pCfgPath := filepath.Join(dir, PlatformCfgFile)
 	pCfg, err := cfg.New(pCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -36,36 +48,94 @@ func Platform() (*platformConfig, error) {
 	}, nil
 }
 
+func Platform() (*platformConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return PlatformInDir(configHome)
+}
+
+func CreatePlatformFileInDir(dir string, overwrite bool) error {
+	pCfgFilePath := filepath.Join(dir, PlatformCfgFile)
+	if _, err := os.Stat(pCfgFilePath); os.IsNotExist(err) || overwrite {
+		err := ioutil.WriteFile(pCfgFilePath, []byte(PlatformTmpl), 0644)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create platform config")
+		}
+	}
+	return nil
+}
+
+func CreatePlatformFile() error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return CreatePlatformFileInDir(configHome, false)
+}
+
+func (p *platformConfig) Dump() (map[string]interface{}, error) {
+	keyMap := make(map[string]interface{})
+
+	var platDumpConsts = []string{
+		gitRemoteName,
+		gitServerHost,
+		gitServerPort,
+		gitServerProtocol,
+		platformServerAddr,
+		platformServerPort,
+		platformServerGrpcPort,
+		mqAddrProtocol,
+		mqAddrUsername,
+		mqAddrPassword,
+		mqAddrHost,
+		mqAddrPort,
+	}
+
+	for _, pCon := range platDumpConsts {
+		newMap, err := p.GetAll(pCon)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		for k, v := range newMap {
+			keyMap[k] = v
+		}
+	}
+
+	return keyMap, nil
+}
+
 func (p *platformConfig) GitRemoteName() (string, error) {
-	return p.Get("gitserver.remote.name")
+	return p.GetValue(gitRemoteName)
 }
 
 func (p *platformConfig) GitServerHost() (string, error) {
-	return p.Get("gitserver.remote.host")
+	return p.GetValue(gitServerHost)
 }
 
 func (p *platformConfig) GitServerPort() (string, error) {
-	return p.Get("gitserver.remote.port")
+	return p.GetValue(gitServerPort)
 }
 
 func (p *platformConfig) GitServerProtocol() (string, error) {
-	return p.Get("gitserver.remote.protocol")
+	return p.GetValue(gitServerProtocol)
 }
 
 func (p *platformConfig) GitServerAddr() (string, error) {
 
-	protocol, err := p.Get("gitserver.remote.protocol")
+	protocol, err := p.GitServerProtocol()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	host, err := p.Get("gitserver.remote.host")
+	host, err := p.GitServerHost()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
 	addr := protocol + "://" + host
-	port, err := p.Get("gitserver.remote.port")
+	port, err := p.GitServerPort()
 	if err != nil || port == "" {
 		return addr, nil
 	}
@@ -73,12 +143,12 @@ func (p *platformConfig) GitServerAddr() (string, error) {
 }
 
 func (p *platformConfig) Address() (string, error) {
-	addr, err := p.Get("addr")
+	addr, err := p.GetValue(platformServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get("port")
+	port, err := p.GetValue(platformServerPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -88,12 +158,12 @@ func (p *platformConfig) Address() (string, error) {
 
 func (p *platformConfig) GrpcAddress() (string, error) {
 
-	addr, err := p.Get("addr")
+	addr, err := p.GetValue(platformServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get("grpc_port")
+	port, err := p.GetValue(platformServerGrpcPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -102,27 +172,27 @@ func (p *platformConfig) GrpcAddress() (string, error) {
 }
 
 func (p *platformConfig) MessageQueueAddr() (string, error) {
-	protocol, err := p.Get("messagequeue.address.protocol")
+	protocol, err := p.GetValue(mqAddrProtocol)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	username, err := p.Get("messagequeue.address.username")
+	username, err := p.GetValue(mqAddrUsername)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	password, err := p.Get("messagequeue.address.password")
+	password, err := p.GetValue(mqAddrPassword)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	host, err := p.Get("messagequeue.address.host")
+	host, err := p.GetValue(mqAddrHost)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	port, err := p.Get("messagequeue.address.port")
+	port, err := p.GetValue(mqAddrPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}

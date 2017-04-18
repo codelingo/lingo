@@ -4,15 +4,25 @@ import (
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
+	"time"
+	"fmt"
 	"path/filepath"
 	"github.com/codelingo/lingo/app/util"
+	"io/ioutil"
+	"os"
+)
+
+const (
+	clientVerLatest = "client.version_latest"
+	clientVerLastChecked = "client.version_last_checked"
+	clientVerUpdated = "client.version_updated"
 )
 
 type versionConfig struct {
 	*config.FileConfig
 }
 
-func Version() (*versionConfig, error) {
+func VersionInDir(dir string) (*versionConfig, error) {
 	configHome, err := util.ConfigHome()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -20,11 +30,7 @@ func Version() (*versionConfig, error) {
 	envFile := filepath.Join(configHome, EnvCfgFile)
 	cfg := config.New(envFile)
 
-	vCfgPath, err := fullCfgPath(VersionCfgFile)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+	vCfgPath := filepath.Join(dir, VersionCfgFile)
 	vCfg, err := cfg.New(vCfgPath)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -35,18 +41,84 @@ func Version() (*versionConfig, error) {
 	}, nil
 }
 
-func (v *versionConfig) ClientVersion() (string, error) {
-	return v.Get("client.version")
+func Version() (*versionConfig, error) {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return VersionInDir(configHome)
 }
 
-func (v *versionConfig) SetClientVersion(cv string) error {
-	// TODO: Use `hashicorp/go-version` package for comparing and setting semvers
-	// https://github.com/hashicorp/go-version
-	return v.Set("all.client.version", cv)
+
+func CreateVersionFileInDir(dir string, overwrite bool) error {
+	vCfgFilePath := filepath.Join(dir, VersionCfgFile)
+	if _, err := os.Stat(vCfgFilePath); os.IsNotExist(err) || overwrite {
+		err := ioutil.WriteFile(vCfgFilePath, []byte(VersionTmpl), 0644)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create version config")
+		}
+	}
+	return nil
 }
 
-var VersionTmpl = `
+func CreateVersionFile() error {
+	configHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return CreateVersionFileInDir(configHome, false)
+}
+
+func (v *versionConfig) Dump() (map[string]interface{}, error) {
+	keyMap := make(map[string]interface{})
+
+	var versDumpConsts = []string {
+		clientVerLatest,
+		clientVerLastChecked,
+		clientVerUpdated,
+	}
+
+	for _, vCon := range versDumpConsts {
+		newMap, err := v.GetAll(vCon)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		for k, v := range newMap {
+			keyMap[k] = v
+		}
+	}
+
+	return keyMap, nil
+}
+
+func (v *versionConfig) ClientLatestVersion() (string, error) {
+	return v.GetValue(clientVerLatest)
+}
+
+func (v *versionConfig) SetClientLatestVersion(version string) error {
+	return v.Set(clientVerLatest, version)
+}
+
+func(v *versionConfig) ClientVersionLastChecked() (string, error) {
+	return v.GetValue(clientVerLastChecked)
+}
+
+func (v *versionConfig) SetClientVersionLastChecked(timeString string) error {
+	return v.Set(clientVerLastChecked, timeString)
+}
+
+func (v *versionConfig) ClientVersionUpdated() (string, error) {
+	return v.GetValue(clientVerUpdated)
+}
+
+func (v *versionConfig) SetClientVersionUpdated(version string) error {
+	return v.SetForEnv("all", clientVerUpdated, version)
+}
+
+var VersionTmpl = fmt.Sprintf(`
 all:
   client:
-    version: `[1:] + common.ClientVersion + `
-`
+    version_latest: %v
+    version_last_checked: %v
+    version_updated: %v
+`, common.ClientVersion, time.Now().UTC().AddDate(0, 0, -1), common.ClientVersion)[1:]

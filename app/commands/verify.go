@@ -12,6 +12,10 @@ import (
 	"github.com/codelingo/lingo/app/util/common"
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
+	"time"
+	"github.com/blang/semver"
+	"github.com/codelingo/lingo/service"
+	"strings"
 )
 
 type require int
@@ -49,7 +53,17 @@ func (r require) Verify() error {
 	case baseRq:
 		return nil
 	case versionRq:
-		return verifyClientVersion()
+		outdated, err := VersionIsOutdated()
+		if err != nil {
+			if outdated {
+				// Don't error, just warn
+				fmt.Println("Warning: " + err.Error())
+				return nil
+			} else {
+				return errors.Trace(err)
+			}
+		}
+		return nil
 	case vcsRq:
 		return verifyVCS()
 	case dotLingoRq:
@@ -185,6 +199,18 @@ func verifyConfig() error {
 		}
 	}
 
+	configDefaults, err := util.ConfigDefaults()
+	configDefaults = filepath.Join(configDefaults, common.ClientVersion)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	if _, err := os.Stat(configDefaults); os.IsNotExist(err) {
+		err := os.MkdirAll(configDefaults, 0775)
+		if err != nil {
+			return errors.Annotate(err, "verifyConfig: Could not create default configs directory")
+		}
+	}
+
 	envCfg := filepath.Join(configsHome, utilConfig.EnvCfgFile)
 	if _, err := os.Stat(envCfg); os.IsNotExist(err) {
 		err := ioutil.WriteFile(envCfg, []byte("all"), 0644)
@@ -193,28 +219,24 @@ func verifyConfig() error {
 		}
 	}
 
-	authCfg := filepath.Join(configsHome, utilConfig.AuthCfgFile)
-	if _, err := os.Stat(authCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(authCfg, []byte(utilConfig.AuthTmpl), 0644)
-		if err != nil {
-			return errors.Annotate(err, "verifyConfig: Could not create auth config")
-		}
+	err = createConfigDefaultFiles(configDefaults)
+	if err != nil {
+		return errors.Trace(err)
 	}
 
-	platformCfg := filepath.Join(configsHome, utilConfig.PlatformCfgFile)
-	if _, err := os.Stat(platformCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(platformCfg, []byte(utilConfig.PlatformTmpl), 0644)
-		if err != nil {
-			return errors.Annotate(err, "verifyConfig: Could not create platform config")
-		}
+	err = utilConfig.CreateAuthFile()
+	if err != nil {
+		return errors.Trace(err)
 	}
 
-	versionCfg := filepath.Join(configsHome, utilConfig.VersionCfgFile)
-	if _, err := os.Stat(versionCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(versionCfg, []byte(utilConfig.VersionTmpl), 0644)
-		if err != nil {
-			return errors.Annotate(err, "verifyConfig: Could not create version config")
-		}
+	err = utilConfig.CreatePlatformFile()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = utilConfig.CreateVersionFile()
+	if err != nil {
+		return errors.Trace(err)
 	}
 
 	// servicesCfg := filepath.Join(configsHome, utilConfig.ServicesCfgFile)
@@ -238,22 +260,96 @@ func verifyConfig() error {
 const missingConfigError string = "Could not get %s config. Please run `lingo setup`."
 
 func verifyClientVersion() error {
-	updateNeededErr := errors.New("Update required. Please run `$ lingo update`.")
-	cfg, err := utilConfig.Version()
+	vCfg, err := utilConfig.Version()
 	if err != nil {
 		// TODO(waigani) don't throw error away before checking type.
 		return errors.New(fmt.Sprintf(missingConfigError, "version"))
 	}
 
-	version, err := cfg.ClientVersion()
+	lastCheckedString, err := vCfg.ClientVersionLastChecked()
 	if err != nil {
-		// TODO(waigani) don't throw error away before checking type.
-		return errors.New(fmt.Sprintf(missingConfigError, "client version"))
+		return errors.Trace(err)
 	}
-	// TODO: Use `hashicorp/go-version` package for comparing and setting semvers
-	// https://github.com/hashicorp/go-version
-	if version != common.ClientVersion {
-		return updateNeededErr
+
+	layout := "2006-01-02 15:04:05.999999999 -0700 MST"
+	lastChecked, err := time.Parse(layout, lastCheckedString)
+	if err != nil {
+		return errors.Trace(err)
 	}
-	return nil
+
+	duration := time.Since(lastChecked)
+	if duration.Hours() >= 24 {
+		latestVersion, err := latestVersion()
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		err = vCfg.SetClientLatestVersion(latestVersion.String())
+		if err != nil {
+			return errors.Trace(err)
+		}
+		err = vCfg.SetClientVersionLastChecked(time.Now().UTC().String())
+		if err != nil {
+			return errors.Trace(err)
+		}
+	}
+
+	latestVersion, err := vCfg.ClientLatestVersion()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	compare, err := compareVersions(common.ClientVersion, latestVersion)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if compare < 0 {
+		return errors.New("Your client is out of date. This may result in unexpected behaviour.")
+	} else if compare > 0 {
+		return errors.New("Your client is newer than the platform. This may result in unexpected behaviour.")
+	} else {
+		// Versions are equal: OK.
+		return nil
+	}
+}
+
+func latestVersion() (*semver.Version, error) {
+	svc, err := service.New()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	versionString, err := svc.LatestClientVersion()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return semver.New(versionString)
+}
+
+func compareVersions(current, latest string) (int, error) {
+	cv, err := semver.Make(current)
+	if err != nil {
+		return -1, errors.Trace(err)
+	}
+
+	lv, err := semver.Make(latest)
+	if err != nil {
+		return 1, errors.Trace(err)
+	}
+
+	return cv.Compare(lv), nil
+}
+
+func VersionIsOutdated() (bool, error) {
+	err := verifyClientVersion()
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "This may result in unexpected behaviour.") {
+			return true, err
+		} else {
+			return false, errors.Trace(err)
+		}
+	}
+	return false, err
 }
