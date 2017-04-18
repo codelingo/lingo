@@ -28,25 +28,29 @@ func init() {
 }
 
 func updateAction(ctx *cli.Context) {
-
-	configDefaults, err := util.ConfigDefaults()
+	err := update(ctx)
 	if err != nil {
 		util.OSErr(err)
-		return
+	}
+}
+
+func update(ctx *cli.Context) error {
+	configDefaults, err := util.ConfigDefaults()
+	if err != nil {
+		return errors.Trace(err)
 	}
 	configDefaults = filepath.Join(configDefaults, common.ClientVersion)
 
 	err = createConfigDefaultFiles(configDefaults)
 	if err != nil {
-		util.OSErr(err)
-		return
+		return errors.Trace(err)
 	}
 
 	// Check version against endpoint
 	outdated, err := VersionIsOutdated()
 	if err != nil {
 		if outdated {
-			fmt.Println("Your client is out of date. Please download and install the latest binary from https://github.com/codelingo/lingo/releases")
+			return errors.New("Your client is out of date. Please download and install the latest binary from https://github.com/codelingo/lingo/releases")
 			/*
 			TODO: Implement automatic download & install when client release becomes public.
 			1. Prompt user to auto download / install.
@@ -55,25 +59,23 @@ func updateAction(ctx *cli.Context) {
 			4. Exit this client so new client can be loaded.
 			5. Either prompt user to run `lingo update` or do it automatically somehow?
 			*/
-			return
 		} else {
-			util.OSErr(err)
-			return
+			return errors.Trace(err)
 		}
 	}
 
 	// Write post-update client defaults to CLHOME/configs/defaults/<version>/*.yaml
 	err = createConfigDefaultFiles(configDefaults)
 	if err != nil {
-		util.OSErr(err)
-		return
+		return errors.Trace(err)
 	}
 
 	err = updateClientConfigs(configDefaults)
 	if err != nil {
-		util.OSErr(err)
-		return
+		return errors.Trace(err)
 	}
+
+	return nil
 }
 
 func updateClientConfigs(configDefaults string) error {
@@ -90,7 +92,6 @@ func updateClientConfigs(configDefaults string) error {
 
 	if versionUpdated == common.ClientVersion {
 		fmt.Printf("Your client & configs are already on the latest version (%v).\n", common.ClientVersion)
-		// TODO:(emersonwood) Does anything more need to happen here? ie. should the user be prompted to update anyway or made aware of `lingo update --reset-configs`?
 		return nil
 	}
 
