@@ -21,6 +21,7 @@ func (c *Config) GetEnv() (string, error) {
 
 	env, err := ioutil.ReadFile(c.envFile)
 	if err != nil {
+		// TODO (emersonwood): These need to be output in a end user error func; see #170
 		if strings.Contains(err.Error(), "lingo-current-env: no such file or directory") {
 			// Trying to read lingo client
 			return "", errors.Errorf("Failed to read '%v'. Please run `lingo use-env <env>` to set the environment.", c.envFile)
