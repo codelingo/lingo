@@ -50,6 +50,10 @@ func init() {
 				Name:  util.InteractiveFlg.String(),
 				Usage: "Be prompted to confirm each issue.",
 			},
+			cli.StringFlag{
+				Name:  util.WorkingDirFlg.String(),
+				Usage: "Run command from give dir.",
+			},
 
 			// cli.BoolFlag{
 			// 	Name:  "all",
@@ -84,6 +88,10 @@ func reviewAction(ctx *cli.Context) {
 }
 
 func reviewCMD(ctx *cli.Context) (string, error) {
+	if dirName := ctx.String("workingdir"); dirName != "" {
+		os.Chdir(dirName)
+	}
+
 	if err := initRepo(ctx); err != nil {
 		// TODO(waigani) use error types
 		// Note: Prior repo init is a valid state.

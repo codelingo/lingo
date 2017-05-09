@@ -14,9 +14,9 @@ import (
 	"github.com/codelingo/lingo/vcs"
 	"github.com/codelingo/lingo/vcs/backing"
 
+	"github.com/briandowns/spinner"
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
-	"github.com/briandowns/spinner"
 )
 
 const noCommitErrMsg = "This looks like a new repository. Please make an initial commit before running `lingo review`. This is only required for the initial commit, subsequent changes to your repo will be picked up by lingo without committing."
@@ -47,50 +47,52 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		}
 		// Otherwise, build review request from current repository
 	} else {
-
 		// TODO(waigani) pass this in as opt
 		repo := vcs.New(backing.Git)
-		owner, repoName, err := repo.OwnerAndNameFromRemote()
-		if err != nil {
-			return nil, errors.Annotate(err, "\nlocal vcs error")
-		}
-
-		sha, err := repo.CurrentCommitId()
-		if err != nil {
-			if noCommitErr(err) {
-				return nil, errors.New(noCommitErrMsg)
-			}
-			return nil, errors.Trace(err)
-		}
 
 		if err := syncRepo(repo); err != nil {
 			return nil, errors.Trace(err)
 		}
 
-		patches, err := repo.Patches()
+		// patches, err := repo.Patches()
+		// if err != nil {
+		// 	return nil, errors.Trace(err)
+		// }
+
+		// dir, err := repo.WorkingDir()
+		// if err != nil {
+		// 	return nil, errors.Trace(err)
+		// }
+
+		// TODO(BlakeMScurr) Allow multiple queries.
+		// TODO(BlakeMScurr) Don't send patches.
+		dotlingo, err := repo.BuildQueries()
 		if err != nil {
-			return nil, errors.Trace(err)
+			if noCommitErr(err) {
+				return nil, errors.New(noCommitErrMsg)
+			}
+
+			return nil, errors.Annotate(err, "\nbad request")
 		}
 
-		dir, err := repo.WorkingDir()
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
+		fmt.Println(dotlingo[0])
 
 		reviewReq = &server.ReviewRequest{
-			Host:         "local",
-			Owner:        owner,
-			Repo:         repoName,
+			Dotlingo:     dotlingo[0],
+			Host:         "asdfasdfasdf",
+			Owner:        "mock",
+			Repo:         "mock",
 			FilesAndDirs: opts.FilesAndDirs,
-			SHA:          sha,
-			Patches:      patches,
+			// Patches:      patches,
 			// TODO(waigani) make this a CLI flag
 			Recursive: true,
-			Dir:       dir,
+			Dir:       "mock",
 		}
 	}
 
-	reviewReq.Dotlingo = opts.DotLingo
+	if opts.DotLingo != "" {
+		reviewReq.Dotlingo = opts.DotLingo
+	}
 
 	svc, err := service.New()
 	if err != nil {
@@ -165,6 +167,11 @@ l:
 	}
 
 	return confirmedIssues, nil
+}
+
+// TODO(waigani) use typed error
+func noCommitErr(err error) bool {
+	return strings.Contains(err.Error(), "ambiguous argument 'HEAD'")
 }
 
 // sync the local repository with the remote, creating the remote if it does
@@ -296,11 +303,6 @@ func ingestBar(current, total int, progressc server.Ingestc) error {
 		}
 	}
 	return nil
-}
-
-// TODO(waigani) use typed error
-func noCommitErr(err error) bool {
-	return strings.Contains(err.Error(), "ambiguous argument 'HEAD'")
 }
 
 func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {

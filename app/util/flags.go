@@ -84,6 +84,10 @@ var (
 		"interactive",
 		"i",
 	}
+	WorkingDirFlg = flagName{
+		"workingdir",
+		"w",
+	}
 )
 
 func (f *flagName) String() string {
