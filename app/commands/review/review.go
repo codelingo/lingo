@@ -54,18 +54,6 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 			return nil, errors.Trace(err)
 		}
 
-		// patches, err := repo.Patches()
-		// if err != nil {
-		// 	return nil, errors.Trace(err)
-		// }
-
-		// dir, err := repo.WorkingDir()
-		// if err != nil {
-		// 	return nil, errors.Trace(err)
-		// }
-
-		// TODO(BlakeMScurr) Allow multiple queries.
-		// TODO(BlakeMScurr) Don't send patches.
 		dotlingo, err := repo.BuildQueries()
 		if err != nil {
 			if noCommitErr(err) {
@@ -75,21 +63,17 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 			return nil, errors.Annotate(err, "\nbad request")
 		}
 
+		// TODO(BlakeMScurr) Allow multiple queries.
+		// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		// DO NOT LAND IN MASTER UNTIL THIS IS DONE
 		fmt.Println(dotlingo[0])
 
 		reviewReq = &server.ReviewRequest{
-			Dotlingo:     dotlingo[0],
-			Host:         "asdfasdfasdf",
-			Owner:        "mock",
-			Repo:         "mock",
-			FilesAndDirs: opts.FilesAndDirs,
-			// Patches:      patches,
-			// TODO(waigani) make this a CLI flag
-			Recursive: true,
-			Dir:       "mock",
+			Dotlingo: dotlingo[0],
 		}
 	}
 
+	// TODO: don't bother with query generation if there is a Dotlingo argument
 	if opts.DotLingo != "" {
 		reviewReq.Dotlingo = opts.DotLingo
 	}
@@ -167,11 +151,6 @@ l:
 	}
 
 	return confirmedIssues, nil
-}
-
-// TODO(waigani) use typed error
-func noCommitErr(err error) bool {
-	return strings.Contains(err.Error(), "ambiguous argument 'HEAD'")
 }
 
 // sync the local repository with the remote, creating the remote if it does
@@ -303,6 +282,11 @@ func ingestBar(current, total int, progressc server.Ingestc) error {
 		}
 	}
 	return nil
+}
+
+// TODO(waigani) use typed error
+func noCommitErr(err error) bool {
+	return strings.Contains(err.Error(), "ambiguous argument 'HEAD'")
 }
 
 func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {

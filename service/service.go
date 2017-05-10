@@ -178,15 +178,6 @@ func cancelReview(sessionKey string) error {
 // require a context.
 func (c client) Review(_ context.Context, req *server.ReviewRequest) (server.Issuec, server.Messagec, server.Ingestc, error) {
 	// set defaults
-	if req.Host == "" {
-		return nil, nil, nil, errors.New("repository host is not set")
-	}
-	if req.Owner == "" {
-		return nil, nil, nil, errors.New("repository owner is not set")
-	}
-	if req.Repo == "" {
-		return nil, nil, nil, errors.New("repository name is not set")
-	}
 
 	// Initialise review session and receive channel prefix
 	prefix, err := c.Session(&server.SessionRequest{})

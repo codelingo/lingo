@@ -1,6 +1,5 @@
 package git
 
-// TODO(BlakeMScurr) Make sure we don't actually depend on the platform
 import (
 	"fmt"
 	"path/filepath"
@@ -9,6 +8,11 @@ import (
 
 	"github.com/juju/errors"
 )
+
+// This file is responsible for building up a set of queries from a git repository.
+// That includes reading reading .lingo files, determining which ones are applicable based on directory
+// from which the review is started (cascade logic), and filling out a CLQL template.
+// TODO(BlakeMScurr) pull out generic query building logic. Define
 
 // BuildQueries finds all the relevant .lingo files from the repo and builds out the vcs section tenet to
 // produce a valid query for the platform.
@@ -42,15 +46,9 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 
 	for dir != "." {
 		dir = filepath.Dir(dir)
-		dirs = append(dirs, filepath.Base(dir))
+		dirs = append([]string{filepath.Base(dir)}, dirs...)
 	}
 
-	for i, j := 0, len(dirs)-1; i < j; i, j = i+1, j-1 {
-		dirs[i], dirs[j] = dirs[j], dirs[i]
-	}
-
-	// Get tenets
-	matchStmts := regexp.MustCompile("(    .*\n)+")
 	vcsFacts, err := r.populateGitTemplate()
 	if err != nil {
 		return "", errors.Trace(err)
@@ -67,6 +65,9 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 		vcsFacts += "\n        git.patch:\n          diff: ```" + strings.Replace(patchString, "\n", "\\n", -1) + "```"
 		whitespace += "  "
 	}
+
+	// Get tenets. Here a tenet is **very loosely** defined as any sequence of lines starting with four spaces.
+	matchStmts := regexp.MustCompile("(    .*\n)+")
 
 	// Update the query string
 	newLingoSrc := lingoSrc
@@ -93,10 +94,7 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 
 		newLingoSrc = strings.Replace(newLingoSrc, match, newMatch, -1)
 	}
-	fmt.Println(lingoSrc)
-	fmt.Println("-------------------------")
-	fmt.Println(newLingoSrc)
-	fmt.Println("=========================")
+
 	return newLingoSrc, nil
 }
 
@@ -137,7 +135,6 @@ func (r *Repo) getDotlingoFiles(workingDir string) (map[string]string, error) {
 	// Go to the root of the repository to do a full test.
 	lingoFiles := map[string]string{}
 	for _, path := range paths {
-		// TODO(BlakeMScurr) Is the dotlingo tree necessary? Make comparison.
 		pathDir := filepath.Dir(path)
 		if pathDir == "." {
 			pathDir = ""
@@ -149,8 +146,6 @@ func (r *Repo) getDotlingoFiles(workingDir string) (map[string]string, error) {
 				return nil, errors.Trace(err)
 			}
 			lingoFiles[path] = lingoSrc
-		} else {
-			fmt.Println(pathDir + " <----------")
 		}
 	}
 	return lingoFiles, nil
