@@ -56,6 +56,18 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 		return "", errors.Trace(err)
 	}
 
+	patches, err := r.Patches()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	whitespace := "    "
+	patchString := strings.Join(patches, "\n")
+	if patchString != "" {
+		vcsFacts += "\n        git.patch:\n          diff: ```" + strings.Replace(patchString, "\n", "\\n", -1) + "```"
+		whitespace += "  "
+	}
+
 	// Update the query string
 	newLingoSrc := lingoSrc
 	for _, match := range matchStmts.FindAllString(lingoSrc, -1) {
@@ -63,9 +75,9 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 		newMatch := vcsFacts + "\n"
 
 		// Limit scope of query to location of the .lingo file
-		whitespace := "    "
+
 		for _, dirFactName := range dirs {
-			newMatch += whitespace + "    dir:\n"
+			newMatch += whitespace + "    common.dir:\n"
 			newMatch += whitespace + "      name: \"" + dirFactName + "\"\n"
 			whitespace += "  "
 		}
@@ -91,20 +103,11 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 const gitTemplate = `    git.repo:
       name: %s
       host: %s
-      owner: %s%s
+      owner: %s
       git.commit:
         sha: "%s"`
 
 func (r *Repo) populateGitTemplate() (string, error) {
-	patches, err := r.Patches()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-	patchString := strings.Join(patches, "\n")
-	if patchString != "" {
-		patchString = "\n      git.patch:\n        diff: ```" + strings.Replace(patchString, "\n", "\\n", -1) + "```"
-	}
-
 	owner, repoName, err := r.OwnerAndNameFromRemote()
 	if err != nil {
 		return "", errors.Annotate(err, "\nlocal vcs error")
@@ -115,7 +118,7 @@ func (r *Repo) populateGitTemplate() (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	return fmt.Sprintf(gitTemplate, repoName, "local", owner, patchString, sha), nil
+	return fmt.Sprintf(gitTemplate, repoName, "local", owner, sha), nil
 }
 
 // Get all .lingo files that apply to the current review.
