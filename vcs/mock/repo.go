@@ -14,6 +14,14 @@ func (mockrepo *Repo) Sync() error {
 	return nil
 }
 
+func (mockrepo *Repo) BuildQueries() ([]string, error) {
+	return []string{}, nil
+}
+
+func (mockrepo *Repo) ReadFile(filename, commitID string) (string, error) {
+	return "", nil
+}
+
 func (mockrepo *Repo) CurrentCommitId() (string, error) {
 	return "", nil
 }

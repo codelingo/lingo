@@ -3,6 +3,7 @@ package backing
 type VCSBacking int
 
 type Repo interface {
+	BuildQueries() ([]string, error)
 	Sync() error
 	CurrentCommitId() (string, error)
 	Patches() ([]string, error)
@@ -13,6 +14,7 @@ type Repo interface {
 	OwnerAndNameFromRemote() (string, string, error)
 	AssertNotTracked() error
 	WorkingDir() (string, error)
+	ReadFile(filename, commitID string) (string, error)
 }
 
 const (

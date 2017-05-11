@@ -205,11 +205,17 @@ func (r *Repo) WorkingDir() (string, error) {
 
 	dir = strings.Replace(dir, "\n", "", -1)
 
-	if dir != "." {
-		dir = "./" + dir
+	return dir, nil
+}
+
+func (r *Repo) ReadFile(filename, commitID string) (string, error) {
+	out, err := gitCMD("show", commitID+":"+filename)
+	if err != nil {
+		// TODO(waigani) better error handling
+		return "", errors.Annotate(err, out)
 	}
 
-	return dir, nil
+	return out, nil
 }
 
 // TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
