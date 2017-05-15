@@ -99,9 +99,9 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 }
 
 const gitTemplate = `    git.repo:
-      name: %s
-      host: %s
-      owner: %s
+      name: "%s"
+      host: "%s"
+      owner: "%s"
       git.commit:
         sha: "%s"`
 
