@@ -45,7 +45,7 @@ service CodeLingo {
     rpc Review (ReviewRequest) returns (ReviewReply) {}
 
     // Queries source code
-    rpc Query (QueryRequest) returns (QueryReply) {}
+    rpc Query (stream QueryRequest) returns (stream QueryReply) {}
 
     // Lists available lexicons
     rpc ListLexicons (ListLexiconsRequest) returns (ListLexiconsReply) {}
@@ -124,12 +124,18 @@ message SessionReply {
 
 // The request message containing the CLQL source code.
 message QueryRequest {
-    string clql = 1;
+    string dotlingo = 1;
 }
 
 // The query response.
 message QueryReply {
-    string result = 1;
+    string id = 1;
+    repeated string kind = 2;
+    message DataList {
+        repeated string data = 1;
+    }
+    map<string, DataList> data = 3;
+    string error = 4;
 }
 
 // The request message containing the files or directories to review.

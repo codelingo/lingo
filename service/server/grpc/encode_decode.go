@@ -100,20 +100,31 @@ func EncodeSessionResponse(ctx context.Context, resp interface{}) (interface{}, 
 	}, nil
 }
 
-func DecodeQueryRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	queryRequest := req.(*codelingo.QueryRequest)
+// TODO: incorporate stream decoding/encoding into grpc server
+func EncodeStreamedQueryReply(out *server.QueryResponse) *codelingo.QueryReply {
+	dataList := map[string]*codelingo.QueryReply_DataList{}
+	for key, datum := range out.Data {
+		dataList[key] = &codelingo.QueryReply_DataList{
+			Data: datum,
+		}
+	}
 
-	return &server.QueryRequest{
-		CLQL: queryRequest.Clql,
-	}, nil
+	return &codelingo.QueryReply{
+		Id:    out.ID,
+		Kind:  out.Kind,
+		Data:  dataList,
+		Error: out.Error,
+	}
+}
+
+func DecodeQueryRequest(ctx context.Context, req interface{}) (interface{}, error) {
+	// No need to decode codelingo.CodeLingo_QueryServer
+	return req, nil
 }
 
 func EncodeQueryResponse(ctx context.Context, resp interface{}) (interface{}, error) {
-	domainResponse := resp.(server.QueryResponse)
-
-	return &codelingo.QueryReply{
-		Result: domainResponse.Result,
-	}, nil
+	// No need to encode codelingo.CodeLingo_QueryServer
+	return resp, nil
 }
 
 func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, error) {

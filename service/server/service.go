@@ -19,7 +19,7 @@ type Issuec chan *codelingo.Issue
 
 type CodeLingoService interface {
 	Session(*SessionRequest) (string, error)
-	Query(src string) (string, error)
+	Query(src []*QueryRequest) (chan *QueryResponse, error)
 	Review(context.Context, *ReviewRequest) (Issuec, Messagec, Ingestc, error)
 	ListLexicons() ([]string, error)
 	ListFacts(owner, name, version string) (map[string][]string, error)

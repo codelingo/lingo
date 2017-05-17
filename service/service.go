@@ -6,6 +6,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -78,18 +80,95 @@ func (c client) Session(req *server.SessionRequest) (string, error) {
 	return r.Key, nil
 }
 
-func (c client) Query(clql string) (string, error) {
-	request := server.QueryRequest{
-		CLQL: clql,
-	}
-	reply, err := c.endpoints["query"](c.Context, request)
+func (c client) Query(dotlingos []*server.QueryRequest) (chan *server.QueryResponse, error) {
+	cc, err := grpcConnection()
 	if err != nil {
-		// c.Logger.Log("err", err)
-		return "", err
+		return nil, errors.Trace(err)
 	}
 
-	r := reply.(server.QueryResponse)
-	return r.Result, nil
+	client := codelingo.NewCodeLingoClient(cc)
+	resultc, err := runQuery(client, dotlingos)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return resultc, nil
+}
+
+func grpcConnection() (*grpc.ClientConn, error) {
+	pCfg, err := config.Platform()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	grpcAddr, err := pCfg.GrpcAddress()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	grpclog.SetLogger(serviceLogger.New())
+	var tlsOpt grpc.DialOption
+	platCfg, err := config.Platform()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	isTLS, err := platCfg.GetValue("gitserver.tls")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	if isTLS == "true" {
+		tlsOpt = grpc.WithInsecure()
+	} else {
+		cp := x509.NewCertPool()
+		if !cp.AppendCertsFromPEM([]byte(cert)) {
+			return nil, errors.New("credentials: failed to append certificates")
+		}
+		creds := credentials.NewTLS(&tls.Config{ServerName: "", RootCAs: cp})
+		tlsOpt = grpc.WithTransportCredentials(creds)
+	}
+	// There may be multiple instances
+	cc, err := grpc.Dial(grpcAddr, tlsOpt)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return cc, nil
+}
+
+func runQuery(client codelingo.CodeLingoClient, dotlingos []*server.QueryRequest) (chan *server.QueryResponse, error) {
+	// stream, err := client.Query(context.Background())
+	stream, err := client.Query(context.Background())
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
+	}
+	resultc := make(chan *server.QueryResponse)
+	go func() {
+		for {
+			in, err := stream.Recv()
+			if err == io.EOF {
+				// read done.
+				close(resultc)
+				return
+			}
+			if err != nil {
+				return
+			}
+
+			resultc <- grpcclient.DecodeStreamedQueryResponse(in)
+
+		}
+	}()
+
+	for _, serverReq := range dotlingos {
+		if err := stream.Send(grpcclient.EncodeStreamedQueryRequest(serverReq)); err != nil {
+			return nil, errors.New(fmt.Sprintf("Failed to send a query request: %v", err))
+		}
+	}
+
+	err = stream.CloseSend()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return resultc, nil
 }
 
 func (c client) ListLexicons() ([]string, error) {
@@ -457,14 +536,14 @@ func New() (server.CodeLingoService, error) {
 		Logger:  logger,
 		endpoints: map[string]endpoint.Endpoint{
 			// TODO(waigani) this could be refactored further, a lot of dups
-			"session":         	buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
-			"query":           	buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
-			"review":          	buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
-			"listfacts":       	buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
-			"listlexicons":    	buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
-			"pathsfromoffset": 	buildEndpoint(tracer, "pathsfromoffset", instances, pathsFromOffsetFactory, randomSeed, logger),
-			"describefact":    	buildEndpoint(tracer, "describefact", instances, describeFactFactory, randomSeed, logger),
-			"latestclientversion": 	buildEndpoint(tracer, "latestclientversion", instances, latestClientVersionFactory, randomSeed, logger),
+			"session":             buildEndpoint(tracer, "session", instances, sessionFactory, randomSeed, logger),
+			"query":               buildEndpoint(tracer, "query", instances, queryFactory, randomSeed, logger),
+			"review":              buildEndpoint(tracer, "review", instances, reviewFactory, randomSeed, logger),
+			"listfacts":           buildEndpoint(tracer, "listfacts", instances, listFactsFactory, randomSeed, logger),
+			"listlexicons":        buildEndpoint(tracer, "listlexicons", instances, listLexiconsFactory, randomSeed, logger),
+			"pathsfromoffset":     buildEndpoint(tracer, "pathsfromoffset", instances, pathsFromOffsetFactory, randomSeed, logger),
+			"describefact":        buildEndpoint(tracer, "describefact", instances, describeFactFactory, randomSeed, logger),
+			"latestclientversion": buildEndpoint(tracer, "latestclientversion", instances, latestClientVersionFactory, randomSeed, logger),
 		},
 	}, nil
 }
