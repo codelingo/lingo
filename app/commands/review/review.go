@@ -68,17 +68,15 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		dotlingos = []string{opts.DotLingo}
 	}
 
-	svc, err := service.New()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
+	queryc := make(chan *codelingo.QueryRequest)
+	go func() {
+		for _, dl := range dotlingos {
+			queryc <- &codelingo.QueryRequest{Dotlingo: dl}
+		}
+		close(queryc)
+	}()
 
-	queries := []*server.QueryRequest{}
-	for _, dl := range dotlingos {
-		queries = append(queries, &server.QueryRequest{Dotlingo: dl})
-	}
-
-	resultc, err := svc.Query(queries)
+	resultc, err := service.Query(queryc)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -90,8 +88,7 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	output := opts.SaveToFile == ""
 	cfm, err := NewConfirmer(output, opts.KeepAll, nil)
 	if err != nil {
-		panic(err.Error())
-		return nil, nil
+		return nil, errors.Trace(err)
 	}
 
 	// If user is manually confirming reviews, set a long timeout.
@@ -128,7 +125,6 @@ l:
 			if !opts.KeepAll {
 				spnr.Restart()
 			}
-
 		case <-timeout:
 			return nil, errors.New("timed out waiting for issue")
 		}

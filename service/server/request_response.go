@@ -40,7 +40,9 @@ type QueryRequest struct {
 
 // QueryResponse is the business domain type for a Query method response.
 type QueryResponse struct {
+	// Id of the result node found by the query
 	ID    string `json:"result"`
+	// The list of kinds that 
 	Kind  []string
 	Data  map[string][]string
 	Error string

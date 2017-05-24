@@ -15,6 +15,13 @@ dev:
       port: "3000"
 test:
   addr: localhost
+  blah:
+    gitserver:
+      remote:
+        name:
+          nested:
+            super: new-name
+            x: b
   gitserver:
     remote:
       name: codelingo_dev

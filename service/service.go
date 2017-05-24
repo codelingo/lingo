@@ -22,6 +22,7 @@ import (
 	"github.com/codelingo/kit/sd"
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service/serviceLogger"
+	"github.com/codelingo/platform/controller/graphdb/query/result"
 	"github.com/juju/errors"
 
 	"github.com/opentracing/opentracing-go"
@@ -80,14 +81,18 @@ func (c client) Session(req *server.SessionRequest) (string, error) {
 	return r.Key, nil
 }
 
-func (c client) Query(dotlingos []*server.QueryRequest) (chan *server.QueryResponse, error) {
+func (c client) Query(ctx context.Context, queryc chan *codelingo.QueryRequest) (chan *result.ResultNode, chan error) {
+	return nil, nil
+}
+
+func Query(queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
 	cc, err := grpcConnection()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	client := codelingo.NewCodeLingoClient(cc)
-	resultc, err := runQuery(client, dotlingos)
+	resultc, err := runQuery(client, queryc)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -134,40 +139,47 @@ func grpcConnection() (*grpc.ClientConn, error) {
 	return cc, nil
 }
 
-func runQuery(client codelingo.CodeLingoClient, dotlingos []*server.QueryRequest) (chan *server.QueryResponse, error) {
-	// stream, err := client.Query(context.Background())
+func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
 	stream, err := client.Query(context.Background())
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
 	}
-	resultc := make(chan *server.QueryResponse)
+
+	resultc := make(chan *codelingo.QueryReply)
 	go func() {
 		for {
 			in, err := stream.Recv()
-			if err == io.EOF {
-				// read done.
+
+			if err != nil {
+				if err != io.EOF {
+					resultc <- &codelingo.QueryReply{Error: err.Error()}
+				}
 				close(resultc)
 				return
 			}
-			if err != nil {
-				return
-			}
-
-			resultc <- grpcclient.DecodeStreamedQueryResponse(in)
-
+			resultc <- in
 		}
 	}()
 
-	for _, serverReq := range dotlingos {
-		if err := stream.Send(grpcclient.EncodeStreamedQueryRequest(serverReq)); err != nil {
-			return nil, errors.New(fmt.Sprintf("Failed to send a query request: %v", err))
-		}
-	}
+	go func() {
+		for {
+			select {
+			case query, ok := <-queryc:
+				if !ok {
+					err = stream.CloseSend()
+					if err != nil {
+						resultc <- &codelingo.QueryReply{Error: err.Error()}
+					}
+					return
+				}
 
-	err = stream.CloseSend()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
+				if err := stream.Send(query); err != nil {
+					resultc <- &codelingo.QueryReply{Error: err.Error()}
+				}
+			}
+		}
+	}()
+
 	return resultc, nil
 }
 

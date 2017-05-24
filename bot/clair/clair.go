@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"strconv"
 
-	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/platform/controller"
 
 	"github.com/codelingo/lingo/service/grpc/codelingo"
@@ -33,55 +32,63 @@ import (
 
 // TODO(waigani) move the bot to the client side - as it builds the query and the result on the client.
 
-func BuildIssue(n *server.QueryResponse) (*codelingo.Issue, error) {
-
-	comment := "mock-comment"
-	name := "mock-tenet-name"
-
-	startOffset, err := strconv.Atoi(n.Data["start_offset"][0])
-	if err != nil {
-		return nil, errors.Trace(err)
+func getSingleValue(reply *codelingo.QueryReply, name string, index int) (string, error) {
+	list, ok := reply.Data[name]
+	if !ok {
+		return "", errors.Errorf("Reply field %s does not exist.", name)
 	}
 
-	startLine, err := strconv.Atoi(n.Data["start_line"][0])
-	if err != nil {
-		return nil, errors.Trace(err)
+	if len(list.Data) <= index {
+		return "", errors.Errorf("Reply field %s has no value at index %d.", name, index)
 	}
 
-	startColumn, err := strconv.Atoi(n.Data["start_column"][0])
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
+	return list.Data[0], nil
+}
 
-	endOffset, err := strconv.Atoi(n.Data["end_offset"][0])
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
+func BuildIssue(n *codelingo.QueryReply) (*codelingo.Issue, error) {
+	intNames := []string{"start_offset", "start_line", "start_column", "end_offset", "end_line", "end_column"}
+	values := []int{}
+	for _, name := range intNames {
+		val, err := getSingleValue(n, name, 0)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 
-	endLine, err := strconv.Atoi(n.Data["end_line"][0])
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	endColumn, err := strconv.Atoi(n.Data["end_column"][0])
-	if err != nil {
-		return nil, errors.Trace(err)
+		intVal, err := strconv.Atoi(val)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		values = append(values, intVal)
 	}
 
 	// we let this panic if filename is not set as it's a developer error.
-	filename := n.Data["filename"][0]
+	filename, err := getSingleValue(n, "filename", 0)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	name, err := getSingleValue(n, "name", 0)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	comment, err := getSingleValue(n, "comment", 0)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	iRange := &codelingo.IssueRange{
 		Start: &codelingo.Position{
 			Filename: filename,
-			Offset:   int64(startOffset),
-			Line:     int64(startLine),
-			Column:   int64(startColumn),
+			Offset:   int64(values[0]),
+			Line:     int64(values[1]),
+			Column:   int64(values[2]),
 		},
 		End: &codelingo.Position{
 			Filename: filename,
-			Offset:   int64(endOffset),
-			Line:     int64(endLine),
-			Column:   int64(endColumn),
+			Offset:   int64(values[3]),
+			Line:     int64(values[4]),
+			Column:   int64(values[5]),
 		},
 	}
 

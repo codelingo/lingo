@@ -17,27 +17,6 @@ func decodeSessionResponse(ctx context.Context, response interface{}) (interface
 	}, nil
 }
 
-// TODO: incorporate streaming encoding/decoding into grpc client structure
-func EncodeStreamedQueryRequest(out *server.QueryRequest) *codelingo.QueryRequest {
-	return &codelingo.QueryRequest{
-		Dotlingo: out.Dotlingo,
-	}
-}
-
-func DecodeStreamedQueryResponse(in *codelingo.QueryReply) *server.QueryResponse {
-	dataMap := map[string][]string{}
-	for key, datum := range in.Data {
-		dataMap[key] = datum.Data
-	}
-
-	return &server.QueryResponse{
-		ID:    in.Id,
-		Kind:  in.Kind,
-		Data:  dataMap,
-		Error: in.Error,
-	}
-}
-
 func encodeQueryRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(server.QueryRequest)
 	return &codelingo.QueryRequest{
