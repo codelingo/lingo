@@ -52,7 +52,7 @@ func init() {
 			},
 			cli.StringFlag{
 				Name:  util.DirectoryFlg.String(),
-				Usage: "Review a given directory. .",
+				Usage: "Review a given directory.",
 			},
 
 			// cli.BoolFlag{
@@ -90,8 +90,7 @@ func reviewAction(ctx *cli.Context) {
 func reviewCMD(ctx *cli.Context) (string, error) {
 	dir := ctx.String("directory")
 	if dir != "" {
-		err := os.Chdir(dir)
-		if err != nil {
+		if err := os.Chdir(dir); err != nil {
 			return "", errors.Trace(err)
 		}
 	}

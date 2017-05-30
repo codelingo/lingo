@@ -140,7 +140,18 @@ func grpcConnection() (*grpc.ClientConn, error) {
 }
 
 func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
-	stream, err := client.Query(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Cancel the context passed to the platform on exit.
+	sigc := make(chan os.Signal, 2)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigc
+		cancel()
+		os.Exit(1)
+	}()
+
+	stream, err := client.Query(ctx)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
 	}
@@ -176,6 +187,8 @@ func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequ
 				if err := stream.Send(query); err != nil {
 					resultc <- &codelingo.QueryReply{Error: err.Error()}
 				}
+			case <-ctx.Done():
+				return
 			}
 		}
 	}()
