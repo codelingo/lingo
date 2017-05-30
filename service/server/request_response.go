@@ -35,12 +35,17 @@ type PathsFromOffsetResponse struct {
 
 // QueryRequest is the business domain type for a Query method request.
 type QueryRequest struct {
-	CLQL string `json:"clql"`
+	Dotlingo string `json:"clql"`
 }
 
 // QueryResponse is the business domain type for a Query method response.
 type QueryResponse struct {
-	Result string `json:"result"`
+	// Id of the result node found by the query
+	ID    string `json:"result"`
+	// The list of kinds that 
+	Kind  []string
+	Data  map[string][]string
+	Error string
 }
 
 // ReviewRequest is the business domain type for a Review method request.

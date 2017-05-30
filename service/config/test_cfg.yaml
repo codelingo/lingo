@@ -6,13 +6,6 @@ all:
       name: new-name
       port: "3030"
   grpc_port: "8002"
-blah:
-  gitserver:
-    remote:
-      name:
-        nested:
-          super: new-name
-          x: b
 dev:
   addr: localhost
   gitserver:
@@ -22,6 +15,13 @@ dev:
       port: "3000"
 test:
   addr: localhost
+  blah:
+    gitserver:
+      remote:
+        name:
+          nested:
+            super: new-name
+            x: b
   gitserver:
     remote:
       name: codelingo_dev

@@ -20,14 +20,23 @@ func decodeSessionResponse(ctx context.Context, response interface{}) (interface
 func encodeQueryRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(server.QueryRequest)
 	return &codelingo.QueryRequest{
-		Clql: req.CLQL,
+		Dotlingo: req.Dotlingo,
 	}, nil
 }
 
 func decodeQueryResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	resp := response.(*codelingo.QueryReply)
+
+	dataMap := map[string][]string{}
+	for key, datum := range resp.Data {
+		dataMap[key] = datum.Data
+	}
+
 	return server.QueryResponse{
-		Result: resp.Result,
+		ID:    resp.Id,
+		Kind:  resp.Kind,
+		Data:  dataMap,
+		Error: resp.Error,
 	}, nil
 }
 

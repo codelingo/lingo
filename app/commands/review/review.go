@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb"
+	"github.com/codelingo/lingo/bot/clair"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/lingo/vcs"
@@ -26,27 +27,19 @@ const noCommitErrMsg = "This looks like a new repository. Please make an initial
 // such as CLAIR use.
 func Review(opts Options) ([]*codelingo.Issue, error) {
 	// build the review request either from a pull request URL or the current repository
-	var reviewReq *server.ReviewRequest
 	var dotlingos []string
 
 	// Build request from pull-request url
 	if opts.PullRequest != "" {
-		// TODO(waigani) support other hosts, e.g. bitbucket
-		prOpts, err := parseGithubPR(opts.PullRequest)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
+		// TODO: create general resourcing layer that allows us to provide lexicons with
+		// generic resources (like git repos), while using the query endpoint.
+		return nil, errors.New("PR reviews from the lingo client currently not available.")
+		// // TODO(waigani) support other hosts, e.g. bitbucket
+		// prOpts, err := parseGithubPR(opts.PullRequest)
+		// if err != nil {
+		// 	return nil, errors.Trace(err)
+		// }
 
-		reviewReq = &server.ReviewRequest{
-			Host:          prOpts.Host,
-			Owner:         prOpts.RepoOwner,
-			Repo:          prOpts.RepoName,
-			IsPullRequest: true,
-			PullRequestID: prOpts.PRID,
-			// TODO(waigani) make this a CLI flag
-			Recursive: false,
-		}
-		// Otherwise, build review request from current repository
 	} else {
 		// TODO(waigani) pass this in as opt
 		var err error
@@ -75,86 +68,73 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 		dotlingos = []string{opts.DotLingo}
 	}
 
-	svc, err := service.New()
+	queryc := make(chan *codelingo.QueryRequest)
+	go func() {
+		for _, dl := range dotlingos {
+			queryc <- &codelingo.QueryRequest{Dotlingo: dl}
+		}
+		close(queryc)
+	}()
+
+	resultc, err := service.Query(queryc)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	var issueBatch []*codelingo.Issue
-	for i, dotlingo := range dotlingos {
-		reviewReq = &server.ReviewRequest{
-			Dotlingo: dotlingo,
-		}
+	var confirmedIssues []*codelingo.Issue
+	spnr := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	spnr.Start()
 
-		issuesc, messagec, progressc, err := svc.Review(nil, reviewReq)
-		if err != nil {
-			if noCommitErr(err) {
-				return nil, errors.New(noCommitErrMsg)
-			}
-
-			return nil, errors.Annotate(err, "\nbad request")
-		}
-
-		if err := showIngestProgress(progressc, messagec); err != nil {
-			return nil, errors.Trace(err)
-		}
-
-		// Ingest complete; show query spinner
-		fmt.Println("Reviewing... Query " + strconv.Itoa(i) + "/" + strconv.Itoa(len(dotlingos)))
-		spnr := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-		spnr.Start()
-
-		// TODO(waigani) these should both be chans - as per first MVP.
-		var confirmedIssues []*codelingo.Issue
-		output := opts.SaveToFile == ""
-		cfm, err := NewConfirmer(output, opts.KeepAll, nil)
-		if err != nil {
-			panic(err.Error())
-			return nil, nil
-		}
-
-		// If user is manually confirming reviews, set a long timeout.
-		timeout := time.After(time.Hour * 1)
-		if opts.KeepAll {
-			timeout = time.After(time.Second * 30)
-		}
-
-	l:
-		for {
-			select {
-			case issue, ok := <-issuesc:
-				if !opts.KeepAll {
-					spnr.Stop()
-				}
-				if !ok {
-					break l
-				}
-				if cfm.Confirm(0, issue) {
-					confirmedIssues = append(confirmedIssues, issue)
-				}
-			case message := <-messagec:
-				msgStr := string(message)
-				// TODO(waigani) Currently, messagec is a mix of info and errors.
-				// Either create a separate errors channel or use log level constants.
-				if strings.HasPrefix(msgStr, "error") {
-					return nil, errors.New(msgStr)
-				}
-
-				if msgStr != "" {
-					fmt.Println(msgStr)
-				}
-			case <-timeout:
-				return nil, errors.New("timed out waiting for issue")
-			}
-		}
-
-		// Stop spinner if it hasn't been stopped already
-		if opts.KeepAll {
-			spnr.Stop()
-		}
-		issueBatch = append(issueBatch, confirmedIssues...)
+	output := opts.SaveToFile == ""
+	cfm, err := NewConfirmer(output, opts.KeepAll, nil)
+	if err != nil {
+		return nil, errors.Trace(err)
 	}
-	return issueBatch, nil
+
+	// If user is manually confirming reviews, set a long timeout.
+	timeout := time.After(time.Hour * 1)
+	if opts.KeepAll {
+		timeout = time.After(time.Second * 30)
+	}
+
+l:
+	for {
+		select {
+		case result, ok := <-resultc:
+			if !opts.KeepAll {
+				spnr.Stop()
+			}
+
+			if !ok {
+				break l
+			}
+
+			if result.Error != "" {
+				return nil, errors.New(result.Error)
+			}
+
+			iss, err := clair.BuildIssue(result)
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+
+			if cfm.Confirm(0, iss) {
+				confirmedIssues = append(confirmedIssues, iss)
+			}
+
+			if !opts.KeepAll {
+				spnr.Restart()
+			}
+		case <-timeout:
+			return nil, errors.New("timed out waiting for issue")
+		}
+	}
+
+	// Stop spinner if it hasn't been stopped already
+	if opts.KeepAll {
+		spnr.Stop()
+	}
+	return confirmedIssues, nil
 }
 
 // sync the local repository with the remote, creating the remote if it does

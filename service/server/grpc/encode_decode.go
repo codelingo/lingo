@@ -101,19 +101,13 @@ func EncodeSessionResponse(ctx context.Context, resp interface{}) (interface{}, 
 }
 
 func DecodeQueryRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	queryRequest := req.(*codelingo.QueryRequest)
-
-	return &server.QueryRequest{
-		CLQL: queryRequest.Clql,
-	}, nil
+	// No need to decode codelingo.CodeLingo_QueryServer
+	return req, nil
 }
 
 func EncodeQueryResponse(ctx context.Context, resp interface{}) (interface{}, error) {
-	domainResponse := resp.(server.QueryResponse)
-
-	return &codelingo.QueryReply{
-		Result: domainResponse.Result,
-	}, nil
+	// No need to encode codelingo.CodeLingo_QueryServer
+	return resp, nil
 }
 
 func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, error) {
