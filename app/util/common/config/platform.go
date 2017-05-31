@@ -2,27 +2,28 @@ package config
 
 import (
 	"fmt"
-	"github.com/codelingo/lingo/service/config"
-	"github.com/juju/errors"
-	"github.com/codelingo/lingo/app/util"
-	"path/filepath"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+
+	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/service/config"
+	"github.com/juju/errors"
 )
 
 const (
-	gitRemoteName = "gitserver.remote.name"
-	gitServerHost = "gitserver.remote.host"
-	gitServerPort = "gitserver.remote.port"
-	gitServerProtocol = "gitserver.remote.protocol"
-	platformServerAddr = "addr"
-	platformServerPort = "port"
+	gitRemoteName          = "gitserver.remote.name"
+	gitServerHost          = "gitserver.remote.host"
+	gitServerPort          = "gitserver.remote.port"
+	gitServerProtocol      = "gitserver.remote.protocol"
+	platformServerAddr     = "addr"
+	platformServerPort     = "port"
 	platformServerGrpcPort = "grpc_port"
-	mqAddrProtocol = "messagequeue.address.protocol"
-	mqAddrUsername = "messagequeue.address.username"
-	mqAddrPassword = "messagequeue.address.password"
-	mqAddrHost = "messagequeue.address.host"
-	mqAddrPort = "messagequeue.address.port"
+	mqAddrProtocol         = "messagequeue.address.protocol"
+	mqAddrUsername         = "messagequeue.address.username"
+	mqAddrPassword         = "messagequeue.address.password"
+	mqAddrHost             = "messagequeue.address.host"
+	mqAddrPort             = "messagequeue.address.port"
 )
 
 type platformConfig struct {
@@ -237,22 +238,22 @@ dev:
       host: "localhost"
       port: "5672"
 onprem:
-  addr: 192.168.99.100
-  // port: "30300"
+  addr: 10.0.17.233
+  port: "30300"
   grpc_port: "30082"
   gitserver:
     tls: "true"
     remote:
       name: "codelingo_onprem"
       protocol: "http"
-      host: "192.168.99.100"
+      host: "10.0.17.233"
       port: "30300"
   messagequeue:
     address:
       protocol: "amqp"
       username: "codelingo"
       password: "codelingo"
-      host: "192.168.99.100"
+      host: "10.0.17.233"
       port: "30567"
 test:
   addr: localhost
