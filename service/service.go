@@ -535,7 +535,7 @@ func New() (server.CodeLingoService, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	if isTLS == "true" {
+	if isTLS == "false" {
 		tlsOpt = grpc.WithInsecure()
 	} else {
 		cp := x509.NewCertPool()
