@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"strconv"
 
-	"github.com/codelingo/platform/controller"
-
 	"github.com/codelingo/lingo/service/grpc/codelingo"
+	"github.com/waigani/diffparser"
 
 	"github.com/juju/errors"
 )
@@ -185,14 +184,15 @@ func setIssueLines(fileSRC string, issue *codelingo.Issue) {
 	}
 }
 
+// Checks if the start and end of a given issue fall within a new code block.
 // TODO(waigani) get diff review working again.
-func isInScope(scope controller.ReviewScope, issue *codelingo.Issue) bool {
+func isInScope(diffFiles []*diffparser.DiffFile, issue *codelingo.Issue) bool {
 
 	// no diffs, review is not scoped
-	if len(scope.DiffFiles) == 0 {
+	if len(diffFiles) == 0 {
 		return true
 	}
-	for _, file := range scope.DiffFiles {
+	for _, file := range diffFiles {
 		start := issue.Position.Start
 		end := issue.Position.End
 		if file.NewName == start.Filename {
