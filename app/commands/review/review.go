@@ -29,38 +29,25 @@ func Review(opts Options) ([]*codelingo.Issue, error) {
 	// build the review request either from a pull request URL or the current repository
 	var dotlingos []string
 
-	// Build request from pull-request url
-	if opts.PullRequest != "" {
-		// TODO: create general resourcing layer that allows us to provide lexicons with
-		// generic resources (like git repos), while using the query endpoint.
-		return nil, errors.New("PR reviews from the lingo client currently not available.")
-		// // TODO(waigani) support other hosts, e.g. bitbucket
-		// prOpts, err := parseGithubPR(opts.PullRequest)
-		// if err != nil {
-		// 	return nil, errors.Trace(err)
-		// }
+	// TODO(waigani) pass this in as opt
+	var err error
+	repo := vcs.New(backing.Git)
 
-	} else {
-		// TODO(waigani) pass this in as opt
-		var err error
-		repo := vcs.New(backing.Git)
+	if err = syncRepo(repo); err != nil {
+		return nil, errors.Trace(err)
+	}
 
-		if err = syncRepo(repo); err != nil {
-			return nil, errors.Trace(err)
+	// TODO: move the query building logic to CLAIR. CLAIR encapsulates all the logic relating
+	// specifically to reviewing repositories.
+	// You will be able to install CLAIR to use with the CLI with a command like `lingo clair review`,
+	// and CLAIR will also be able to listen for GitHub pull requests.
+	dotlingos, err = repo.BuildQueries()
+	if err != nil {
+		if noCommitErr(err) {
+			return nil, errors.New(noCommitErrMsg)
 		}
 
-		// TODO: move the query building logic to CLAIR. CLAIR encapsulates all the logic relating
-		// specifically to reviewing repositories.
-		// You will be able to install CLAIR to use with the CLI with a command like `lingo clair review`,
-		// and CLAIR will also be able to listen for GitHub pull requests.
-		dotlingos, err = repo.BuildQueries()
-		if err != nil {
-			if noCommitErr(err) {
-				return nil, errors.New(noCommitErrMsg)
-			}
-
-			return nil, errors.Annotate(err, "\nbad request")
-		}
+		return nil, errors.Annotate(err, "\nbad request")
 	}
 
 	// TODO: don't bother with query generation if there is a Dotlingo argument

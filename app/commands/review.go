@@ -88,39 +88,57 @@ func reviewAction(ctx *cli.Context) {
 }
 
 func reviewCMD(ctx *cli.Context) (string, error) {
-	dir := ctx.String("directory")
-	if dir != "" {
-		if err := os.Chdir(dir); err != nil {
+	// TODO: divide this logic out between the Client and a new Bot endpoint layer.
+	// All calls to logic in the clair package will be replaced by calls to the CLAIR server in the
+	// bot endpoint layer.
+
+	// Make the repository available to be parsed
+	if opts.PullRequest != "" {
+		// Build request from pull-request url
+		prOpts, err := review.ParsePR(opts.PullRequest)
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		// The will be one of the endpoints available on the bot layer, all proceeding commands
+		// on this execution path should be thought of as occurring on CLAIR.
+		issues := clair.ReviewPullRequest(prOpts)
+
+		// TODO: change dir to the local place where we've pulled down the code
+	} else {
+		dir := ctx.String("directory")
+		if dir != "" {
+			if err := os.Chdir(dir); err != nil {
+				return "", errors.Trace(err)
+			}
+		}
+
+		dotlingo, err := readDotLingo(ctx)
+		if err != nil {
 			return "", errors.Trace(err)
 		}
-	}
 
-	if err := initRepo(ctx); err != nil {
-		// TODO(waigani) use error types
-		// Note: Prior repo init is a valid state.
-		if !strings.Contains(err.Error(), "already exists") {
+		// TODO: use this code on client not bot layer
+		// opts := review.Options{
+		// 	FilesAndDirs: ctx.Args(),
+		// 	Diff:         ctx.Bool("diff"),
+		// 	SaveToFile:   ctx.String("output"),
+		// 	KeepAll:      !ctx.Bool("interactive"),
+		// 	DotLingo:     dotlingo,
+		// }
+
+		// Give access to
+		// The nfs package is shared between client, bot layer, lexicon, and glustfs server (probably).
+		volumeID := nfsclient.MountCurrentDirectory()
+
+		issues = clair.ReviewLocalRepo(volumeID, dotlingo)
+		if err != nil {
 			return "", errors.Trace(err)
 		}
+
 	}
 
-	dotlingo, err := readDotLingo(ctx)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	opts := review.Options{
-		FilesAndDirs: ctx.Args(),
-		Diff:         ctx.Bool("diff"),
-		SaveToFile:   ctx.String("output"),
-		KeepAll:      !ctx.Bool("interactive"),
-		DotLingo:     dotlingo,
-	}
-
-	issues, err := review.Review(opts)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
+	// TODO: streaming back to the client, verify issues on the client side.
 	if len(issues) == 0 {
 		return fmt.Sprintf("Done! No issues found.\n"), nil
 	}
