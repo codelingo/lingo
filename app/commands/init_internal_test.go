@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/codelingo/lingo/vcs"
 	"github.com/codelingo/lingo/vcs/backing"
 	"github.com/codelingo/lingo/vcs/mock"
 )
@@ -41,7 +42,7 @@ func TestRepoNaming(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		gotName, gotErr := createRepo(c.r, c.dirName)
+		gotName, gotErr := vcs.CreateRepo(c.r, c.dirName)
 		if gotName != c.expectedRepoName {
 			t.Error(`want: `, c.expectedRepoName, `
 		got: `, gotName)

@@ -90,8 +90,13 @@ func newFilePatch(filename string) (string, error) {
 		return "", errors.Trace(err)
 	}
 	// TODO(waigani) handle errors.
-	out, _ := gitCMD("-C", repoRoot, "diff", "--no-index", "/dev/null", filename)
-	return out, nil
+	out, err := gitCMD("-C", repoRoot, "diff", "--no-index", "/dev/null", filename)
+	// TODO: why does this command give the correct output with a failing exit code?
+	// Possibly occurs when the diff adds a new file.
+	if strings.Contains(err.Error(), "exit status 1") {
+		return out, nil
+	}
+	return out, errors.Trace(err)
 }
 
 func repoRoot() (string, error) {

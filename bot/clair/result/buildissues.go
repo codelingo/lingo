@@ -1,4 +1,7 @@
-package clair
+// The result package is responsible for taking query results, transforming them into issuues,
+// and routing them to their destination, whether that's the user, or Github etc.
+
+package result
 
 import (
 	"bytes"
@@ -44,7 +47,13 @@ func getSingleValue(reply *codelingo.QueryReply, name string, index int) (string
 	return list.Data[0], nil
 }
 
-func BuildIssue(n *codelingo.QueryReply) (*codelingo.Issue, error) {
+func buildIssue(n *codelingo.QueryReply) (*codelingo.Issue, error) {
+	if n.Error != "" {
+		return &codelingo.Issue{
+			Err: n.Error,
+		}, nil
+	}
+
 	intNames := []string{"start_offset", "start_line", "start_column", "end_offset", "end_line", "end_column"}
 	values := []int{}
 	for _, name := range intNames {
@@ -97,11 +106,7 @@ func BuildIssue(n *codelingo.QueryReply) (*codelingo.Issue, error) {
 		// TODO(waigani) make comment a slice
 		Comment: comment,
 		// Metrics
-		Tags:    []string{"one", "two"},
-		Link:    "some link",
 		NewCode: true,
-		Patch:   "some patch",
-		Err:     "this is err",
 	}
 
 	// TODO(waigani) validate all pos info.

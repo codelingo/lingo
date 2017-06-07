@@ -14,11 +14,23 @@ func (mockrepo *Repo) Sync() error {
 	return nil
 }
 
-func (mockrepo *Repo) BuildQueries() ([]string, error) {
+func (mockrepo *Repo) Clone(path, url string) error {
+	return nil
+}
+
+func (mockrepo *Repo) ApplyPatch(diff string) error {
+	return nil
+}
+
+func (mockrepo *Repo) ClearChanges() error {
+	return nil
+}
+
+func (mockrepo *Repo) BuildQueries(host string) ([]string, error) {
 	return []string{}, nil
 }
 
-func (mockrepo *Repo) ReadFile(filename, commitID string) (string, error) {
+func (mockrepo *Repo) ReadFile(filename string) (string, error) {
 	return "", nil
 }
 

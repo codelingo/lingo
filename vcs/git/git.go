@@ -1,7 +1,10 @@
 package git
 
 import (
+	"bufio"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -157,7 +160,6 @@ func (r *Repo) AssertNotTracked() error {
 }
 
 func (r *Repo) CreateRemote(name string) error {
-
 	gogsClient, err := gogsClientForCurrentUser()
 	if err != nil {
 		return errors.Trace(err)
@@ -208,19 +210,73 @@ func (r *Repo) WorkingDir() (string, error) {
 	return dir, nil
 }
 
-func (r *Repo) ReadFile(filename, commitID string) (string, error) {
-	out, err := gitCMD("show", commitID+":"+filename)
+func (r *Repo) ReadFile(filename string) (string, error) {
+	// If we are dealing with unstaged changes or the diff from a pull request,
+	// just read from the current state of the repo.
+	out, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return string(out), nil
+}
+
+func (r *Repo) Clone(path, url string) error {
+	out, err := gitCMD("-C", path, "clone", url)
 	if err != nil {
 		// TODO(waigani) better error handling
-		return "", errors.Annotate(err, out)
+		errMsg := err.Error() + " " + string(out)
+
+		// There is a race condition where the same repo may be cloned at
+		// the same time.
+		if !strings.Contains(errMsg, "already exists") {
+			return errors.Annotate(err, "error cloning repo '"+url+"': "+errMsg)
+		}
+	}
+	return nil
+}
+
+// Applies a raw diff to the current repo
+// TODO: pass diff to stdin without whitespace unrecognised input error
+func (r *Repo) ApplyPatch(diff string) error {
+	// Create a new patch file containing the diff
+	fname := "../temp.patch"
+	f, err := os.Create(fname)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	_, err = fmt.Fprint(w, diff)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	w.Flush()
+
+	// Apply the patch
+	_, err = gitCMD("apply", fname)
+	if err != nil {
+		return errors.Trace(err)
 	}
 
-	return out, nil
+	return errors.Trace(os.Remove(fname))
+}
+
+// ClearChanges ensures there are no unstaged changes
+func (r *Repo) ClearChanges() error {
+	// repo already checked out, fetch latest.
+	if _, err := gitCMD("clean", "-f"); err != nil {
+		return errors.Trace(err)
+	}
+
+	if _, err := gitCMD("checkout", "."); err != nil {
+		return errors.Trace(err)
+	}
+	return nil
 }
 
 // TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
 // by any git command-line actions
-
 func gitCMD(args ...string) (out string, err error) {
 	cmd := exec.Command("git", args...)
 	b, err := cmd.CombinedOutput()
