@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/bot/clair"
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
@@ -45,30 +46,54 @@ func init() {
 }
 
 func reviewPullRequestAction(ctx *cli.Context) {
+	msg, err := reviewPullRequestCMD(ctx)
+	if err != nil {
+		// Debugging
+		// print(errors.ErrorStack(err))
+		util.OSErr(err)
+		return
+	}
+	fmt.Println(msg)
+}
+
+func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 	if l := len(ctx.Args()); l != 1 {
-		fmt.Printf("expected one arg, got %d", l)
-		return
+		return "", errors.Errorf("expected one arg, got %d", l)
 	}
 
-	dotlingo, err := readDotLingo(ctx)
+	dotlingo, err := review.ReadDotLingo(ctx)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		return "", errors.Trace(err)
 	}
 
-	opts := review.Options{
-		PullRequest: ctx.Args()[0],
-		SaveToFile:  ctx.String("save"),
-		KeepAll:     ctx.Bool("keep-all"),
+	opts, err := review.ParsePR(ctx.Args()[0])
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	issuec, err := clair.Review(clair.Request{
+		PullRequest: opts,
 		DotLingo:    dotlingo,
-	}
-
-	issueCount, err := review.Review(opts)
+	})
 	if err != nil {
-		fmt.Println(errors.ErrorStack(err))
-		return
-		// errors.ErrorStack(err)
+		return "", errors.Trace(err)
 	}
 
-	fmt.Printf("Done! Found %d issues \n", issueCount)
+	issues, err := review.ConfirmIssues(issuec, ctx.Bool("keep-all"), ctx.String("save"))
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	// TODO: streaming back to the client, verify issues on the client side.
+	if len(issues) == 0 {
+		return "Done! No issues found.\n", nil
+	}
+
+	msg, err := review.MakeReport(issues, ctx.String("format"), ctx.String("save"))
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	fmt.Println(fmt.Printf("Done! Found %d issues \n", len(issues)))
+	return msg, nil
 }

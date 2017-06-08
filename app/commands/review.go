@@ -1,26 +1,18 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/juju/errors"
 
-	"github.com/codelingo/lingo/app/commands/review"
-	"github.com/codelingo/lingo/app/util/common/config"
+	"github.com/codelingo/lingo/bot/clair"
 
+	"github.com/codelingo/lingo/app/commands/review"
 	"github.com/codelingo/lingo/app/util"
 
 	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
 
 	"github.com/codegangsta/cli"
-
-	"github.com/codelingo/lingo/vcs"
-	"github.com/codelingo/lingo/vcs/backing"
 )
 
 func init() {
@@ -95,28 +87,23 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		}
 	}
 
-	if err := initRepo(ctx); err != nil {
-		// TODO(waigani) use error types
-		// Note: Prior repo init is a valid state.
-		if !strings.Contains(err.Error(), "already exists") {
-			return "", errors.Trace(err)
-		}
-	}
-
-	dotlingo, err := readDotLingo(ctx)
+	dotlingo, err := review.ReadDotLingo(ctx)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	opts := review.Options{
-		FilesAndDirs: ctx.Args(),
-		Diff:         ctx.Bool("diff"),
-		SaveToFile:   ctx.String("output"),
-		KeepAll:      !ctx.Bool("interactive"),
-		DotLingo:     dotlingo,
+	// Send review request to the bot layer.
+	// When CLAIR is taken out of the client we will need to Init and Sync the repo from here,
+	// as well as having the Init logic in the bot layer to recieve external resources.
+	issuec, err := clair.Review(clair.Request{
+		DotLingo: dotlingo,
+	})
+
+	if err != nil {
+		return "", errors.Trace(err)
 	}
 
-	issues, err := review.Review(opts)
+	issues, err := review.ConfirmIssues(issuec, !ctx.Bool("interactive"), ctx.String("output"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -125,108 +112,6 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return fmt.Sprintf("Done! No issues found.\n"), nil
 	}
 
-	var data []byte
-	format := ctx.String("format")
-	switch format {
-	case "json":
-		data, err = json.Marshal(issues)
-		if err != nil {
-			return "", errors.Trace(err)
-		}
-	case "json-pretty":
-		data, err = json.MarshalIndent(issues, " ", " ")
-		if err != nil {
-			return "", errors.Trace(err)
-		}
-	default:
-		return "", errors.Errorf("Unknown format %q", format)
-	}
-
-	if outputFile := opts.SaveToFile; outputFile != "" {
-		err = ioutil.WriteFile(outputFile, data, 0775)
-		if err != nil {
-			return "", errors.Annotate(err, "Error writing issues to file")
-		}
-		return fmt.Sprintf("Done! %d issues written to %s \n", len(issues), outputFile), nil
-	}
-
-	return string(data), nil
-}
-
-func readDotLingo(ctx *cli.Context) (string, error) {
-	var dotlingo []byte
-
-	if filename := ctx.String(util.LingoFile.Long); filename != "" {
-		var err error
-		dotlingo, err = ioutil.ReadFile(filename)
-		if err != nil {
-			return "", errors.Trace(err)
-		}
-	}
-	return string(dotlingo), nil
-}
-
-// TODO(waigani) start ingesting repo as soon as it's inited
-
-func initRepo(ctx *cli.Context) error {
-
-	repo := vcs.New(backing.Git)
-	authCfg, err := config.Auth()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	if err = repo.AssertNotTracked(); err != nil {
-		// TODO (benjamin-rood): Check the error type
-		return errors.Trace(err)
-	}
-
-	// TODO(waigani) Try to get owner and name from origin remote first.
-
-	// get the repo owner name
-	repoOwner, err := authCfg.GetGitUserName()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	// get the repo name, default to working directory name
-	dir, err := os.Getwd()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	repoName := filepath.Base(dir)
-
-	// TODO(benjamin-rood) Check if repo name and contents are identical.
-	// If, so this should be a no-op and only the remote needs to be set.
-	// ensure creation of distinct remote.
-	repoName, err = createRepo(repo, repoName)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	_, _, err = repo.SetRemote(repoOwner, repoName)
-	return err
-}
-
-func createRepo(repo backing.Repo, name string) (string, error) {
-	if err := repo.CreateRemote(name); err != nil {
-		if strings.Contains(err.Error(), "already exists") {
-			parts := strings.Split(name, "-")
-			num := parts[len(parts)-1]
-
-			// We ignore the error here because the only case in which Atoi
-			// would error is if the name had not yet been appended with -n.
-			// In this case, n will be set to zero which is what we require.
-			n, _ := strconv.Atoi(num)
-			if n != 0 {
-				// Need to remove existing trailing number where present,
-				// otherwise the repoName only appends rather than replaces
-				// and will produce names of the pattern "myPkg-1-2-...-n-n+1".
-				name = strings.TrimSuffix(name, "-"+num)
-			}
-			return createRepo(repo, fmt.Sprintf("%s-%d", name, n+1))
-		}
-		return "", err
-	}
-	return name, nil
+	msg, err := review.MakeReport(issues, ctx.String("format"), ctx.String("output"))
+	return msg, errors.Trace(err)
 }

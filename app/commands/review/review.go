@@ -1,107 +1,89 @@
 package review
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/cheggaaa/pb"
-	"github.com/codelingo/lingo/bot/clair"
+	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
-	"github.com/codelingo/lingo/vcs"
-	"github.com/codelingo/lingo/vcs/backing"
 
-	"github.com/briandowns/spinner"
-	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
 )
 
-const noCommitErrMsg = "This looks like a new repository. Please make an initial commit before running `lingo review`. This is only required for the initial commit, subsequent changes to your repo will be picked up by lingo without committing."
-
-// TODO(waigani) this function is used by other services, such as CLAIR.
-// Refactor to have a services package, which both the lingo tool and services
-// such as CLAIR use.
-func Review(opts Options) ([]*codelingo.Issue, error) {
-	// build the review request either from a pull request URL or the current repository
-	var dotlingos []string
-
-	// Build request from pull-request url
-	if opts.PullRequest != "" {
-		// TODO: create general resourcing layer that allows us to provide lexicons with
-		// generic resources (like git repos), while using the query endpoint.
-		return nil, errors.New("PR reviews from the lingo client currently not available.")
-		// // TODO(waigani) support other hosts, e.g. bitbucket
-		// prOpts, err := parseGithubPR(opts.PullRequest)
-		// if err != nil {
-		// 	return nil, errors.Trace(err)
-		// }
-
-	} else {
-		// TODO(waigani) pass this in as opt
-		var err error
-		repo := vcs.New(backing.Git)
-
-		if err = syncRepo(repo); err != nil {
-			return nil, errors.Trace(err)
-		}
-
-		// TODO: move the query building logic to CLAIR. CLAIR encapsulates all the logic relating
-		// specifically to reviewing repositories.
-		// You will be able to install CLAIR to use with the CLI with a command like `lingo clair review`,
-		// and CLAIR will also be able to listen for GitHub pull requests.
-		dotlingos, err = repo.BuildQueries()
+func MakeReport(issues []*codelingo.Issue, format, outputFile string) (string, error) {
+	var data []byte
+	var err error
+	switch format {
+	case "json":
+		data, err = json.Marshal(issues)
 		if err != nil {
-			if noCommitErr(err) {
-				return nil, errors.New(noCommitErrMsg)
-			}
+			return "", errors.Trace(err)
+		}
+	case "json-pretty":
+		data, err = json.MarshalIndent(issues, " ", " ")
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+	default:
+		return "", errors.Errorf("Unknown format %q", format)
+	}
 
-			return nil, errors.Annotate(err, "\nbad request")
+	if outputFile != "" {
+		err = ioutil.WriteFile(outputFile, data, 0775)
+		if err != nil {
+			return "", errors.Annotate(err, "Error writing issues to file")
+		}
+		return fmt.Sprintf("Done! %d issues written to %s \n", len(issues), outputFile), nil
+	}
+
+	return string(data), nil
+}
+
+// Read a .lingo file from a filepath argument
+func ReadDotLingo(ctx *cli.Context) (string, error) {
+	var dotlingo []byte
+
+	if filename := ctx.String(util.LingoFile.Long); filename != "" {
+		var err error
+		dotlingo, err = ioutil.ReadFile(filename)
+		if err != nil {
+			return "", errors.Trace(err)
 		}
 	}
+	return string(dotlingo), nil
+}
 
-	// TODO: don't bother with query generation if there is a Dotlingo argument
-	if opts.DotLingo != "" {
-		dotlingos = []string{opts.DotLingo}
-	}
-
-	queryc := make(chan *codelingo.QueryRequest)
-	go func() {
-		for _, dl := range dotlingos {
-			queryc <- &codelingo.QueryRequest{Dotlingo: dl}
-		}
-		close(queryc)
-	}()
-
-	resultc, err := service.Query(queryc)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+func ConfirmIssues(issuec chan *codelingo.Issue, keepAll bool, saveToFile string) ([]*codelingo.Issue, error) {
 	var confirmedIssues []*codelingo.Issue
 	spnr := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spnr.Start()
 
-	output := opts.SaveToFile == ""
-	cfm, err := NewConfirmer(output, opts.KeepAll, nil)
+	output := saveToFile == ""
+	cfm, err := NewConfirmer(output, keepAll, nil)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	// If user is manually confirming reviews, set a long timeout.
 	timeout := time.After(time.Hour * 1)
-	if opts.KeepAll {
+	if keepAll {
 		timeout = time.After(time.Second * 30)
 	}
 
 l:
 	for {
 		select {
-		case result, ok := <-resultc:
-			if !opts.KeepAll {
+		case iss, ok := <-issuec:
+			if !keepAll {
 				spnr.Stop()
 			}
 
@@ -109,20 +91,15 @@ l:
 				break l
 			}
 
-			if result.Error != "" {
-				return nil, errors.New(result.Error)
-			}
-
-			iss, err := clair.BuildIssue(result)
-			if err != nil {
-				return nil, errors.Trace(err)
+			if iss.Err != "" {
+				return nil, errors.New(iss.Err)
 			}
 
 			if cfm.Confirm(0, iss) {
 				confirmedIssues = append(confirmedIssues, iss)
 			}
 
-			if !opts.KeepAll {
+			if !keepAll {
 				spnr.Restart()
 			}
 		case <-timeout:
@@ -131,43 +108,10 @@ l:
 	}
 
 	// Stop spinner if it hasn't been stopped already
-	if opts.KeepAll {
+	if keepAll {
 		spnr.Stop()
 	}
 	return confirmedIssues, nil
-}
-
-// sync the local repository with the remote, creating the remote if it does
-// not exist.
-func syncRepo(repo backing.Repo) error {
-
-	if syncErr := repo.Sync(); syncErr != nil {
-
-		// This case is triggered when a local remote has been added but
-		// the remote repo does not exist. In this case, we create the
-		// remote and try to sync again.
-		missingRemote, err := regexp.MatchString("fatal: repository '.*' not found.*", syncErr.Error())
-		if err != nil {
-			return errors.Trace(err)
-		}
-		if missingRemote {
-			_, repoName, err := repo.OwnerAndNameFromRemote()
-			if err != nil {
-				return errors.Trace(err)
-			}
-
-			// TODO(waigani) use typed errors
-			if err := repo.CreateRemote(repoName); err != nil && !strings.HasPrefix(err.Error(), "repository already exists") {
-				return errors.Trace(err)
-			}
-			if err := repo.Sync(); err != nil {
-				return errors.Trace(err)
-			}
-		}
-
-		return errors.Trace(syncErr)
-	}
-	return nil
 }
 
 func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) error {
@@ -266,11 +210,6 @@ func ingestBar(current, total int, progressc server.Ingestc) error {
 		}
 	}
 	return nil
-}
-
-// TODO(waigani) use typed error
-func noCommitErr(err error) bool {
-	return strings.Contains(err.Error(), "ambiguous argument 'HEAD'")
 }
 
 func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {

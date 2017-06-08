@@ -16,7 +16,7 @@ import (
 
 // BuildQueries finds all the relevant .lingo files from the repo and builds out the vcs section tenet to
 // produce a valid query for the platform.
-func (r *Repo) BuildQueries() ([]string, error) {
+func (r *Repo) BuildQueries(host string) ([]string, error) {
 	workingDir, err := r.WorkingDir()
 	if err != nil {
 		return []string{}, errors.Trace(err)
@@ -30,7 +30,7 @@ func (r *Repo) BuildQueries() ([]string, error) {
 	queries := []string{}
 
 	for dir, lingoSrc := range lingoFiles {
-		q, err := r.buildQuery(dir, lingoSrc)
+		q, err := r.buildQuery(host, dir, lingoSrc)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -40,7 +40,7 @@ func (r *Repo) BuildQueries() ([]string, error) {
 	return queries, nil
 }
 
-func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
+func (r *Repo) buildQuery(host, dir, lingoSrc string) (string, error) {
 	// Create dir nodes
 	dirs := []string{}
 
@@ -49,7 +49,7 @@ func (r *Repo) buildQuery(dir, lingoSrc string) (string, error) {
 		dirs = append([]string{filepath.Base(dir)}, dirs...)
 	}
 
-	vcsFacts, err := r.populateGitTemplate()
+	vcsFacts, err := r.populateGitTemplate(host)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -105,7 +105,7 @@ const gitTemplate = `    git.repo:
       git.commit:
         sha: "%s"`
 
-func (r *Repo) populateGitTemplate() (string, error) {
+func (r *Repo) populateGitTemplate(host string) (string, error) {
 	owner, repoName, err := r.OwnerAndNameFromRemote()
 	if err != nil {
 		return "", errors.Annotate(err, "\nlocal vcs error")
@@ -116,17 +116,12 @@ func (r *Repo) populateGitTemplate() (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	return fmt.Sprintf(gitTemplate, repoName, "local", owner, sha), nil
+	return fmt.Sprintf(gitTemplate, repoName, host, owner, sha), nil
 }
 
 // Get all .lingo files that apply to the current review.
 func (r *Repo) getDotlingoFiles(workingDir string) (map[string]string, error) {
-	sha, err := r.CurrentCommitId()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	paths, err := r.getDotlingoFilepaths(sha, workingDir)
+	paths, err := r.getDotlingoFilepaths(workingDir)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -141,7 +136,7 @@ func (r *Repo) getDotlingoFiles(workingDir string) (map[string]string, error) {
 		}
 
 		if strings.HasPrefix(pathDir, workingDir) || strings.HasPrefix(workingDir, pathDir) {
-			lingoSrc, err := r.ReadFile(path, sha)
+			lingoSrc, err := r.ReadFile(path)
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
@@ -152,13 +147,19 @@ func (r *Repo) getDotlingoFiles(workingDir string) (map[string]string, error) {
 }
 
 // gets the file paths of all the .lingo files in the repo
-func (r *Repo) getDotlingoFilepaths(commitID string, directory string) ([]string, error) {
-	out, err := gitCMD("ls-tree", "-r", "--name-only", "--full-tree", commitID)
+func (r *Repo) getDotlingoFilepaths(directory string) ([]string, error) {
+	staged, err := gitCMD("ls-tree", "-r", "--name-only", "--full-tree", "HEAD")
 	if err != nil {
-		return []string{}, errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
 
-	files := strings.Split(out, "\n")
+	unstaged, err := gitCMD("ls-files", "--others", "--exclude-standard")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	files := strings.Split(staged, "\n")
+	files = append(files, strings.Split(unstaged, "\n")...)
 
 	dotlingoFilepaths := []string{}
 	for _, filepath := range files {
