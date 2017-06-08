@@ -67,7 +67,7 @@ echo $v | while IFS=',' read -d';' os arch;  do
 
 	GOOS=$os GOARCH=$arch go build -o $binpath/lingo$ext -v github.com/codelingo/lingo
 
-	cd bin
+	cd $binpath
 	filename=lingo-$version-$os-$arch
 	if [ "$os" == "windows" ]; then
 		fn="$filename.zip"
