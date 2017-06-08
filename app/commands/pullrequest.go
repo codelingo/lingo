@@ -75,7 +75,6 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 		PullRequest: opts,
 		DotLingo:    dotlingo,
 	})
-
 	if err != nil {
 		return "", errors.Trace(err)
 	}

@@ -28,12 +28,12 @@ func Review(req Request) (chan *codelingo.Issue, error) {
 		return nil, errors.Trace(err)
 	}
 
+	queries = []string{req.DotLingo}
+
 	if req.DotLingo == "" {
-		var host string
+		host := "local"
 		if req.PullRequest != nil {
 			host = req.PullRequest.Repo.Host
-		} else {
-			host = "local"
 		}
 
 		// TODO: return a channel of queries
@@ -41,8 +41,6 @@ func Review(req Request) (chan *codelingo.Issue, error) {
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
-	} else {
-		queries = []string{req.DotLingo}
 	}
 
 	resultc, err := queryPlatform(queries)

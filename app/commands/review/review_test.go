@@ -19,6 +19,6 @@ var _ = Suite(&reviewSuite{})
 
 func (s *reviewSuite) TestParseURL(c *C) {
 	urlStr := "https://github.com/waigani/codelingo_demo/pull/1"
-	_, err := parseGithubPR(urlStr)
+	_, err := ParsePR(urlStr)
 	c.Assert(err, jc.ErrorIsNil)
 }
