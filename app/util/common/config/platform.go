@@ -239,7 +239,7 @@ dev:
       port: "5672"
 onprem:
   addr: 10.0.17.233
-  port: "30300"
+  port: "30303"
   grpc_port: "30082"
   gitserver:
     tls: "false"
