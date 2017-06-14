@@ -36,3 +36,4 @@ import:
 - package: gopkg.in/yaml.v1
 - package: gopkg.in/yaml.v2
 - package: github.com/hishboy/gocommons
+- package: github.com/codelingo/lib
