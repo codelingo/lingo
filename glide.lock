@@ -9,6 +9,8 @@ imports:
   version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/codegangsta/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+- name: github.com/codelingo/platform
+  version: b5a237be568f772aad3652be6799fecd31edb964
 - name: github.com/codelingo/kit
   version: 27b2194fb0398eb38d86f436cc375f48d32b2850
   subpackages:

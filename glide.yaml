@@ -3,6 +3,7 @@ import:
 - package: github.com/blang/semver
 - package: github.com/cheggaaa/pb
 - package: github.com/codegangsta/cli
+- package: github.com/codelingo/platform
 - package: github.com/codelingo/kit
   subpackages:
   - endpoint
