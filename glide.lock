@@ -13,6 +13,8 @@ imports:
   version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/codegangsta/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+- name: github.com/codelingo/platform
+  version: b5a237be568f772aad3652be6799fecd31edb964
 - name: github.com/codelingo/cayley
   version: c26247a63d46ac0893bd855cf68d058ed3f5d823
   subpackages:
