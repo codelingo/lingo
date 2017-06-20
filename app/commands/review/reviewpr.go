@@ -7,12 +7,19 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/codelingo/lingo/bot/clair/resource"
 	"github.com/juju/errors"
 )
 
+type PROpts struct {
+	Host     string
+	HostName string
+	Owner    string
+	Name     string
+	PRID     int
+}
+
 // ParsePR produces a set of PROpts to be sent to CLAIR in the bot endpoint layer
-func ParsePR(urlStr string) (*resource.PROpts, error) {
+func ParsePR(urlStr string) (*PROpts, error) {
 	// TODO: Try to parse urlStr as a request for each VCS host
 
 	result, err := url.Parse(urlStr)
@@ -37,7 +44,7 @@ func ParsePR(urlStr string) (*resource.PROpts, error) {
 	}
 }
 
-func parseGithubPR(urlPath []string) (*resource.PROpts, error) {
+func parseGithubPR(urlPath []string) (*PROpts, error) {
 	if l := len(urlPath); l != 4 {
 		return nil, errors.Errorf("Github pull request URL needs to be in the following format: https://github.com/<username>/<repo_name>/pull/<pull_number>")
 	}
@@ -47,23 +54,21 @@ func parseGithubPR(urlPath []string) (*resource.PROpts, error) {
 		return nil, errors.Trace(err)
 	}
 
-	return &resource.PROpts{
-		Repo: resource.RepoOpts{
-			Host:     "github.com",
-			Owner:    urlPath[0],
-			Name:     urlPath[1],
-			HostName: "github_com",
-		},
-		PRID: n,
+	return &PROpts{
+		Host:     "github.com",
+		HostName: "github_com",
+		Owner:    urlPath[0],
+		Name:     urlPath[1],
+		PRID:     n,
 	}, nil
 }
 
 // TODO: implement
-func parseBitBucketPR(urlStr []string) (*resource.PROpts, error) {
+func parseBitBucketPR(urlStr []string) (*PROpts, error) {
 	return nil, errors.New("BitBucket not supported.")
 }
 
 // TODO: implement
-func parseGitlabPR(urlStr []string) (*resource.PROpts, error) {
+func parseGitlabPR(urlStr []string) (*PROpts, error) {
 	return nil, errors.New("Gitlab not supported.")
 }

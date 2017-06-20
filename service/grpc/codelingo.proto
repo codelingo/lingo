@@ -42,7 +42,7 @@ service CodeLingo {
     rpc Session (SessionRequest) returns (SessionReply) {}
 
     // Reviews files
-    rpc Review (ReviewRequest) returns (ReviewReply) {}
+    rpc Review (ReviewRequest) returns (stream Issue) {}
 
     // Queries source code
     rpc Query (stream QueryRequest) returns (stream QueryReply) {}
@@ -140,23 +140,18 @@ message QueryReply {
 
 // The request message containing the files or directories to review.
 message ReviewRequest {
-    string key = 12;
     string host = 1;
-    string owner = 2;
-    string repo= 3;
-    string sha = 4;
-    repeated string filesAndDirs = 5;
-    bool recursive = 6;
-    repeated string Patches = 7;
-    bool isPullRequest = 8;
-    int64 pullRequestID = 9;
-    string vcs = 10;
-    string dotlingo = 11;
-    string dir = 13;
+    string hostname = 2;
+    string owner = 3;
+    string repo= 4;
+    string sha = 5;
+    repeated string Patches = 6;
+    bool isPullRequest = 7;
+    int64 pullRequestID = 8;
+    string vcs = 9;
+    string dotlingo = 10;
+    string dir = 11;
 }
-
-// Empty, we use the control queue once a review is started
-message ReviewReply {}
 
 // Issue returned from a review.
 message Issue {

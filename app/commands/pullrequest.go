@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/bot/clair"
+	"github.com/codelingo/lingo/service"
+	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
@@ -71,9 +72,15 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	issuec, err := clair.Review(clair.Request{
-		PullRequest: opts,
-		DotLingo:    dotlingo,
+	issuec, err := service.Review(&codelingo.ReviewRequest{
+		Host:     opts.Host,
+		Hostname: opts.HostName,
+		Owner:    opts.Owner,
+		Repo:     opts.Name,
+		// Sha and patches are defined by the PR
+		IsPullRequest: true,
+		PullRequestID: int64(opts.PRID),
+		Dotlingo:      dotlingo,
 	})
 	if err != nil {
 		return "", errors.Trace(err)

@@ -81,6 +81,48 @@ func (c client) Session(req *server.SessionRequest) (string, error) {
 	return r.Key, nil
 }
 
+func Review(req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
+	cc, err := grpcConnection()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	client := codelingo.NewCodeLingoClient(cc)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	// Cancel the context passed to the platform on exit.
+	sigc := make(chan os.Signal, 2)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigc
+		cancel()
+		os.Exit(1)
+	}()
+
+	stream, err := client.Review(ctx, req)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
+	}
+
+	issuec := make(chan *codelingo.Issue)
+	go func() {
+		for {
+			in, err := stream.Recv()
+
+			if err != nil {
+				if err != io.EOF {
+					issuec <- &codelingo.Issue{Err: err.Error()}
+				}
+				close(issuec)
+				return
+			}
+			issuec <- in
+		}
+	}()
+
+	return issuec, nil
+}
+
 func (c client) Query(ctx context.Context, queryc chan *codelingo.QueryRequest) (chan *result.ResultNode, chan error) {
 	return nil, nil
 }

@@ -2,13 +2,17 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/juju/errors"
 
-	"github.com/codelingo/lingo/bot/clair"
+	"github.com/codelingo/lingo/service/grpc/codelingo"
+	"github.com/codelingo/lingo/vcs"
+	"github.com/codelingo/lingo/vcs/backing"
 
 	"github.com/codelingo/lingo/app/commands/review"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/service"
 
 	"os"
 
@@ -92,11 +96,46 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
+	repo := vcs.New(backing.Git)
+
+	if err := vcs.InitRepo(backing.Git); err != nil {
+		// TODO(waigani) use error types
+		// Note: Prior repo init is a valid state.
+		if !strings.Contains(err.Error(), "already exists") {
+			return "", errors.Trace(err)
+		}
+	}
+
+	owner, name, err := repo.OwnerAndNameFromRemote()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	sha, err := repo.CurrentCommitId()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	patches, err := repo.Patches()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	workingDir, err := repo.WorkingDir()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
 	// Send review request to the bot layer.
-	// When CLAIR is taken out of the client we will need to Init and Sync the repo from here,
-	// as well as having the Init logic in the bot layer to recieve external resources.
-	issuec, err := clair.Review(clair.Request{
-		DotLingo: dotlingo,
+	issuec, err := service.Review(&codelingo.ReviewRequest{
+		Host:     "local",
+		Owner:    owner,
+		Repo:     name,
+		Sha:      sha,
+		Patches:  patches,
+		Vcs:      "git",
+		Dir:      workingDir,
+		Dotlingo: dotlingo,
 	})
 
 	if err != nil {
