@@ -106,6 +106,11 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		}
 	}
 
+	// TODO: replace this system with nfs-like communication.
+	if err = vcs.SyncRepo(repo); err != nil {
+		return "", errors.Trace(err)
+	}
+
 	owner, name, err := repo.OwnerAndNameFromRemote()
 	if err != nil {
 		return "", errors.Trace(err)
@@ -129,6 +134,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	// Send review request to the bot layer.
 	issuec, err := service.Review(&codelingo.ReviewRequest{
 		Host:     "local",
+		Hostname: "local",
 		Owner:    owner,
 		Repo:     name,
 		Sha:      sha,

@@ -99,9 +99,18 @@ func Review(req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
 		os.Exit(1)
 	}()
 
-	stream, err := client.Review(ctx, req)
+	stream, err := client.Review(ctx)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
+	}
+
+	if err := stream.Send(req); err != nil {
+		errors.Trace(err)
+	}
+
+	err = stream.CloseSend()
+	if err != nil {
+		errors.Trace(err)
 	}
 
 	issuec := make(chan *codelingo.Issue)

@@ -42,7 +42,7 @@ service CodeLingo {
     rpc Session (SessionRequest) returns (SessionReply) {}
 
     // Reviews files
-    rpc Review (ReviewRequest) returns (stream Issue) {}
+    rpc Review (stream ReviewRequest) returns (stream Issue) {}
 
     // Queries source code
     rpc Query (stream QueryRequest) returns (stream QueryReply) {}

@@ -111,19 +111,8 @@ func EncodeQueryResponse(ctx context.Context, resp interface{}) (interface{}, er
 }
 
 func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	reviewRequest := req.(*codelingo.ReviewRequest)
-	return &server.ReviewRequest{
-		Host:          reviewRequest.Host,
-		Owner:         reviewRequest.Owner,
-		Repo:          reviewRequest.Repo,
-		SHA:           reviewRequest.Sha,
-		Patches:       reviewRequest.Patches,
-		IsPullRequest: reviewRequest.IsPullRequest,
-		Vcs:           reviewRequest.Vcs,
-		Dotlingo:      reviewRequest.Dotlingo,
-		PullRequestID: int(reviewRequest.PullRequestID),
-		Dir:           reviewRequest.Dir,
-	}, nil
+	// No need to encode codelingo.CodeLingo_QueryServer
+	return req, nil
 }
 
 func EncodeReviewResponse(ctx context.Context, resp interface{}) (interface{}, error) {

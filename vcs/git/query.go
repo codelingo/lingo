@@ -17,7 +17,7 @@ import (
 
 // BuildQueries finds all the relevant .lingo files from the repo and builds out the vcs section tenet to
 // produce a valid query for the platform.
-func (r *Repo) BuildQueries(host string) ([]string, error) {
+func (r *Repo) BuildQueries(host, owner, name string) ([]string, error) {
 	workingDir, err := r.WorkingDir()
 	if err != nil {
 		return []string{}, errors.Trace(err)
@@ -31,7 +31,7 @@ func (r *Repo) BuildQueries(host string) ([]string, error) {
 	queries := []string{}
 
 	for dir, lingoSrc := range lingoFiles {
-		q, err := r.buildQuery(host, dir, lingoSrc)
+		q, err := r.buildQuery(host, owner, name, dir, lingoSrc)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -46,7 +46,7 @@ func (r *Repo) BuildQueries(host string) ([]string, error) {
 //  - add basic vcs facts to the base of the match statement
 // New fact that introduces a new lexicon should add a corresponding import. New facts that do *not* introduce
 // a new lexicon should use that lexicon's short identifier (if it exists)..
-func (r *Repo) buildQuery(host, dir, lingoSrc string) (string, error) {
+func (r *Repo) buildQuery(host, owner, name, dir, lingoSrc string) (string, error) {
 	dl, err := dotlingo.Parse(lingoSrc)
 	if err != nil {
 		return "", errors.Trace(err)
@@ -72,7 +72,7 @@ func (r *Repo) buildQuery(host, dir, lingoSrc string) (string, error) {
 			return "", errors.Trace(err)
 		}
 
-		fullTree, err := r.addRepoFacts(patchFacts, git, host)
+		fullTree, err := r.addRepoFacts(patchFacts, git, host, owner, name)
 		if err != nil {
 			return "", errors.Trace(err)
 		}
@@ -172,12 +172,7 @@ func (r *Repo) addPatchFacts(child *ast.Fact, gitLex *dotlingo.Lexicon) (*ast.Fa
 }
 
 // addRepoFacts nests the whole query inside a set of facts representing the current repo.
-func (r *Repo) addRepoFacts(child *ast.Fact, gitLex *dotlingo.Lexicon, host string) (*ast.Fact, error) {
-	owner, repoName, err := r.OwnerAndNameFromRemote()
-	if err != nil {
-		return nil, errors.Annotate(err, "\nlocal vcs error")
-	}
-
+func (r *Repo) addRepoFacts(child *ast.Fact, gitLex *dotlingo.Lexicon, host, owner, repoName string) (*ast.Fact, error) {
 	sha, err := r.CurrentCommitId()
 	if err != nil {
 		return nil, errors.Trace(err)
