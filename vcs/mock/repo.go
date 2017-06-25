@@ -26,8 +26,12 @@ func (mockrepo *Repo) ClearChanges() error {
 	return nil
 }
 
-func (mockrepo *Repo) BuildQueries(host string) ([]string, error) {
+func (mockrepo *Repo) BuildQueries(host, owner, name string) ([]string, error) {
 	return []string{}, nil
+}
+
+func (mockrepo *Repo) CheckoutRemote(name string) error {
+	return nil
 }
 
 func (mockrepo *Repo) ReadFile(filename string) (string, error) {
