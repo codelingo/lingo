@@ -118,6 +118,10 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 
 	sha, err := repo.CurrentCommitId()
 	if err != nil {
+		if noCommitErr(err) {
+			return "", errors.New(noCommitErrMsg)
+		}
+
 		return "", errors.Trace(err)
 	}
 
@@ -159,4 +163,11 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 
 	msg, err := review.MakeReport(issues, ctx.String("format"), ctx.String("output"))
 	return msg, errors.Trace(err)
+}
+
+const noCommitErrMsg = "This looks like a new repository. Please make an initial commit before running `lingo review`. This is only required for the initial commit, subsequent changes to your repo will be picked up by lingo without committing."
+
+// TODO(waigani) use typed error
+func noCommitErr(err error) bool {
+	return strings.Contains(err.Error(), "ambiguous argument 'HEAD'")
 }
