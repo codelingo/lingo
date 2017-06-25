@@ -56,7 +56,7 @@ func MakeReviewEndpointFactory(tracer opentracing.Tracer, tracingLogger log.Logg
 			"Review",
 			encodeReviewRequest,
 			decodeReviewResponse,
-			codelingo.ReviewReply{},
+			codelingo.Issue{},
 			// grpctransport.SetClientBefore(kitot.ToGRPCRequest(tracer, tracingLogger)),
 		).Endpoint(), cc, errors.Trace(err)
 	}

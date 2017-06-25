@@ -3,7 +3,7 @@ package backing
 type VCSBacking int
 
 type Repo interface {
-	BuildQueries(host string) ([]string, error)
+	BuildQueries(host, owner, name string) ([]string, error)
 	Sync() error
 	CurrentCommitId() (string, error)
 	Patches() ([]string, error)
@@ -18,6 +18,7 @@ type Repo interface {
 	Clone(path, url string) error
 	ApplyPatch(diff string) error
 	ClearChanges() error
+	CheckoutRemote(sha string) error
 }
 
 const (

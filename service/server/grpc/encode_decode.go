@@ -111,26 +111,13 @@ func EncodeQueryResponse(ctx context.Context, resp interface{}) (interface{}, er
 }
 
 func DecodeReviewRequest(ctx context.Context, req interface{}) (interface{}, error) {
-	reviewRequest := req.(*codelingo.ReviewRequest)
-	return &server.ReviewRequest{
-		Key:           reviewRequest.Key,
-		Host:          reviewRequest.Host,
-		Owner:         reviewRequest.Owner,
-		Repo:          reviewRequest.Repo,
-		SHA:           reviewRequest.Sha,
-		FilesAndDirs:  reviewRequest.FilesAndDirs,
-		Recursive:     reviewRequest.Recursive,
-		Patches:       reviewRequest.Patches,
-		IsPullRequest: reviewRequest.IsPullRequest,
-		Vcs:           reviewRequest.Vcs,
-		Dotlingo:      reviewRequest.Dotlingo,
-		PullRequestID: int(reviewRequest.PullRequestID),
-		Dir:           reviewRequest.Dir,
-	}, nil
+	// No need to encode codelingo.CodeLingo_QueryServer
+	return req, nil
 }
 
 func EncodeReviewResponse(ctx context.Context, resp interface{}) (interface{}, error) {
-	return codelingo.ReviewReply{}, nil
+	// Unused due to streaming and circumventing gokit
+	return codelingo.Issue{}, nil
 }
 
 func DecodeLatestClientVersionRequest(ctx context.Context, req interface{}) (interface{}, error) {

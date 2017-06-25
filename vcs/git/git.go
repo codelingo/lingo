@@ -262,6 +262,38 @@ func (r *Repo) ApplyPatch(diff string) error {
 	return errors.Trace(os.Remove(fname))
 }
 
+func (r *Repo) CheckoutRemote(sha string) error {
+	var err error
+	var currentSha string
+	if currentSha, err = r.CurrentCommitId(); err != nil {
+		return errors.Trace(err)
+	}
+	if currentSha == sha {
+		return nil
+	}
+
+	// fetch origin
+	if _, err = gitCMD("fetch", "origin"); err != nil {
+		return errors.Trace(err)
+	}
+
+	// checkout sha
+	if _, err = gitCMD("checkout", sha); err != nil {
+		return errors.Trace(err)
+	}
+
+	// delete master
+	if _, err = gitCMD("branch", "-D", "master"); err != nil {
+		return errors.Trace(err)
+	}
+
+	// checkout new master
+	if _, err = gitCMD("checkout", "-b", "master"); err != nil {
+		return errors.Trace(err)
+	}
+	return nil
+}
+
 // ClearChanges ensures there are no unstaged changes
 func (r *Repo) ClearChanges() error {
 	// repo already checked out, fetch latest.
