@@ -17,6 +17,7 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/util/common/config"
 )
 
 func init() {
@@ -135,10 +136,23 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
+	cfg, err := config.Platform()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	addr, err := cfg.GitServerAddr()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	hostname, err := cfg.GitRemoteName()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
 	// Send review request to the bot layer.
 	issuec, err := service.Review(&codelingo.ReviewRequest{
-		Host:     "local",
-		Hostname: "local",
+		Host:     addr,
+		Hostname: hostname,
 		Owner:    owner,
 		Repo:     name,
 		Sha:      sha,
