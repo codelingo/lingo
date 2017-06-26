@@ -1,30 +1,21 @@
-hash: 073538430d1a48bf0d509336b63e29f4d0994536d71610e98ca641f461772688
-updated: 2017-06-14T11:25:36.420098554+12:00
+hash: 311850066f64fa4db5107c92ef7b10e203e11fa74ea1aa1d1f572206375b3f0f
+updated: 2017-06-26T11:55:22.354607747+12:00
 imports:
-- name: github.com/andybalholm/cascadia
-  version: 1c31af6f6c1a7b101ed05aacc7d8a738b43ae86e
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
-- name: github.com/boltdb/bolt
-  version: 04a3e85793043e76d41164037d0d7f9d53eecae3
 - name: github.com/briandowns/spinner
   version: ec599f41a86d9a71c359e224bd71a2df3e909a3d
 - name: github.com/cheggaaa/pb
   version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: github.com/codegangsta/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
-- name: github.com/codelingo/platform
-  version: b5a237be568f772aad3652be6799fecd31edb964
 - name: github.com/codelingo/cayley
   version: c26247a63d46ac0893bd855cf68d058ed3f5d823
   subpackages:
-  - clog
   - exporter
   - graph
   - graph/bolt
   - graph/iterator
-  - graph/memstore
-  - graph/memstore/b
   - graph/path
   - quad
   - voc
@@ -42,28 +33,18 @@ imports:
   - transport/grpc
 - name: github.com/codelingo/lib
   version: 1a9d70d5544b6de6eb02475b870248e5258b37d7
-  subpackages:
-  - api
-  - gh
-  - quickdb
-  - util
-  - util/strings
 - name: github.com/codelingo/platform
-  version: 4dd79651f17cbdc3ce9d33fcf6efca1efe1b016f
+  version: a2dc12cace50bcd29d3dea9eca9e282f26a1eec5
   subpackages:
-  - backend/lexicon/vcs
-  - controller/constants
+  - controller/dotlingo
+  - controller/dotlingo/clql
+  - controller/dotlingo/clql/ast
+  - controller/dotlingo/clql/errors
+  - controller/dotlingo/clql/lexer
+  - controller/dotlingo/clql/parser
+  - controller/dotlingo/clql/token
+  - controller/dotlingo/preprocessor
   - controller/graphdb/query/result
-  - controller/graphdb/tree
-  - controller/node
-  - util
-- name: github.com/coreos/go-systemd
-  version: b4a58d95188dd092ae20072bac14cece0e67c388
-  subpackages:
-  - activation
-  - dbus
-  - unit
-  - util
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
@@ -95,19 +76,10 @@ imports:
   version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
 - name: github.com/fsouza/go-dockerclient
   version: 2ce05b8e04b7475b63ae21c1aeaf72b8a5b05eb5
-- name: github.com/gabriel-samfira/sys
-  version: 9ddc60d56b511544223adecea68da1e4f2153beb
-  subpackages:
-  - windows
-  - windows/registry
-  - windows/svc
-  - windows/svc/mgr
 - name: github.com/go-logfmt/logfmt
   version: d4327190ff838312623b09bfeb50d7c93c8d9c1d
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
-- name: github.com/godbus/dbus
-  version: c7fdd8b5cd55e87b4e1f4e372cdb1db61dd6c66f
 - name: github.com/gogits/go-gogs-client
   version: d8aff570fa22d4e38954c753ec8b21862239b31d
 - name: github.com/golang/protobuf
@@ -125,29 +97,8 @@ imports:
   version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
 - name: github.com/juju/errors
   version: 1b5e39b83d1835fa480e0c2ddefb040ee82d58b3
-- name: github.com/juju/juju
-  version: 11682c54646fbe625120c0368b41b3349f04df77
-  subpackages:
-  - agent/tools
-  - cert
-  - controller
-  - feature
-  - juju/osenv
-  - juju/paths
-  - mongo
-  - network
-  - service
-  - service/common
-  - service/systemd
-  - service/upstart
-  - service/windows
-  - tools
 - name: github.com/juju/loggo
   version: 0e0537f18a29c2f0a814dad75b1ccc577852538a
-- name: github.com/juju/replicaset
-  version: fb7294cf57a1e2f08a57691f1246d129a87ab7e8
-- name: github.com/juju/schema
-  version: 29dd021fc4b6a9358065c5a06fbdf66a50a87a95
 - name: github.com/juju/testing
   version: 321edad6b2d1ccac4af9ee05c25b8ad734d40546
   subpackages:
@@ -155,23 +106,7 @@ imports:
 - name: github.com/juju/utils
   version: bdb77b07e7e3f77463d10d2b554cd1b7a78009a2
   subpackages:
-  - arch
   - clock
-  - exec
-  - featureflag
-  - filepath
-  - os
-  - packaging
-  - packaging/commands
-  - packaging/config
-  - packaging/manager
-  - proxy
-  - series
-  - set
-  - shell
-  - symlink
-- name: github.com/juju/version
-  version: 4ae6172c00626779a5a462c3e3d22fc0e889431a
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/mattn/go-colorable
@@ -193,48 +128,22 @@ imports:
   version: 0c3154a3c2ce79d3271985848659870599dfb77c
   subpackages:
   - log
-- name: github.com/pborman/uuid
-  version: 1b00554d822231195d1babd97ff4a781231955c9
-- name: github.com/PuerkitoBio/goquery
-  version: 56a198aba89cdf7a612e6c762eff9d788b9f2dae
-- name: github.com/rogpeppe/fastuuid
-  version: 6724a57986aff9bff1a1770e9347036def7c89f6
 - name: github.com/Sirupsen/logrus
   version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
 - name: github.com/streadway/amqp
   version: 2e25825abdbd7752ff08b270d313b93519a0a232
 - name: github.com/waigani/diffparser
   version: 42ae6ebdde8d5414cb002ac435c1d6be3f926c32
-- name: github.com/waigani/xxx
-  version: 996d259109d1481f6cb397c495801602216175e2
-- name: go.uber.org/atomic
-  version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
-- name: go.uber.org/zap
-  version: 1550bc05539134bbf8612a35f34a79ab8bf34ee3
-  subpackages:
-  - buffer
-  - internal/bufferpool
-  - internal/color
-  - internal/exit
-  - internal/multierror
-  - zapcore
 - name: golang.org/x/crypto
   version: c197bcf24cde29d3f73c7b4ac6fd41f4384e8af6
   subpackages:
-  - curve25519
-  - nacl/box
-  - nacl/secretbox
   - pbkdf2
-  - poly1305
-  - salsa20/salsa
   - ssh/terminal
 - name: golang.org/x/net
   version: da118f7b8e5954f39d0d2130ab35d4bf0e3cb344
   subpackages:
   - context
   - context/ctxhttp
-  - html
-  - html/atom
   - http2
   - http2/hpack
   - idna
@@ -274,25 +183,12 @@ imports:
   - transport
 - name: gopkg.in/check.v1
   version: 4f90aeace3a26ad7021961c297b22c42160c7b25
-- name: gopkg.in/errgo.v1
-  version: 66cb46252b94c1f3d65646f54ee8043ab38d766c
-- name: gopkg.in/juju/names.v2
-  version: fa4c1959bef64b8f18569dc83a85b25d15204503
-- name: gopkg.in/macaroon-bakery.v1
-  version: 469b44e6f1f9479e115c8ae879ef80695be624d5
-  subpackages:
-  - bakery
-  - bakery/checkers
-- name: gopkg.in/macaroon.v1
-  version: d8fd13e6951f2ce46f0964a58149cf2f103cac9a
 - name: gopkg.in/mgo.v2
   version: 01ee097136da162d1dd3c9b44fbdf3abf4fd6552
   subpackages:
   - bson
   - internal/sasl
   - internal/scram
-- name: gopkg.in/tomb.v1
-  version: dd632973f1e7218eb1089048e0798ec9ae7dceb8
 - name: gopkg.in/yaml.v1
   version: 9f9df34309c04878acc86042b16630b0f696e1de
 - name: gopkg.in/yaml.v2
