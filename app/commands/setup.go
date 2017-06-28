@@ -160,6 +160,10 @@ func setupLingo(c *cli.Context) (string, error) {
 	// Set creds in github.
 	// TODO(waigani) these should all be consts.
 	gitCredFile := filepath.Join(cfgDir, credFilename)
+
+	// Potential bug if the username contains "\\" which is unlikely to happen
+	gitCredFile = strings.Replace(gitCredFile, "\\", "/", -1)
+	gitCredFile = strings.Replace(gitCredFile, "C:", "/C", 1)
 	out, err := gitCMD("config",
 		"--global", fmt.Sprintf("credential.%s.helper", gitaddr),
 		fmt.Sprintf("store --file %s", gitCredFile),
