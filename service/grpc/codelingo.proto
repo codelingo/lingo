@@ -135,7 +135,8 @@ message QueryReply {
         repeated string data = 1;
     }
     map<string, DataList> data = 3;
-    string error = 4;
+    map<string, DataList> metadata = 4;
+    string error = 5;
 }
 
 // The request message containing the files or directories to review.
