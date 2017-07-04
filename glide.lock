@@ -34,7 +34,7 @@ imports:
 - name: github.com/codelingo/lib
   version: 1a9d70d5544b6de6eb02475b870248e5258b37d7
 - name: github.com/codelingo/platform
-  version: a2dc12cace50bcd29d3dea9eca9e282f26a1eec5
+  version: 5099cf7d56f8a868ad940f38ebbfe42022dfef56
   subpackages:
   - controller/dotlingo
   - controller/dotlingo/clql

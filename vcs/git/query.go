@@ -1,7 +1,6 @@
 package git
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -100,7 +99,6 @@ func getLex(lexicons []*dotlingo.Lexicon, owner, name string) (*dotlingo.Lexicon
 	newLex := &dotlingo.Lexicon{
 		Owner: owner,
 		Name:  name,
-		Ident: name,
 		// TODO(BlakeMScurr) default to latest
 		Version: "0.0.0",
 	}
@@ -123,8 +121,8 @@ func (r *Repo) addDirFacts(child *ast.Fact, commonLex *dotlingo.Lexicon, dir str
 		dirs = append(dirs, filepath.Base(dir))
 		child = &ast.Fact{
 			Name:      "dir",
-			Namespace: commonLex.Ident,
-			LexiconID: fmt.Sprintf("%s/%s/%s", commonLex.Owner, commonLex.Name, commonLex.Version),
+			Namespace: commonLex.Name,
+			LexiconID: commonLex.ID(),
 			Level:     0,
 			Arg: ast.FactList{
 				child,
@@ -145,8 +143,6 @@ func (r *Repo) addPatchFacts(child *ast.Fact, gitLex *dotlingo.Lexicon) (*ast.Fa
 		return child, nil
 	}
 
-	lexId := fmt.Sprintf("%s/%s/%s", gitLex.Owner, gitLex.Name, gitLex.Version)
-
 	patchString := strings.Join(patches, "\n")
 	patchString = "__$```$__" + strings.Replace(patchString, "\n", "\\\\n", -1) + "__$```$__"
 
@@ -157,8 +153,8 @@ func (r *Repo) addPatchFacts(child *ast.Fact, gitLex *dotlingo.Lexicon) (*ast.Fa
 
 	return &ast.Fact{
 		Name:      "patch",
-		Namespace: gitLex.Ident,
-		LexiconID: lexId,
+		Namespace: gitLex.Name,
+		LexiconID: gitLex.ID(),
 		Level:     0,
 		Arg: ast.FactList{
 			&ast.Fact{
@@ -178,7 +174,7 @@ func (r *Repo) addRepoFacts(child *ast.Fact, gitLex *dotlingo.Lexicon, host, own
 		return nil, errors.Trace(err)
 	}
 
-	lexId := fmt.Sprintf("%s/%s/%s", gitLex.Owner, gitLex.Name, gitLex.Version)
+	lexId := gitLex.ID()
 
 	err = child.IncrementLevel(2)
 	if err != nil {
@@ -189,7 +185,7 @@ func (r *Repo) addRepoFacts(child *ast.Fact, gitLex *dotlingo.Lexicon, host, own
 	// parse time from the imported lexicon. But the eventual goal is to only parse once.
 	return &ast.Fact{
 		Name:      "repo",
-		Namespace: gitLex.Ident,
+		Namespace: gitLex.Name,
 		LexiconID: lexId,
 		Level:     0,
 		Arg: ast.FactList{
@@ -210,7 +206,7 @@ func (r *Repo) addRepoFacts(child *ast.Fact, gitLex *dotlingo.Lexicon, host, own
 			},
 			&ast.Fact{
 				Name:      "commit",
-				Namespace: gitLex.Ident,
+				Namespace: gitLex.Name,
 				LexiconID: lexId,
 				Level:     1,
 				Arg: ast.FactList{
