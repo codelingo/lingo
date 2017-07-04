@@ -16,10 +16,10 @@ import (
 
 // BuildQueries finds all the relevant .lingo files from the repo and builds out the vcs section tenet to
 // produce a valid query for the platform.
-func (r *Repo) BuildQueries(host, owner, name string) ([]string, error) {
+func (r *Repo) BuildQueries(host, owner, name string) ([]*dotlingo.DotLingo, error) {
 	workingDir, err := r.WorkingDir()
 	if err != nil {
-		return []string{}, errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
 
 	lingoFiles, err := r.getDotlingoFiles(workingDir)
@@ -27,7 +27,7 @@ func (r *Repo) BuildQueries(host, owner, name string) ([]string, error) {
 		return nil, errors.Trace(err)
 	}
 
-	queries := []string{}
+	queries := []*dotlingo.DotLingo{}
 
 	for dir, lingoSrc := range lingoFiles {
 		q, err := r.buildQuery(host, owner, name, dir, lingoSrc)
@@ -45,10 +45,10 @@ func (r *Repo) BuildQueries(host, owner, name string) ([]string, error) {
 //  - add basic vcs facts to the base of the match statement
 // New fact that introduces a new lexicon should add a corresponding import. New facts that do *not* introduce
 // a new lexicon should use that lexicon's short identifier (if it exists)..
-func (r *Repo) buildQuery(host, owner, name, dir, lingoSrc string) (string, error) {
+func (r *Repo) buildQuery(host, owner, name, dir, lingoSrc string) (*dotlingo.DotLingo, error) {
 	dl, err := dotlingo.Parse(lingoSrc)
 	if err != nil {
-		return "", errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
 
 	var common, git *dotlingo.Lexicon
@@ -63,17 +63,17 @@ func (r *Repo) buildQuery(host, owner, name, dir, lingoSrc string) (string, erro
 		// from the state of the repository.
 		dirFacts, err := r.addDirFacts(userQuery, common, dir)
 		if err != nil {
-			return "", errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 
 		patchFacts, err := r.addPatchFacts(dirFacts, git)
 		if err != nil {
-			return "", errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 
 		fullTree, err := r.addRepoFacts(patchFacts, git, host, owner, name)
 		if err != nil {
-			return "", errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 
 		dl.Tenets[i].Match = &ast.Fact{
@@ -85,8 +85,8 @@ func (r *Repo) buildQuery(host, owner, name, dir, lingoSrc string) (string, erro
 			},
 		}
 	}
-	str, err := dl.String()
-	return str, errors.Trace(err)
+
+	return dl, errors.Trace(err)
 }
 
 // getLex returns a lexicon of a given owner and name, with the correct ident.

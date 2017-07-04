@@ -1,9 +1,13 @@
 package backing
 
+import (
+	"github.com/codelingo/platform/controller/dotlingo"
+)
+
 type VCSBacking int
 
 type Repo interface {
-	BuildQueries(host, owner, name string) ([]string, error)
+	BuildQueries(host, owner, name string) ([]*dotlingo.DotLingo, error)
 	Sync() error
 	CurrentCommitId() (string, error)
 	Patches() ([]string, error)
