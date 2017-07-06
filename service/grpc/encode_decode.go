@@ -17,11 +17,9 @@ func decodeSessionResponse(ctx context.Context, response interface{}) (interface
 	}, nil
 }
 
+// Query is bidirectionally streamed making this irrelevant
 func encodeQueryRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	req := request.(server.QueryRequest)
-	return &codelingo.QueryRequest{
-		Dotlingo: req.Dotlingo,
-	}, nil
+	return nil, nil
 }
 
 func decodeQueryResponse(ctx context.Context, response interface{}) (interface{}, error) {

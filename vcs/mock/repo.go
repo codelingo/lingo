@@ -1,6 +1,7 @@
 package mock
 
 import "errors"
+import "github.com/codelingo/platform/controller/dotlingo"
 
 // Repo mocking for unit testing.
 // Intended to mock behaviour of the git.Repo implementation.
@@ -26,8 +27,8 @@ func (mockrepo *Repo) ClearChanges() error {
 	return nil
 }
 
-func (mockrepo *Repo) BuildQueries(host, owner, name string) ([]string, error) {
-	return []string{}, nil
+func (mockrepo *Repo) BuildQueries(host, owner, name string) ([]*dotlingo.DotLingo, error) {
+	return nil, nil
 }
 
 func (mockrepo *Repo) CheckoutRemote(name string) error {
