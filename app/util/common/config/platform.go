@@ -16,8 +16,10 @@ const (
 	gitServerHost          = "gitserver.remote.host"
 	gitServerPort          = "gitserver.remote.port"
 	gitServerProtocol      = "gitserver.remote.protocol"
-	platformServerAddr     = "addr"
-	platformServerPort     = "port"
+	webSiteAddr            = "website.addr"
+	webSitePort            = "website.port"
+	platformServerAddr     = "platform.addr"
+	platformServerPort     = "platform.port"
 	platformServerGrpcPort = "grpc_port"
 	mqAddrProtocol         = "messagequeue.address.protocol"
 	mqAddrUsername         = "messagequeue.address.username"
@@ -84,6 +86,9 @@ func (p *platformConfig) Dump() (map[string]interface{}, error) {
 		gitServerHost,
 		gitServerPort,
 		gitServerProtocol,
+		webSiteAddr,
+		webSitePort,
+		platformServerPort,
 		platformServerAddr,
 		platformServerPort,
 		platformServerGrpcPort,
@@ -157,6 +162,20 @@ func (p *platformConfig) Address() (string, error) {
 	return addr + ":" + port, nil
 }
 
+func (p *platformConfig) WebSiteAddress() (string, error) {
+	addr, err := p.GetValue(webSiteAddr)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	port, err := p.GetValue(webSitePort)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return addr + ":" + port, nil
+}
+
 func (p *platformConfig) GrpcAddress() (string, error) {
 
 	addr, err := p.GetValue(platformServerAddr)
@@ -203,8 +222,12 @@ func (p *platformConfig) MessageQueueAddr() (string, error) {
 
 var PlatformTmpl = `
 all:
-  addr: codelingo.io
-  port: "80"
+  website:
+    addr: codelingo.io
+    port: "80"
+  platform:
+    addr: codelingo.io
+    port: "80"
   grpc_port: "8002"
   gitserver:
     tls: "true"
@@ -221,8 +244,12 @@ all:
       host: "codelingo.io"
       port: "5672"
 dev:
-  addr: localhost
-  port: "3030"
+  website:
+    addr: 10.0.17.233
+    port: "30303"
+  platform:
+    addr: localhost
+    port: "3030"
   gitserver:
     tls: "false"
     remote:
@@ -256,8 +283,12 @@ onprem:
       host: "10.0.17.233"
       port: "30567"
 test:
-  addr: localhost
-  port: "3030"
+  website:
+    addr: 10.0.17.233
+    port: "30303"
+  platform:
+    addr: localhost
+    port: "3030"
   gitserver:
     tls: "true"
     remote:
