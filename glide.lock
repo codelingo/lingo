@@ -36,14 +36,6 @@ imports:
 - name: github.com/codelingo/platform
   version: 5099cf7d56f8a868ad940f38ebbfe42022dfef56
   subpackages:
-  - controller/dotlingo
-  - controller/dotlingo/clql
-  - controller/dotlingo/clql/ast
-  - controller/dotlingo/clql/errors
-  - controller/dotlingo/clql/lexer
-  - controller/dotlingo/clql/parser
-  - controller/dotlingo/clql/token
-  - controller/dotlingo/preprocessor
   - controller/graphdb/query/result
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
