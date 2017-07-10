@@ -64,7 +64,7 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	webAddr, err := platConfig.Address()
+	webAddr, err := platConfig.WebSiteAddress()
 	if err != nil {
 		return "", errors.Trace(err)
 	}

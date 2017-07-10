@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"os"
+
 	"github.com/hishboy/gocommons/lang"
 )
 
@@ -39,7 +40,7 @@ func (c *Config) GetEnv() (string, error) {
 func (c *Config) SetEnv(env string) error {
 	err := ioutil.WriteFile(c.envFile, []byte(env), 0644)
 	if err != nil {
-		 return errors.Trace(err)
+		return errors.Trace(err)
 	}
 	return nil
 }
@@ -114,7 +115,7 @@ type cfgInfo struct {
 
 type yamlNode struct {
 	depth int
-	key string
+	key   string
 	value interface{}
 }
 
@@ -293,7 +294,7 @@ func (fc *FileConfig) GetForEnv(env, key string) (interface{}, error) {
 
 func (fc *FileConfig) SetForEnv(env string, key string, value interface{}) error {
 	// Prepend the env to the given key
-	key = env+"."+key
+	key = env + "." + key
 
 	mapData, err := readYaml(fc.filename)
 	if err != nil {
