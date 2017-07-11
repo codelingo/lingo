@@ -18,7 +18,24 @@ import (
 
 	goDocker "github.com/fsouza/go-dockerclient"
 	"github.com/juju/errors"
+
+	"go.uber.org/zap"
 )
+
+func init() {
+	// TODO(waigani) use config/flags to set level etc
+
+	zlog, err := zap.NewDevelopment()
+	if err != nil {
+		// yes panic, this is a developer error.
+		panic(errors.ErrorStack(err))
+	}
+
+	Logger = zlog.Sugar()
+
+}
+
+var Logger *zap.SugaredLogger
 
 // TODO(anyone): Change this back to '.lingo' after making config loader check if
 //               .lingo is file (not dir) before reading.
