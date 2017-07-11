@@ -1,5 +1,5 @@
 hash: 311850066f64fa4db5107c92ef7b10e203e11fa74ea1aa1d1f572206375b3f0f
-updated: 2017-06-26T11:55:22.354607747+12:00
+updated: 2017-07-11T12:32:59.17736602+12:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/codegangsta/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: github.com/codelingo/cayley
-  version: c26247a63d46ac0893bd855cf68d058ed3f5d823
+  version: 968ab96ec44521a921003749cbdd492503c49216
   subpackages:
   - exporter
   - graph
@@ -37,10 +37,6 @@ imports:
   version: 5099cf7d56f8a868ad940f38ebbfe42022dfef56
   subpackages:
   - controller/graphdb/query/result
-- name: github.com/davecgh/go-spew
-  version: 346938d642f2ec3594ed81d874461961cd0faa76
-  subpackages:
-  - spew
 - name: github.com/docker/docker
   version: cc8b8ce0b3d2d6b3345687464d3a3b1c2c4971ef
   subpackages:

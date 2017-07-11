@@ -87,13 +87,7 @@ func InitRepo(vcsType backing.VCSBacking) error {
 	// ensure creation of distinct remote.
 	repoName, err = CreateRepo(repo, repoName)
 	if err != nil {
-
-		// TODO(waigani) TECHDEBT correct fix is to remove the go-gogs-client
-		// client and replace it with gogsclient in
-		// bots/clair/resource/gogsclient.go.
-		if err.Error() == "unexpected end of JSON input" {
-			return errors.New("VCS Error: 401 Unauthorised")
-		}
+		return errors.Trace(err)
 	}
 	_, _, err = repo.SetRemote(repoOwner, repoName)
 	return err

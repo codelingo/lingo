@@ -13,6 +13,7 @@ import (
 
 	"github.com/juju/errors"
 
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/vcs/backing"
 )
@@ -170,6 +171,20 @@ func (r *Repo) CreateRemote(name string) error {
 		AutoInit: false,
 		//	Readme:   "Default",
 	})
+
+	util.Logger.Debugw("repo.CreateRemote",
+		"Name", name,
+		"Private", "true",
+		"AutoInit", "false",
+		"err_stack", errors.ErrorStack(err))
+
+	// TODO(waigani) TECHDEBT correct fix is to remove the go-gogs-client
+	// client and replace it with gogsclient in
+	// bots/clair/resource/gogsclient.go.
+	if err.Error() == "unexpected end of JSON input" {
+		err = errors.New("VCS Error: 401 Unauthorised")
+	}
+
 	return errors.Trace(err)
 }
 
