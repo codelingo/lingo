@@ -12,14 +12,31 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/cheggaaa/pb"
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/flow/service/client"
+	"github.com/codelingo/flow/service/flow"
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/service/grpc/codelingo"
+	"github.com/codelingo/lingo/service"
 	"github.com/codelingo/lingo/service/server"
 
 	"github.com/juju/errors"
 )
 
-func MakeReport(issues []*codelingo.Issue, format, outputFile string) (string, error) {
+func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error) {
+	conn, err := service.GrpcConnection(service.LocalClient, service.FlowServer)
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	c := client.NewFlowClient(conn)
+	issuec, errorc, err := c.Review(req)
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	return issuec, errorc, nil
+}
+
+func MakeReport(issues []*flow.Issue, format, outputFile string) (string, error) {
 	var data []byte
 	var err error
 	switch format {
@@ -62,8 +79,8 @@ func ReadDotLingo(ctx *cli.Context) (string, error) {
 	return string(dotlingo), nil
 }
 
-func ConfirmIssues(issuec chan *codelingo.Issue, keepAll bool, saveToFile string) ([]*codelingo.Issue, error) {
-	var confirmedIssues []*codelingo.Issue
+func ConfirmIssues(issuec chan *flow.Issue, errorc chan error, keepAll bool, saveToFile string) ([]*flow.Issue, error) {
+	var confirmedIssues []*flow.Issue
 	spnr := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spnr.Start()
 
@@ -82,6 +99,13 @@ func ConfirmIssues(issuec chan *codelingo.Issue, keepAll bool, saveToFile string
 l:
 	for {
 		select {
+		case err, ok := <-errorc:
+			if !ok {
+				break
+			}
+
+			defer util.Logger.Sync()
+			util.Logger.Debug("Review error: ", err.Error())
 		case iss, ok := <-issuec:
 			if !keepAll {
 				spnr.Stop()
@@ -212,18 +236,18 @@ func ingestBar(current, total int, progressc server.Ingestc) error {
 	return nil
 }
 
-func NewRange(filename string, startLine, endLine int) *codelingo.IssueRange {
-	start := &codelingo.Position{
+func NewRange(filename string, startLine, endLine int) *flow.IssueRange {
+	start := &flow.Position{
 		Filename: filename,
 		Line:     int64(startLine),
 	}
 
-	end := &codelingo.Position{
+	end := &flow.Position{
 		Filename: filename,
 		Line:     int64(endLine),
 	}
 
-	return &codelingo.IssueRange{
+	return &flow.IssueRange{
 		Start: start,
 		End:   end,
 	}

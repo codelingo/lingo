@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -82,7 +83,7 @@ func (c client) Session(req *server.SessionRequest) (string, error) {
 }
 
 func Review(req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
-	cc, err := grpcConnection()
+	cc, err := GrpcConnection(LocalClient, PlatformServer)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -136,12 +137,7 @@ func (c client) Query(ctx context.Context, queryc chan *codelingo.QueryRequest) 
 	return nil, nil
 }
 
-func Query(queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
-	cc, err := grpcConnection()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
+func Query(cc *grpc.ClientConn, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
 	client := codelingo.NewCodeLingoClient(cc)
 	resultc, err := runQuery(client, queryc)
 	if err != nil {
@@ -151,27 +147,62 @@ func Query(queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, err
 	return resultc, nil
 }
 
-func grpcConnection() (*grpc.ClientConn, error) {
-	pCfg, err := config.Platform()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	grpcAddr, err := pCfg.GrpcAddress()
-	if err != nil {
-		return nil, errors.Trace(err)
+const (
+	FlowServer = "flowserver"
+	// TODO: remove public access to the platform server
+	PlatformServer = "platformserver"
+	FlowClient     = "flowclient"
+	LocalClient    = "localclient"
+)
+
+// GrpcConnection creates a connection between a given server and client type.
+// TODO(BlakeMScurr): this should be moved into its own service repo, so that flow and platform don't have
+// to depend on the client. The code pertaining specifically to the client side and flow side
+// configs should be kept in the client/flow repos, and addresses and tls values should be
+// passed as arguments.
+func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
+
+	var grpcAddr string
+	var isTLS bool
+	switch LocalClient {
+	case LocalClient:
+		pCfg, err := config.Platform()
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		strTLS, err := pCfg.GetValue("gitserver.tls")
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		isTLS, err = strconv.ParseBool(strTLS)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		switch server {
+		case FlowServer:
+			grpcAddr, err = pCfg.FlowAddress()
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+		case PlatformServer:
+			grpcAddr, err = pCfg.PlatformAddress()
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+		default:
+			return nil, errors.Errorf("Unknown Server %s:", server)
+		}
+	case FlowClient:
+		isTLS = false
+		grpcAddr = "localhost:8008"
 	}
 
 	grpclog.SetLogger(serviceLogger.New())
 	var tlsOpt grpc.DialOption
-	platCfg, err := config.Platform()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	isTLS, err := platCfg.GetValue("gitserver.tls")
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	if isTLS == "false" {
+
+	if !isTLS {
 		tlsOpt = grpc.WithInsecure()
 	} else {
 		cp := x509.NewCertPool()
@@ -512,7 +543,7 @@ func New() (server.CodeLingoService, error) {
 		return nil, errors.Trace(err)
 	}
 
-	grpcAddr, err := pCfg.GrpcAddress()
+	grpcAddr, err := pCfg.PlatformAddress()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

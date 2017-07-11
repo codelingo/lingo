@@ -3,9 +3,8 @@ package commands
 import (
 	"fmt"
 
+	"github.com/codelingo/flow/service/flow"
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/service"
-	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
@@ -72,7 +71,7 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	issuec, err := service.Review(&codelingo.ReviewRequest{
+	issuec, errorc, err := review.RequestReview(&flow.ReviewRequest{
 		Host:     opts.Host,
 		Hostname: opts.HostName,
 		Owner:    opts.Owner,
@@ -86,7 +85,7 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	issues, err := review.ConfirmIssues(issuec, ctx.Bool("keep-all"), ctx.String("save"))
+	issues, err := review.ConfirmIssues(issuec, errorc, ctx.Bool("keep-all"), ctx.String("save"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}

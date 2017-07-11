@@ -77,7 +77,7 @@ func (l *logger) reconnect() {
 		if err != nil {
 			errors.Trace(err)
 		}
-		grpcAddr, err := cfg.GrpcAddress()
+		grpcAddr, err := cfg.PlatformAddress()
 		if err != nil {
 			errors.Trace(err)
 		}
