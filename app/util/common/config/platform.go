@@ -21,6 +21,8 @@ const (
 	platformServerAddr     = "platform.addr"
 	platformServerPort     = "platform.port"
 	platformServerGrpcPort = "grpc_port"
+	flowServerGrpcPort     = "flow.port"
+	flowServerGrpcAddress  = "flow.address"
 	mqAddrProtocol         = "messagequeue.address.protocol"
 	mqAddrUsername         = "messagequeue.address.username"
 	mqAddrPassword         = "messagequeue.address.password"
@@ -176,14 +178,28 @@ func (p *platformConfig) WebSiteAddress() (string, error) {
 	return addr + ":" + port, nil
 }
 
-func (p *platformConfig) GrpcAddress() (string, error) {
-
+func (p *platformConfig) PlatformAddress() (string, error) {
 	addr, err := p.GetValue(platformServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
 	port, err := p.GetValue(platformServerGrpcPort)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return addr + ":" + port, nil
+}
+
+func (p *platformConfig) FlowAddress() (string, error) {
+
+	addr, err := p.GetValue(flowServerGrpcAddress)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	port, err := p.GetValue(flowServerGrpcPort)
 	if err != nil {
 		return "", errors.Trace(err)
 	}

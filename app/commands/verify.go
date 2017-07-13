@@ -8,14 +8,15 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"strings"
+	"time"
+
+	"github.com/blang/semver"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
-	"github.com/juju/errors"
-	"time"
-	"github.com/blang/semver"
 	"github.com/codelingo/lingo/service"
-	"strings"
+	"github.com/juju/errors"
 )
 
 type require int

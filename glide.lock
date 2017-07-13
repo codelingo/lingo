@@ -33,6 +33,8 @@ imports:
   - transport/grpc
 - name: github.com/codelingo/lib
   version: 1a9d70d5544b6de6eb02475b870248e5258b37d7
+- name: github.com/codelingo/flow
+  version: 345e3416a9a2dbbab1a1bacb7896ca6f02cbb995
 - name: github.com/codelingo/platform
   version: 5099cf7d56f8a868ad940f38ebbfe42022dfef56
   subpackages:

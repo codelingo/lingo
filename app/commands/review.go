@@ -6,13 +6,12 @@ import (
 
 	"github.com/juju/errors"
 
-	"github.com/codelingo/lingo/service/grpc/codelingo"
+	"github.com/codelingo/flow/service/flow"
 	"github.com/codelingo/lingo/vcs"
 	"github.com/codelingo/lingo/vcs/backing"
 
 	"github.com/codelingo/lingo/app/commands/review"
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/lingo/service"
 
 	"os"
 
@@ -154,7 +153,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	}
 
 	// Send review request to the bot layer.
-	issuec, err := service.Review(&codelingo.ReviewRequest{
+	issuec, errorc, err := review.RequestReview(&flow.ReviewRequest{
 		Host:     addr,
 		Hostname: hostname,
 		Owner:    owner,
@@ -170,7 +169,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	issues, err := review.ConfirmIssues(issuec, !ctx.Bool("interactive"), ctx.String("output"))
+	issues, err := review.ConfirmIssues(issuec, errorc, !ctx.Bool("interactive"), ctx.String("output"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}
