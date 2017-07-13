@@ -244,6 +244,9 @@ all:
   platform:
     addr: codelingo.io
     port: "80"
+  flow:
+    addr: codelingo.io
+    port: "8008"
   grpc_port: "8002"
   gitserver:
     tls: "true"
@@ -260,6 +263,9 @@ all:
       host: "codelingo.io"
       port: "5672"
 dev:
+  flow:
+    addr: localhost
+    port: "8008"
   website:
     addr: 10.0.17.233
     port: "30303"
