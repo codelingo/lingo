@@ -165,27 +165,33 @@ func (r *Repo) CreateRemote(name string) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	_, err = gogsClient.CreateRepo(gogs.CreateRepoOption{
+
+	repoOpts := gogs.CreateRepoOption{
 		Name:     name,
 		Private:  true,
 		AutoInit: false,
 		//	Readme:   "Default",
-	})
-
-	util.Logger.Debugw("repo.CreateRemote",
-		"Name", name,
-		"Private", "true",
-		"AutoInit", "false",
-		"err_stack", errors.ErrorStack(err))
-
-	// TODO(waigani) TECHDEBT correct fix is to remove the go-gogs-client
-	// client and replace it with gogsclient in
-	// bots/clair/resource/gogsclient.go.
-	if err.Error() == "unexpected end of JSON input" {
-		err = errors.New("VCS Error: 401 Unauthorised")
 	}
 
-	return errors.Trace(err)
+	if _, err = gogsClient.CreateRepo(repoOpts); err != nil {
+		util.Logger.Debugw("repo.CreateRemote",
+			"Name", name,
+			"Private", "true",
+			"AutoInit", "false",
+			"err_stack", errors.ErrorStack(err))
+		util.Logger.Sync()
+
+		// TODO(waigani) TECHDEBT correct fix is to remove the go-gogs-client
+		// client and replace it with gogsclient in
+		// bots/clair/resource/gogsclient.go.
+		if err.Error() == "unexpected end of JSON input" {
+			err = errors.New("VCS Error: 401 Unauthorised")
+		}
+
+		return errors.Trace(err)
+	}
+
+	return nil
 }
 
 func (r *Repo) Sync() error {
