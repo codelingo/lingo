@@ -1,5 +1,5 @@
 hash: 311850066f64fa4db5107c92ef7b10e203e11fa74ea1aa1d1f572206375b3f0f
-updated: 2017-07-11T12:32:59.17736602+12:00
+updated: 2017-07-13T16:29:05.329415838+12:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -21,6 +21,11 @@ imports:
   - voc
   - voc/schema
   - writer
+- name: github.com/codelingo/flow
+  version: 345e3416a9a2dbbab1a1bacb7896ca6f02cbb995
+  subpackages:
+  - service/client
+  - service/flow
 - name: github.com/codelingo/kit
   version: 27b2194fb0398eb38d86f436cc375f48d32b2850
   subpackages:
@@ -33,10 +38,8 @@ imports:
   - transport/grpc
 - name: github.com/codelingo/lib
   version: 1a9d70d5544b6de6eb02475b870248e5258b37d7
-- name: github.com/codelingo/flow
-  version: 345e3416a9a2dbbab1a1bacb7896ca6f02cbb995
 - name: github.com/codelingo/platform
-  version: 5099cf7d56f8a868ad940f38ebbfe42022dfef56
+  version: d4a3d9a4c21b22721e1f107fa00af699a11171c8
   subpackages:
   - controller/graphdb/query/result
 - name: github.com/docker/docker
@@ -63,7 +66,7 @@ imports:
 - name: github.com/docker/go-units
   version: 9b001659dd36225e356b4467c465d732e745f53d
 - name: github.com/fatih/color
-  version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
+  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
 - name: github.com/fsouza/go-dockerclient
   version: 2ce05b8e04b7475b63ae21c1aeaf72b8a5b05eb5
 - name: github.com/go-logfmt/logfmt
@@ -124,6 +127,17 @@ imports:
   version: 2e25825abdbd7752ff08b270d313b93519a0a232
 - name: github.com/waigani/diffparser
   version: 42ae6ebdde8d5414cb002ac435c1d6be3f926c32
+- name: go.uber.org/atomic
+  version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
+- name: go.uber.org/zap
+  version: 1550bc05539134bbf8612a35f34a79ab8bf34ee3
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - internal/multierror
+  - zapcore
 - name: golang.org/x/crypto
   version: c197bcf24cde29d3f73c7b4ac6fd41f4384e8af6
   subpackages:
@@ -141,7 +155,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  version: 9ccfe848b9db8435a24c424abbc07a921adf1df5
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -156,7 +170,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 0eb507a2ca07f13baf499f89d66cc566bf644643
+  version: b15215fb911b24a5d61d57feec4233d610530464
   subpackages:
   - codes
   - credentials
