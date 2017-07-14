@@ -1,6 +1,7 @@
 package review
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -28,7 +29,7 @@ func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error
 	}
 
 	c := client.NewFlowClient(conn)
-	issuec, errorc, err := c.Review(req)
+	issuec, errorc, err := c.Review(context.Background(), req)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
