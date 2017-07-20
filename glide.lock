@@ -1,5 +1,5 @@
 hash: 311850066f64fa4db5107c92ef7b10e203e11fa74ea1aa1d1f572206375b3f0f
-updated: 2017-07-13T16:29:05.329415838+12:00
+updated: 2017-07-20T15:26:32.250936209+12:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
@@ -72,7 +72,7 @@ imports:
 - name: github.com/go-logfmt/logfmt
   version: d4327190ff838312623b09bfeb50d7c93c8d9c1d
 - name: github.com/go-stack/stack
-  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+  version: 54be5f394ed2c3e19dac9134a40a95ba5a017f7b
 - name: github.com/gogits/go-gogs-client
   version: d8aff570fa22d4e38954c753ec8b21862239b31d
 - name: github.com/golang/protobuf

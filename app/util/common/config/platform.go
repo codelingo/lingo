@@ -245,7 +245,7 @@ all:
     addr: codelingo.io
     port: "80"
   flow:
-    addr: codelingo.io
+    address: codelingo.io
     port: "8008"
   grpc_port: "8002"
   gitserver:
@@ -264,7 +264,7 @@ all:
       port: "5672"
 dev:
   flow:
-    addr: localhost
+    address: localhost
     port: "8008"
   website:
     addr: 10.0.17.233
@@ -294,8 +294,8 @@ onprem:
     addr: 10.0.17.233
     port: "30303"
   flow:
-    addr: 10.0.17.233
-    port: "8008"
+    address: 10.0.17.233
+    port: "30808"
   grpc_port: "30082"
   gitserver:
     tls: "false"
