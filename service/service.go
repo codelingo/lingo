@@ -164,7 +164,7 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 
 	var grpcAddr string
 	var isTLS bool
-	switch LocalClient {
+	switch client {
 	case LocalClient:
 		pCfg, err := config.Platform()
 		if err != nil {
