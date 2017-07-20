@@ -293,6 +293,9 @@ onprem:
   platform:
     addr: 10.0.17.233
     port: "30303"
+  flow:
+    addr: 10.0.17.233
+    port: "8008"
   grpc_port: "30082"
   gitserver:
     tls: "false"
