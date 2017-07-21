@@ -103,7 +103,7 @@ func setupLingo(c *cli.Context) (string, error) {
 			}
 		}
 	}
-
+	// TODO (Junyu) set proper Perforce Username and password
 	// Prompt for user
 	if username == "" || password == "" {
 		lingoTokenAddr := "http://" + webAddr + "/lingo-token"

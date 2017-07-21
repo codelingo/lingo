@@ -103,7 +103,10 @@ func verifyVCS() error {
 	var errBuf bytes.Buffer
 	cmd.Stderr = &errBuf
 	if err := cmd.Run(); err != nil {
-		return errors.Annotate(err, "lingo cannot be used outside of a git repository")
+		cmd = exec.Command("p4", "status")
+		if err := cmd.Run(); err != nil{
+			return errors.Annotate(err, "lingo cannot be used outside of a git or perforce repository")
+		}
 	}
 
 	if errBuf.Len() > 0 {
