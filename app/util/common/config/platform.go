@@ -23,6 +23,11 @@ const (
 	platformServerGrpcPort = "grpc_port"
 	flowServerGrpcPort     = "flow.port"
 	flowServerGrpcAddress  = "flow.address"
+	p4RemoteName           = "p4server.remote.name"
+	p4RemoteDepotName      = "p4server.remote.depot.name"
+	p4ServerHost           = "p4server.remote.host"
+	p4ServerPort           = "p4server.remote.port"
+	p4ServerProtocol       = "p4server.remote.protocol"
 	mqAddrProtocol         = "messagequeue.address.protocol"
 	mqAddrUsername         = "messagequeue.address.username"
 	mqAddrPassword         = "messagequeue.address.password"
@@ -193,7 +198,6 @@ func (p *platformConfig) PlatformAddress() (string, error) {
 }
 
 func (p *platformConfig) FlowAddress() (string, error) {
-
 	addr, err := p.GetValue(flowServerGrpcAddress)
 	if err != nil {
 		return "", errors.Trace(err)
@@ -205,6 +209,34 @@ func (p *platformConfig) FlowAddress() (string, error) {
 	}
 
 	return addr + ":" + port, nil
+}
+
+func (p *platformConfig) P4ServerAddr() (string, error) {
+	addr, err := p.GetValue(p4ServerHost)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	port, err := p.GetValue(p4ServerPort)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return addr + ":" + port, nil
+}
+
+func (p *platformConfig) P4RemoteName() (string, error) {
+	remoteName, err := p.GetValue(p4RemoteName)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return remoteName, nil
+}
+
+func (p *platformConfig) P4RemoteDepotName() (string, error) {
+	remoteName, err := p.GetValue(p4RemoteDepotName)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return remoteName, nil
 }
 
 func (p *platformConfig) MessageQueueAddr() (string, error) {
@@ -255,6 +287,14 @@ all:
       protocol: "https"
       host: "codelingo.io"
       port: "3030"
+  p4server:
+    remote:
+      name: "codelingo"
+      protocol: "https"
+      host: "codelingo.io"
+      port: "30166"
+      depot:
+        name: "depot"
   messagequeue:
     address:
       protocol: "amqp"
@@ -279,6 +319,14 @@ dev:
       protocol: "http"
       host: "localhost"
       port: "3000"
+  p4server:
+    remote:
+      name: "codelingo_dev"
+      protocol: "http"
+      host: "10.0.17.233"
+      port: "30166"
+      depot:
+        name: "depot"
   messagequeue:
     address:
       protocol: "amqp"
@@ -302,14 +350,22 @@ onprem:
     remote:
       name: "codelingo_onprem"
       protocol: "http"
-      host: "10.0.17.233"
+      host: 10.0.17.233
       port: "30300"
+  p4server:
+    remote:
+      name: "codelingo_onprem"
+      protocol: "http"
+      host: 10.0.17.233
+      port: "30166"
+      depot:
+        name: "depot"
   messagequeue:
     address:
       protocol: "amqp"
       username: "codelingo"
       password: "codelingo"
-      host: "10.0.17.233"
+      host: 10.0.17.233
       port: "30567"
 test:
   website:
@@ -325,6 +381,15 @@ test:
       protocol: "http"
       host: "localhost"
       port: "3000"
+  p4server:
+    tls: "true"
+    remote:
+      name: "codelingo_dev"
+      protocol: "http"
+      host: "10.0.17.233"
+      port: "30166"
+      depot:
+        name: "depot"
   messagequeue:
     address:
       protocol: "amqp"

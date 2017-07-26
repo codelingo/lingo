@@ -15,11 +15,10 @@ import (
 
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common/config"
-	"github.com/codelingo/lingo/vcs/backing"
 )
 
 // TODO(waigani) pass in owner/name here and set them on Repo.
-func New() backing.Repo {
+func New() *Repo {
 	return &Repo{}
 }
 
@@ -194,7 +193,7 @@ func (r *Repo) CreateRemote(name string) error {
 	return nil
 }
 
-func (r *Repo) Sync() error {
+func (r *Repo) Sync(repoOwner string, workingDir string) error {
 	cfg, err := config.Platform()
 	if err != nil {
 		return errors.Trace(err)

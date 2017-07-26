@@ -1,18 +1,21 @@
 package config
 
 import (
-	"path/filepath"
-	"github.com/juju/errors"
-	"github.com/codelingo/lingo/service/config"
-	"github.com/codelingo/lingo/app/util"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+
+	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/service/config"
+	"github.com/juju/errors"
 )
 
-const(
+const (
 	gitCredentialFilename = "gitserver.credentials_filename"
-	gitUserName = "gitserver.user.username"
-	gitPassword = "gitserver.user.password"
+	gitUserName           = "gitserver.user.username"
+	gitPassword           = "gitserver.user.password"
+	p4UserName            = "p4server.user.username"
+	p4Password            = "p4server.user.password"
 )
 
 type authConfig struct {
@@ -107,6 +110,21 @@ func (a *authConfig) SetGitUserPassword(userPassword string) error {
 	return a.Set(gitPassword, userPassword)
 }
 
+func (a *authConfig) GetP4UserName() (string, error) {
+	return a.GetValue(p4UserName)
+}
+
+func (a *authConfig) SetP4UserName(userName string) error {
+	return a.Set(p4UserName, userName)
+}
+
+func (a *authConfig) GetP4UserPassword() (string, error) {
+	return a.GetValue(p4Password)
+}
+
+func (a *authConfig) SetP4UserPassword(userPassword string) error {
+	return a.Set(p4Password, userPassword)
+}
 
 var AuthTmpl = `
 all:
@@ -123,4 +141,5 @@ onprem:
     credentials_filename: git-credentials-onprem
 test:
   gitserver:
-    credentials_filename: git-credentials-test`[1:]
+    credentials_filename: git-credentials-test
+`[1:]

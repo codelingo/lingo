@@ -8,8 +8,8 @@ import (
 
 	"github.com/juju/errors"
 
-	"github.com/codelingo/flow/service/client"
-	"github.com/codelingo/flow/service/flow"
+	"github.com/codelingo/flow/backend/service/client"
+	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 

@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/codelingo/flow/service/flow"
+	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
 
@@ -74,7 +74,7 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 	issuec, errorc, err := review.RequestReview(&flow.ReviewRequest{
 		Host:     opts.Host,
 		Hostname: opts.HostName,
-		Owner:    opts.Owner,
+		Datum:    &flow.ReviewRequest_Owner{opts.Owner},
 		Repo:     opts.Name,
 		// Sha and patches are defined by the PR
 		IsPullRequest: true,

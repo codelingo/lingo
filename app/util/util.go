@@ -93,8 +93,8 @@ func userFacingErrMsg(mainErr error) string {
 		lang := strings.Split(message, ":")[4]
 		lang = lang[1:]
 		return fmt.Sprintf("error: Lingo doesn't support \"%s\" yet", lang)
-	// TODO this should be more specific parse error on platform:
-	//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
+		// TODO this should be more specific parse error on platform:
+		//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
 	case strings.Contains(message, "expected one of: < ! var indent id"):
 		return "error: Queries must not be terminated by colons."
 	case strings.Contains(message, "error: missing yield"):
