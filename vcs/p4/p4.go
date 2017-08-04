@@ -60,7 +60,6 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 	if err != nil {
 		return "", "", errors.Trace(err)
 	}
-	c3.Stdout = os.Stdout
 	if err := c3.Start(); err != nil {
 		return "", "", errors.Trace(err)
 	}
@@ -87,7 +86,6 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 	if err != nil {
 		return "", "", errors.Trace(err)
 	}
-	c3.Stdout = os.Stdout
 	if err := c3.Start(); err != nil {
 		return "", "", errors.Trace(err)
 	}

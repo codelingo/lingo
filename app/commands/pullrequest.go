@@ -72,10 +72,10 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 	}
 
 	issuec, errorc, err := review.RequestReview(&flow.ReviewRequest{
-		Host:     opts.Host,
-		Hostname: opts.HostName,
-		Datum:    &flow.ReviewRequest_Owner{opts.Owner},
-		Repo:     opts.Name,
+		Host:         opts.Host,
+		Hostname:     opts.HostName,
+		OwnerOrDepot: &flow.ReviewRequest_Owner{opts.Owner},
+		Repo:         opts.Name,
 		// Sha and patches are defined by the PR
 		IsPullRequest: true,
 		PullRequestID: int64(opts.PRID),
