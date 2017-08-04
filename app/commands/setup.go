@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
@@ -103,7 +105,7 @@ func setupLingo(c *cli.Context) (string, error) {
 			}
 		}
 	}
-
+	// TODO (Junyu) set proper Perforce Username and password
 	// Prompt for user
 	if username == "" || password == "" {
 		lingoTokenAddr := "http://" + webAddr + "/lingo-token"
@@ -139,6 +141,15 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 	if err := authConfig.SetGitUserPassword(password); err != nil {
+		return "", errors.Trace(err)
+	}
+
+	// TODo (Junyu) md5 is not secure. All communication should be over tls
+	md5Password := strings.ToUpper(GetMD5Hash(password))
+	if err := authConfig.SetP4UserName(username); err != nil {
+		return "", errors.Trace(err)
+	}
+	if err := authConfig.SetP4UserPassword(md5Password); err != nil {
 		return "", errors.Trace(err)
 	}
 
@@ -200,4 +211,10 @@ func gitCMD(args ...string) (out string, err error) {
 	b, err := cmd.CombinedOutput()
 	out = strings.TrimSpace(string(b))
 	return out, errors.Annotate(err, out)
+}
+
+func GetMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

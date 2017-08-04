@@ -15,7 +15,7 @@ const (
 	PlatformCfgFile = "platform.yaml"
 	VersionCfgFile  = "version.yaml"
 	AuthCfgFile     = "auth.yaml"
-	EnvCfgFile 	= "lingo-current-env"
+	EnvCfgFile      = "lingo-current-env"
 )
 
 // Load assumes cfgFilename is relative to $LINGO_HOME. It loads the config

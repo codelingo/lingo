@@ -6,14 +6,15 @@ import (
 
 	"github.com/juju/errors"
 
-	"github.com/codelingo/flow/service/flow"
+	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/vcs"
-	"github.com/codelingo/lingo/vcs/backing"
 
 	"github.com/codelingo/lingo/app/commands/review"
 	"github.com/codelingo/lingo/app/util"
 
 	"os"
+
+	"path/filepath"
 
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/common/config"
@@ -99,10 +100,11 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
-	repo := vcs.New(backing.Git)
-
-	if err := vcs.InitRepo(backing.Git); err != nil {
+	vcsType, repo, err := vcs.New()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	if err := vcs.InitRepo(vcsType, repo); err != nil {
 		// TODO(waigani) use error types
 		// Note: Prior repo init is a valid state.
 		if !strings.Contains(err.Error(), "already exists") {
@@ -111,7 +113,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	}
 
 	// TODO: replace this system with nfs-like communication.
-	if err = vcs.SyncRepo(repo); err != nil {
+	if err = vcs.SyncRepo(vcsType, repo); err != nil {
 		return "", errors.Trace(err)
 	}
 
@@ -143,30 +145,71 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	addr, err := cfg.GitServerAddr()
+	vcsTypeStr, err := vcs.TypeToString(vcsType)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	hostname, err := cfg.GitRemoteName()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
+	addr := ""
+	issuec := make(chan *flow.Issue)
+	errorc := make(chan error)
+	switch vcsTypeStr {
+	case "Git":
+		addr, err = cfg.GitServerAddr()
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		hostname, err := cfg.GitRemoteName()
+		if err != nil {
+			return "", errors.Trace(err)
+		}
 
-	// Send review request to the bot layer.
-	issuec, errorc, err := review.RequestReview(&flow.ReviewRequest{
-		Host:     addr,
-		Hostname: hostname,
-		Owner:    owner,
-		Repo:     name,
-		Sha:      sha,
-		Patches:  patches,
-		Vcs:      "git",
-		Dir:      workingDir,
-		Dotlingo: dotlingo,
-	})
+		issuec, errorc, err = review.RequestReview(&flow.ReviewRequest{
+			Host:         addr,
+			Hostname:     hostname,
+			OwnerOrDepot: &flow.ReviewRequest_Owner{owner},
+			Repo:         name,
+			Sha:          sha,
+			Patches:      patches,
+			Vcs:          vcsTypeStr,
+			Dir:          workingDir,
+			Dotlingo:     dotlingo,
+		})
 
-	if err != nil {
-		return "", errors.Trace(err)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+	case "P4":
+		addr, err = cfg.P4ServerAddr()
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		hostname, err := cfg.P4RemoteName()
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		depot, err := cfg.P4RemoteDepotName()
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		name = filepath.Join(owner, name)
+
+		issuec, errorc, err = review.RequestReview(&flow.ReviewRequest{
+			Host:         addr,
+			Hostname:     hostname,
+			OwnerOrDepot: &flow.ReviewRequest_Depot{depot},
+			Repo:         name,
+			Sha:          sha,
+			Patches:      patches,
+			Vcs:          vcsTypeStr,
+			Dir:          workingDir,
+			Dotlingo:     dotlingo,
+		})
+
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+	default:
+		return "", errors.New("invalid VCS found.")
 	}
 
 	issues, err := review.ConfirmIssues(issuec, errorc, !ctx.Bool("interactive"), ctx.String("output"))

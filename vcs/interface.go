@@ -1,9 +1,9 @@
-package backing
+package vcs
 
-type VCSBacking int
+type Type int
 
 type Repo interface {
-	Sync() error
+	Sync(repoOwner string, workingDir string) error
 	CurrentCommitId() (string, error)
 	Patches() ([]string, error)
 	// TODO(waigani) owner + name should be part of Repo struct.
@@ -21,12 +21,14 @@ type Repo interface {
 }
 
 const (
-	NotAuthedErr VCSError   = "not logged into CodeLingo"
-	Git          VCSBacking = iota
+	NotAuthedErr Error   = "not logged into CodeLingo"
+	Git          Type = iota
+	P4
 )
 
-type VCSError string
+type Error string
 
-func (v VCSError) Error() string {
+func (v Error) Error() string {
 	return string(v)
 }
+
