@@ -72,8 +72,9 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 	}
 
 	issuec, errorc, err := review.RequestReview(&flow.ReviewRequest{
-		Host:         opts.Host,
-		Hostname:     opts.HostName,
+		Host:     opts.Host,
+		Hostname: opts.HostName,
+		// TODO (Junyu) separate it into two separate fields
 		OwnerOrDepot: &flow.ReviewRequest_Owner{opts.Owner},
 		Repo:         opts.Name,
 		// Sha and patches are defined by the PR
