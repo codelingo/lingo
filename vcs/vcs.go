@@ -15,6 +15,11 @@ import (
 	"github.com/juju/errors"
 )
 
+const (
+	vcsGit string = "git"
+	vcsP4  string = "perforce"
+)
+
 func New() (Type, Repo, error) {
 	b, err := DetectVCSType()
 	if err != nil {
@@ -32,9 +37,9 @@ func New() (Type, Repo, error) {
 func TypeToString(b Type) (string, error) {
 	switch b {
 	case Git:
-		return "Git", nil
+		return vcsGit, nil
 	case P4:
-		return "P4", nil
+		return vcsP4, nil
 	}
 	return "", errors.New("unknow VCS type")
 }

@@ -202,7 +202,6 @@ func (r *Repo) Sync(repoOwner string, workingDir string) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-
 	// sync local and remote before reviewing
 	_, err = gitCMD("push", remote, "HEAD", "--force", "--no-verify")
 	return errors.Trace(err)

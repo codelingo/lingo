@@ -20,6 +20,11 @@ import (
 	"github.com/codelingo/lingo/app/util/common/config"
 )
 
+const (
+	vcsGit string = "git"
+	vcsP4  string = "perforce"
+)
+
 func init() {
 	register(&cli.Command{
 		Name:        "review",
@@ -153,7 +158,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	issuec := make(chan *flow.Issue)
 	errorc := make(chan error)
 	switch vcsTypeStr {
-	case "Git":
+	case vcsGit:
 		addr, err = cfg.GitServerAddr()
 		if err != nil {
 			return "", errors.Trace(err)
@@ -178,7 +183,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		if err != nil {
 			return "", errors.Trace(err)
 		}
-	case "P4":
+	case vcsP4:
 		addr, err = cfg.P4ServerAddr()
 		if err != nil {
 			return "", errors.Trace(err)

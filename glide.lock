@@ -22,10 +22,10 @@ imports:
   - voc/schema
   - writer
 - name: github.com/codelingo/flow
-  version: ce36ef54e9900e8646b257ebf2ed2c97c39ea8f9
+  version: 9b0832e6cc02f1946f397c9f544168844f35b824
   subpackages:
-  - service/client
-  - service/flow
+  - backend/service/client
+  - backend/service/flow
 - name: github.com/codelingo/kit
   version: 27b2194fb0398eb38d86f436cc375f48d32b2850
   subpackages:
