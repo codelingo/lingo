@@ -13,7 +13,6 @@ import (
 
 	"github.com/juju/errors"
 
-	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common/config"
 )
 
@@ -173,12 +172,12 @@ func (r *Repo) CreateRemote(name string) error {
 	}
 
 	if _, err = gogsClient.CreateRepo(repoOpts); err != nil {
-		util.Logger.Debugw("repo.CreateRemote",
-			"Name", name,
-			"Private", "true",
-			"AutoInit", "false",
-			"err_stack", errors.ErrorStack(err))
-		util.Logger.Sync()
+		// util.Logger.Debugw("repo.CreateRemote",
+		// 	"Name", name,
+		// 	"Private", "true",
+		// 	"AutoInit", "false",
+		// 	"err_stack", errors.ErrorStack(err))
+		// util.Logger.Sync()
 
 		// TODO(waigani) TECHDEBT correct fix is to remove the go-gogs-client
 		// client and replace it with gogsclient in

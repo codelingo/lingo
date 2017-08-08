@@ -2,10 +2,12 @@ package p4
 
 // TODO (Junyu) remove any unnecessary functions.
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/juju/errors"
@@ -49,57 +51,28 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 		}
 	}
 
-	c1 := exec.Command("p4", "remote", "-o", remoteName)
-	c2 := exec.Command("sed", "-e", "s/Address:\tlocalhost:1666/Address:\t"+remoteAddr+"/")
-	c3 := exec.Command("p4", "remote", "-i")
-	c2.Stdin, err = c1.StdoutPipe()
+	out, err = p4CMD("remote", "-o", remoteName)
 	if err != nil {
-		return "", "", errors.Trace(err)
+		return "", "", errors.Annotate(err, out)
 	}
-	c3.Stdin, err = c2.StdoutPipe()
+	in := strings.Replace(out, "Address:\tlocalhost:1666", "Address:\t"+remoteAddr, 1)
+	cmd := exec.Command("p4", "remote", "-i")
+	cmd.Stdin = bytes.NewReader([]byte(in))
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", "", errors.Trace(err)
+		return "", "", errors.Annotate(err, string(output))
 	}
-	if err := c3.Start(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c2.Start(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c1.Run(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c2.Wait(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c3.Wait(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	c1 = exec.Command("p4", "remote", "-o", remoteName)
-	c2 = exec.Command("sed", "-e", "s@//... //...@//stream/main/... //depot/"+repoOwner+"/"+repoName+"/...@")
-	c3 = exec.Command("p4", "remote", "-i")
-	c2.Stdin, err = c1.StdoutPipe()
+
+	out, err = p4CMD("remote", "-o", remoteName)
 	if err != nil {
-		return "", "", errors.Trace(err)
+		return "", "", errors.Annotate(err, out)
 	}
-	c3.Stdin, err = c2.StdoutPipe()
+	in = strings.Replace(out, "//... //...", "//stream/main/... //depot/"+repoOwner+"/"+repoName+"/...", 1)
+	cmd = exec.Command("p4", "remote", "-i")
+	cmd.Stdin = bytes.NewReader([]byte(in))
+	output, err = cmd.CombinedOutput()
 	if err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c3.Start(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c2.Start(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c1.Run(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c2.Wait(); err != nil {
-		return "", "", errors.Trace(err)
-	}
-	if err := c3.Wait(); err != nil {
-		return "", "", errors.Trace(err)
+		return "", "", errors.Annotate(err, string(output))
 	}
 	return remoteName, remoteAddr, nil
 }
@@ -112,6 +85,9 @@ func currentUser() (string, error) {
 	reg := regexp.MustCompile("(?m)^User:.+")
 	str := reg.FindString(out)
 	userName := strings.Split(str, "\t")[1]
+	if strings.Contains(userName, "\r") {
+		userName = strings.Split(userName, "\r")[0]
+	}
 	return userName, nil
 }
 
@@ -220,14 +196,31 @@ func (r *Repo) WorkingDir() (string, error) {
 	reg := regexp.MustCompile("(?m)^Root:.+")
 	str := reg.FindString(out)
 	root := strings.Split(str, "\t")[1]
-
+	if strings.Contains(root, "\r") {
+		root = strings.Split(root, "\r")[0]
+	}
 	out, err = p4CMD("where")
 	if err != nil {
 		return "", errors.Annotate(err, out)
 	}
-	reg = regexp.MustCompile(root + ".+")
+	rootQM := regexp.QuoteMeta(root)
+	if runtime.GOOS == "windows" {
+
+		b, err := exec.Command("pwd").CombinedOutput()
+		if err == nil {
+			rootQM = strings.Replace(root, "\\", "/", -1)
+			out = strings.Replace(out, "C:", "c:", 1)
+			root = rootQM
+		} else if !strings.Contains(err.Error(), "executable file not found") {
+			return "", errors.Annotate(err, string(b))
+		}
+
+	}
+	reg = regexp.MustCompile(rootQM + ".+")
 	str = reg.FindString(out)
-	workingDir := strings.Split(strings.Split(str, root+"/")[1], "...")[0]
+	subStr := strings.Split(str, root)[1]
+	subStr = subStr[1 : len(subStr)-1]
+	workingDir := strings.Split(subStr, "...")[0]
 	return workingDir, nil
 }
 
