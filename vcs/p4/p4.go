@@ -14,8 +14,6 @@ import (
 
 	"regexp"
 
-	"fmt"
-
 	"github.com/codelingo/lingo/app/util/common/config"
 )
 
@@ -176,7 +174,6 @@ func (r *Repo) Sync(repoOwner string, workingDir string) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	fmt.Println(repoOwner, password, remoteName)
 	out, err := p4CMD("-u", repoOwner, "-P", password, "push", "-r", remoteName)
 	if err != nil {
 		return errors.Annotate(errors.Trace(err), out)
@@ -219,18 +216,11 @@ func (r *Repo) WorkingDir() (string, error) {
 		}
 
 	}
-
-	fmt.Println("rootQM is:", rootQM)
-	fmt.Println("out is:", out)
 	reg = regexp.MustCompile(rootQM + ".+")
 	str = reg.FindString(out)
-	fmt.Println("string is:", str)
-	fmt.Println("root is:", root)
 	subStr := strings.Split(str, root)[1]
 	subStr = subStr[1 : len(subStr)-1]
-	fmt.Println("substring is:", subStr)
 	workingDir := strings.Split(subStr, "...")[0]
-	fmt.Println(workingDir)
 	return workingDir, nil
 }
 

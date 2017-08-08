@@ -195,7 +195,6 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 		name = owner + "/" + name
-		fmt.Println(addr, hostname, depot, name, sha, patches, patches, vcsTypeStr, workingDir, dotlingo)
 		issuec, errorc, err = review.RequestReview(&flow.ReviewRequest{
 			Host:         addr,
 			Hostname:     hostname,

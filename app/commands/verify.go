@@ -102,7 +102,7 @@ func verifyVCS() error {
 
 	var errBuf bytes.Buffer
 	cmd.Stderr = &errBuf
-	vcsErr := errors.New("")
+	var vcsErr error
 	if err := cmd.Run(); err != nil {
 		vcsErr = errors.New(errBuf.String())
 	}
