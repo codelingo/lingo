@@ -143,7 +143,11 @@ message Fact {
     string Name = 2;
     string LexiconID = 3;
     bool Negated = 4;
-    int64 Depth = 5;
+    message DepthRange {
+        uint64 Max = 1;
+        uint64 Min = 2;
+    }
+    DepthRange Depth = 5;
     bool Yield = 6;
     Argument Arg = 7;
 }
