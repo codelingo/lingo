@@ -14,8 +14,6 @@ import (
 
 	"os"
 
-	"path/filepath"
-
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/common/config"
 )
@@ -196,8 +194,8 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		if err != nil {
 			return "", errors.Trace(err)
 		}
-		name = filepath.Join(owner, name)
-
+		name = owner + "/" + name
+		fmt.Println(addr, hostname, depot, name, sha, patches, patches, vcsTypeStr, workingDir, dotlingo)
 		issuec, errorc, err = review.RequestReview(&flow.ReviewRequest{
 			Host:         addr,
 			Hostname:     hostname,

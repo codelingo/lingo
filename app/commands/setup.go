@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
@@ -145,11 +146,11 @@ func setupLingo(c *cli.Context) (string, error) {
 	}
 
 	// TODo (Junyu) md5 is not secure. All communication should be over tls
-	md5Password := strings.ToUpper(GetMD5Hash(password))
+	p4Password := strings.ToUpper(GetMD5Hash(password))
 	if err := authConfig.SetP4UserName(username); err != nil {
 		return "", errors.Trace(err)
 	}
-	if err := authConfig.SetP4UserPassword(md5Password); err != nil {
+	if err := authConfig.SetP4UserPassword(p4Password); err != nil {
 		return "", errors.Trace(err)
 	}
 
@@ -162,7 +163,6 @@ func setupLingo(c *cli.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
 	cfgDir, err := util.ConfigHome()
 	if err != nil {
 		return "", errors.Trace(err)
@@ -171,13 +171,20 @@ func setupLingo(c *cli.Context) (string, error) {
 	// Set creds in github.
 	// TODO(waigani) these should all be consts.
 	gitCredFile := filepath.Join(cfgDir, credFilename)
-
-	// Potential bug if the username contains "\\" which is unlikely to happen
-	gitCredFile = strings.Replace(gitCredFile, "\\", "/", -1)
-	gitCredFile = strings.Replace(gitCredFile, "C:", "/C", 1)
+	gitCfgFile := gitCredFile
+	if runtime.GOOS == "windows" {
+		b, err := exec.Command("pwd").CombinedOutput()
+		if err == nil {
+			// Potential bug if the username contains "\\" which is unlikely to happen
+			gitCredFile = strings.Replace(gitCredFile, "\\", "/", -1)
+			gitCfgFile = strings.Replace(gitCredFile, "C:", "/C", 1)
+		} else if !strings.Contains(err.Error(), "executable file not found") {
+			return "", errors.Annotate(err, string(b))
+		}
+	}
 	out, err := gitCMD("config",
 		"--global", fmt.Sprintf("credential.%s.helper", gitaddr),
-		fmt.Sprintf("store --file %s", gitCredFile),
+		fmt.Sprintf("store --file %s", gitCfgFile),
 	)
 	if err != nil {
 		return "", errors.Annotate(err, out)
