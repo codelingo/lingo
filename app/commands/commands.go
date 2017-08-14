@@ -89,7 +89,7 @@ func Before(c *cli.Context) error {
 // isHelpAlias returns true when a command's arguments are equivalent to the
 // help command. For example, `lingo review --help` == `lingo help review`.
 func isHelpAlias(flags []string) bool {
-	helpFlags := strings.Split(cli.HelpFlag.Name, ", ")
+	helpFlags := strings.Split(cli.HelpFlag.GetName(), ", ")
 	return len(flags) == 1 && (flags[0] == "--"+helpFlags[0] || flags[0] == "-"+helpFlags[1])
 }
 
