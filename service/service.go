@@ -197,7 +197,9 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 		}
 	case FlowClient:
 		isTLS = false
-		grpcAddr = "localhost:8008"
+		// TODO: this is hardcoded to platform address:port
+		// create a flow config and read from that
+		grpcAddr = "localhost:8002"
 	}
 
 	grpclog.SetLogger(serviceLogger.New())
