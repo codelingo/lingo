@@ -212,7 +212,8 @@ func ingestBar(current, total int, progressc server.Ingestc) error {
 
 	// fast forward to where the ingest is up to.
 	for i := 0; i < current; i++ {
-		if ingestProgress.Increment() == total {
+		ingestProgress = ingestProgress.Increment()
+		if ingestProgress.Total() == int64(total) {
 			ingestProgress.Finish()
 			finished = true
 			break
@@ -225,7 +226,8 @@ func ingestBar(current, total int, progressc server.Ingestc) error {
 			timeout := time.After(time.Second * 600)
 			select {
 			case _, ok := <-progressc:
-				if ingestProgress.Increment() == total || !ok {
+				ingestProgress = ingestProgress.Increment()
+				if ingestProgress.Total() == int64(total) || !ok {
 					ingestProgress.Finish()
 					break l
 				}
