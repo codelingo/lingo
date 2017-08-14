@@ -5,13 +5,12 @@ import (
 	"testing"
 
 	"github.com/codelingo/lingo/vcs"
-	"github.com/codelingo/lingo/vcs/backing"
 	"github.com/codelingo/lingo/vcs/mock"
 )
 
 func TestRepoNaming(t *testing.T) {
 	cases := []struct {
-		r                         backing.Repo
+		r                         vcs.Repo
 		dirName, expectedRepoName string
 		expectedErr               error
 	}{
