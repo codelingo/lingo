@@ -13,6 +13,7 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 
 	endpointCtx "golang.org/x/net/context"
@@ -238,8 +239,17 @@ func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequ
 		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
 	}
 
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
 	resultc := make(chan *codelingo.QueryReply)
 	go func() {
+		wg.Wait()
+		close(resultc)
+	}()
+
+	go func() {
+		defer wg.Done()
 		for {
 			in, err := stream.Recv()
 
@@ -247,7 +257,6 @@ func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequ
 				if err != io.EOF {
 					resultc <- &codelingo.QueryReply{Error: err.Error()}
 				}
-				close(resultc)
 				return
 			}
 			resultc <- in
@@ -255,6 +264,7 @@ func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequ
 	}()
 
 	go func() {
+		defer wg.Done()
 		for {
 			select {
 			case query, ok := <-queryc:
