@@ -1,16 +1,20 @@
 package mock
 
-import "errors"
+import (
+	"errors"
+	"github.com/codelingo/lingo/vcs"
+)
 
 // Repo mocking for unit testing.
 // Intended to mock behaviour of the git.Repo implementation.
 type Repo struct {
+	vcs.Repo
 }
 
 // Minimal methods which implement backing.Repo interface.
 // All methods reurn the default "zero" values except where fleshed out.
 
-func (mockrepo *Repo) Sync() error {
+func (mockrepo *Repo) Sync(repoOwner string, workingDir string) error {
 	return nil
 }
 
