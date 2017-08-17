@@ -84,9 +84,8 @@ func reviewAction(ctx *cli.Context) {
 		if ctx.IsSet("debug") {
 			// Debugging
 			util.Logger.Debugw("reviewAction", "err_stack", errors.ErrorStack(err))
-
-			util.OSErr(err)
 		}
+		util.OSErr(err)
 		return
 	}
 
