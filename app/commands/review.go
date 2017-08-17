@@ -54,7 +54,10 @@ func init() {
 				Name:  util.DirectoryFlg.String(),
 				Usage: "Review a given directory.",
 			},
-
+			cli.BoolFlag{
+				Name:  "debug",
+				Usage: "Display debug messages",
+			},
 			// cli.BoolFlag{
 			// 	Name:  "all",
 			// 	Usage: "review all files under all directories from pwd down",
@@ -75,13 +78,15 @@ func init() {
 }
 
 func reviewAction(ctx *cli.Context) {
+
 	msg, err := reviewCMD(ctx)
 	if err != nil {
+		if ctx.IsSet("debug") {
+			// Debugging
+			util.Logger.Debugw("reviewAction", "err_stack", errors.ErrorStack(err))
 
-		// Debugging
-		util.Logger.Debugw("reviewAction", "err_stack", errors.ErrorStack(err))
-
-		util.OSErr(err)
+			util.OSErr(err)
+		}
 		return
 	}
 
@@ -89,9 +94,10 @@ func reviewAction(ctx *cli.Context) {
 }
 
 func reviewCMD(ctx *cli.Context) (string, error) {
-	defer util.Logger.Sync()
-	util.Logger.Debugw("reviewCMD called")
-
+	if ctx.IsSet("debug") {
+		defer util.Logger.Sync()
+		util.Logger.Debugw("reviewCMD called")
+	}
 	dir := ctx.String("directory")
 	if dir != "" {
 		if err := os.Chdir(dir); err != nil {
