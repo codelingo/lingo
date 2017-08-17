@@ -25,6 +25,12 @@ func init() {
 		Name:   "use-env",
 		Usage:  "Use the given environment.",
 		Action: useEnvAction,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "ip",
+				Usage: "Set the IP of the OnPrem Platform.",
+			},
+		},
 	}, false, homeRq, configRq)
 }
 
@@ -64,9 +70,11 @@ func useEnv(ctx *cli.Context) error {
 		return errors.Trace(err)
 	}
 	if newEnv == "onprem" {
-		ip := ""
-		fmt.Print("Enter the Platform IP: ")
-		fmt.Scanln(&ip)
+		ip := ctx.String("ip")
+		if ip == "" {
+			fmt.Print("Enter the Platform IP: ")
+			fmt.Scanln(&ip)
+		}
 		cfg, err := commonConfig.Platform()
 		if err != nil {
 			return errors.Trace(err)
