@@ -9,6 +9,7 @@ import:
 - package: github.com/codegangsta/cli
   version: ~1.20.0
 - package: github.com/codelingo/flow
+  repo: git@github.com:codelingo/flow.git
   version: origin/master
   subpackages:
   - backend/service/client
@@ -23,6 +24,7 @@ import:
   - sd/lb
   - transport/grpc
 - package: github.com/codelingo/platform
+  repo: git@github.com:codelingo/platform.git
   version: origin/master
   subpackages:
   - controller/graphdb/query/result

@@ -23,6 +23,7 @@ imports:
   - writer
 - name: github.com/codelingo/flow
   version: 9b0832e6cc02f1946f397c9f544168844f35b824
+  repo: git@github.com:codelingo/flow.git
   subpackages:
   - backend/service/client
   - backend/service/flow
@@ -38,6 +39,7 @@ imports:
   - transport/grpc
 - name: github.com/codelingo/platform
   version: d4a3d9a4c21b22721e1f107fa00af699a11171c8
+  repo: git@github.com:codelingo/platform.git
   subpackages:
   - controller/graphdb/query/result
 - name: github.com/docker/docker
