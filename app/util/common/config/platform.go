@@ -274,19 +274,19 @@ all:
     addr: codelingo.io
     port: "80"
   platform:
-    addr: codelingo.io
+    addr: 35.202.117.144
     port: "80"
   flow:
-    address: codelingo.io
-    port: "8008"
-  grpc_port: "8002"
+    address: 35.202.117.144
+    port: "9008"
+  grpc_port: "9002"
   gitserver:
     tls: "true"
     remote:
-      name: "codelingo"
-      protocol: "https"
-      host: "codelingo.io"
-      port: "3030"
+      host: git.codelingo.io
+      name: codelingo
+      port: "443"
+      protocol: https
   p4server:
     remote:
       name: "codelingo"
@@ -294,14 +294,10 @@ all:
       host: "codelingo.io"
       port: "30166"
       depot:
-        name: "depot"
-  messagequeue:
-    address:
-      protocol: "amqp"
-      username: "codelingo"
-      password: "codelingo"
-      host: "codelingo.io"
-      port: "5672"
+        name: depot
+  gcloud:
+    API_key: "AIzaSyD1YT3XQJNsnx-gjnaJYUi_SKqVKigrQAA"
+
 dev:
   flow:
     address: localhost
@@ -327,13 +323,7 @@ dev:
       port: "30166"
       depot:
         name: "depot"
-  messagequeue:
-    address:
-      protocol: "amqp"
-      username: "codelingo"
-      password: "codelingo"
-      host: "localhost"
-      port: "5672"
+
 onprem:
   website:
     addr: 10.0.17.233
@@ -360,13 +350,7 @@ onprem:
       port: "30166"
       depot:
         name: "depot"
-  messagequeue:
-    address:
-      protocol: "amqp"
-      username: "codelingo"
-      password: "codelingo"
-      host: 10.0.17.233
-      port: "30567"
+
 test:
   website:
     addr: 10.0.17.233
@@ -390,11 +374,4 @@ test:
       port: "30166"
       depot:
         name: "depot"
-  messagequeue:
-    address:
-      protocol: "amqp"
-      username: "codelingo"
-      password: "codelingo"
-      host: "localhost"
-      port: "5672"
 `[1:]

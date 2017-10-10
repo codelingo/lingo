@@ -91,7 +91,12 @@ func Review(req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
 
 	client := codelingo.NewCodeLingoClient(cc)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	ctx, cancel := context.WithCancel(newCtx)
 	// Cancel the context passed to the platform on exit.
 	sigc := make(chan os.Signal, 2)
 	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
@@ -225,7 +230,12 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 }
 
 func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
-	ctx, cancel := context.WithCancel(context.Background())
+	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	ctx, cancel := context.WithCancel(newCtx)
 
 	// Cancel the context passed to the platform on exit.
 	sigc := make(chan os.Signal, 2)
@@ -650,8 +660,13 @@ func New() (server.CodeLingoService, error) {
 	describeFactFactory := grpcclient.MakeDescribeFactEndpointFactory(tracer, tracingLogger, tlsOpt)
 	latestClientVersionFactory := grpcclient.MakeLatestClientVersionFactory(tracer, tracingLogger, tlsOpt)
 
+	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	return client{
-		Context: context.Background(),
+		Context: newCtx,
 		Logger:  logger,
 		endpoints: map[string]endpoint.Endpoint{
 			// TODO(waigani) this could be refactored further, a lot of dups

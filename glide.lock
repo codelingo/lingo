@@ -28,7 +28,7 @@ imports:
   - backend/service/client
   - backend/service/flow
 - name: github.com/codelingo/kit
-  version: 27b2194fb0398eb38d86f436cc375f48d32b2850
+  version: a11eda293c5f74e9810b3e23ee30f81f4affafbb
   subpackages:
   - endpoint
   - log

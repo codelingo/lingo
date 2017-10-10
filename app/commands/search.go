@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,6 +11,7 @@ import (
 	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
+	grpcclient "github.com/codelingo/lingo/service/grpc"
 
 	"github.com/codegangsta/cli"
 )
@@ -80,7 +80,13 @@ func searchCMD(ctx *cli.Context) (string, error) {
 	}
 
 	c := client.NewFlowClient(conn)
-	resultc, errorc, err := c.Search(context.Background(), &flow.SearchRequest{
+
+	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	resultc, errorc, err := c.Search(newCtx, &flow.SearchRequest{
 		Dotlingo: string(dotlingo),
 	})
 	if err != nil {
