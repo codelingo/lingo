@@ -1,7 +1,6 @@
 package review
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -17,6 +16,7 @@ import (
 	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
+	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/server"
 
 	"github.com/juju/errors"
@@ -29,7 +29,13 @@ func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error
 	}
 
 	c := client.NewFlowClient(conn)
-	issuec, errorc, err := c.Review(context.Background(), req)
+
+	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	issuec, errorc, err := c.Review(newCtx, req)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
