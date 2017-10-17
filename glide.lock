@@ -1,5 +1,5 @@
-hash: e7b97cf24578e51c9a5d735bbdec30c3e57e7f871b23f29095099365e8232833
-updated: 2017-08-14T17:03:23.788104958+12:00
+hash: dc7b99ea1018ea6d5905f00a847223d52f84450012e9f3bfe7574606d2dc733b
+updated: 2017-10-17T13:10:29.895193153+13:00
 imports:
 - name: github.com/blang/semver
   version: 2ee87856327ba09384cabd113bc6b5d174e9ec0f
@@ -9,26 +9,14 @@ imports:
   version: 4a1bf7a97d1348c5b50aabf6e1eb0496ca0a3d33
 - name: github.com/codegangsta/cli
   version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
-- name: github.com/codelingo/cayley
-  version: 968ab96ec44521a921003749cbdd492503c49216
-  subpackages:
-  - exporter
-  - graph
-  - graph/bolt
-  - graph/iterator
-  - graph/path
-  - quad
-  - voc
-  - voc/schema
-  - writer
 - name: github.com/codelingo/flow
-  version: 9b0832e6cc02f1946f397c9f544168844f35b824
+  version: c20f623aa4960239dc824a148f6acde36df37066
   repo: git@github.com:codelingo/flow.git
   subpackages:
   - backend/service/client
   - backend/service/flow
 - name: github.com/codelingo/kit
-  version: a11eda293c5f74e9810b3e23ee30f81f4affafbb
+  version: 8b41a6ba7470a181024f3867e5d699b7f201c7dd
   subpackages:
   - endpoint
   - log
@@ -38,7 +26,7 @@ imports:
   - sd/lb
   - transport/grpc
 - name: github.com/codelingo/platform
-  version: d4a3d9a4c21b22721e1f107fa00af699a11171c8
+  version: 92b0c51beebe7584125663669a9f645a9ef45b7e
   repo: git@github.com:codelingo/platform.git
   subpackages:
   - controller/graphdb/query/result
@@ -169,9 +157,10 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: b8669c35455183da6d5c474ea6e72fbf55183274
+  version: b3ddf786825de56a4178401b7e174ee332173b66
   subpackages:
   - codes
+  - connectivity
   - credentials
   - grpclb/grpc_lb_v1
   - grpclog

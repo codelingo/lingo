@@ -15,7 +15,7 @@ import:
   - backend/service/client
   - backend/service/flow
 - package: github.com/codelingo/kit
-  version: origin/master
+  version: origin/cl-pubsub
   subpackages:
   - endpoint
   - log
