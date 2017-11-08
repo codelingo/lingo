@@ -182,8 +182,20 @@ func (r *Repo) Sync(repoOwner string, workingDir string) error {
 }
 
 func (r *Repo) CurrentCommitId() (string, error) {
-	// TODO (Junyu) check if submit identity is set. If it is, then return the unique ID, otherwise return ""
-	return "", nil
+	latestChangelist, err := p4CMD("changes", "-s", "submitted", "-m1")
+	if err != nil {
+		return "", errors.Annotate(err, latestChangelist)
+	}
+	out, err := p4CMD("change", "-o", strings.Split(latestChangelist, " ")[1])
+	if err != nil {
+		return "", errors.Annotate(err, latestChangelist)
+	}
+	reg := regexp.MustCompile("(?m)^Identity:.+")
+	str := reg.FindString(out)
+	if str == "" {
+		return "", errors.New("submit identity is missing in the changelist")
+	}
+	return strings.TrimSpace(strings.Split(str, ":")[1]), nil
 }
 
 // WorkingDir returns a string representing the user's current directory in the format of the
