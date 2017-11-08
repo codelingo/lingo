@@ -192,10 +192,10 @@ func (r *Repo) CurrentCommitId() (string, error) {
 	}
 	reg := regexp.MustCompile("(?m)^Identity:.+")
 	str := reg.FindString(out)
-	if str != "" {
-		return strings.TrimSpace(strings.Split(str, ":")[1]), nil
+	if str == "" {
+		return "", errors.New("submit identity is missing in the changelist")
 	}
-	return "", errors.New("submit identity is missing in the latest changelist")
+	return strings.TrimSpace(strings.Split(str, ":")[1]), nil
 }
 
 // WorkingDir returns a string representing the user's current directory in the format of the
