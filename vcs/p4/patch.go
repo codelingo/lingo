@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/juju/errors"
+	"regexp"
 )
 
 // Todo(Junyu) add patch function for added and removed files
@@ -20,6 +21,14 @@ func (r *Repo) Patches() ([]string, error) {
 		patches = append(patches, diffPatch)
 	}
 
+	delFiles, err := deletedFiles()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	for _, file := range delFiles {
+		patches = append(patches, file)
+	}
+
 	return patches, nil
 }
 
@@ -29,4 +38,19 @@ func stagedAndUnstagedPatch() (string, error) {
 		return "", errors.Trace(err)
 	}
 	return out, nil
+}
+
+// deletedFile creates a slice of custom patch strings about the deleted files
+// ie. delete //stream/main/hello.cpp
+func deletedFiles() ([]string, error) {
+	out, err := p4CMD("-Ztag", "-F", "%action% %depotFile%", "status")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	reg := regexp.MustCompile("(?m)^delete .+")
+	matches := reg.FindAllString(out, -1)
+	if len(matches) == 0 {
+		return nil, nil
+	}
+	return matches, nil
 }
