@@ -111,6 +111,8 @@ imports:
   version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
 - name: github.com/streadway/amqp
   version: 2e25825abdbd7752ff08b270d313b93519a0a232
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
 - name: github.com/waigani/diffparser
   version: 42ae6ebdde8d5414cb002ac435c1d6be3f926c32
 - name: go.uber.org/atomic
