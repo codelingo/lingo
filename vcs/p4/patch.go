@@ -60,6 +60,7 @@ func stagedAndUnstagedPatch() (string, error) {
 	}
 
 	for _, filePath := range filePaths {
+		relativeFilePath = ""
 		filePath = strings.Split(filePath, "edit ")[1]
 		out, err := p4CMD("where", filePath)
 		if err != nil {
@@ -75,8 +76,8 @@ func stagedAndUnstagedPatch() (string, error) {
 			relativeFilePath += pathElements[i] + "/"
 		}
 		relativeFilePath += pathElements[len(pathElements)-1]
-		strings.Replace(diff, strings.Split(filePath, "...")[0], relativeFilePath, 1)
-		strings.Replace(diff, strings.Split(localPath, "...")[0], relativeFilePath, 1)
+		diff = strings.Replace(diff, strings.Split(filePath, "...")[0], relativeFilePath, 1)
+		diff = strings.Replace(diff, strings.Split(localPath, "...")[0], relativeFilePath, 1)
 	}
 	return diff, nil
 }
@@ -95,7 +96,7 @@ func deletedFiles() ([]string, error) {
 		return nil, nil
 	}
 
-	for _, match := range matches {
+	for k, match := range matches {
 		filePath := strings.Split(match, " ")[1]
 		depotFile, err := p4CMD("-Ztag", "-F", "%depotFile%", "where", filePath)
 		if err != nil {
@@ -106,7 +107,7 @@ func deletedFiles() ([]string, error) {
 			relativeFilePath += pathElements[i] + "/"
 		}
 		relativeFilePath += pathElements[len(pathElements)-1]
-		strings.Replace(match, filePath, relativeFilePath, 1)
+		matches[k] = strings.Replace(match, filePath, relativeFilePath, 1)
 	}
 	return matches, nil
 }
@@ -126,6 +127,7 @@ func newFiles() ([]string, error) {
 	}
 
 	for _, filePath := range filePaths {
+		relativeFilePath = ""
 		filePath = strings.Split(filePath, "add ")[1]
 		out, err := p4CMD("where", filePath)
 		if err != nil {
