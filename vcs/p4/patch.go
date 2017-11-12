@@ -110,50 +110,37 @@ func newFiles() ([]string, error) {
 		return nil, nil
 	}
 
-	// todo (Junyu) add windows version
-	if runtime.GOOS != "windows" {
-		for _, filePath := range filePaths {
-			filePath = strings.Split(filePath, "add ")[1]
-			out, err := p4CMD("where", filePath)
-			if err != nil {
-				return nil, errors.Trace(err)
-			}
-			localPath := strings.Split(strings.TrimSpace(out), " ")[2]
-			fileDiff, err := getFileDiff(localPath)
-			if err != nil {
-				fmt.Println(err.Error())
-				return nil, errors.Trace(err)
-			}
-			fmt.Println(fileDiff)
-			if strings.TrimSpace(fileDiff) == "" {
-				return nil, errors.New(fmt.Sprintf("%s No such file, but it has \"add\" action in p4 status", localPath))
-			}
-			depotFile, err := p4CMD("-Ztag", "-F", "%depotFile%", "where", filePath)
-			if err != nil {
-				return nil, errors.Trace(err)
-			}
-			pathElements := strings.Split(strings.Split(strings.TrimSpace(depotFile), "...")[0], "/")
-			for i := 4; i < len(pathElements)-1; i++ {
-				relativeFilePath += pathElements[i] + "/"
-			}
-			relativeFilePath += pathElements[len(pathElements)-1]
-
-			patches = append(patches, strings.Replace(fileDiff, strings.Split(localPath, "...")[0], relativeFilePath, 1))
+	for _, filePath := range filePaths {
+		filePath = strings.Split(filePath, "add ")[1]
+		out, err := p4CMD("where", filePath)
+		if err != nil {
+			return nil, errors.Trace(err)
 		}
+		localPath := strings.Split(strings.TrimSpace(out), " ")[2]
+		fileDiff, err := getFileDiff(localPath)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		if strings.TrimSpace(fileDiff) == "" {
+			return nil, errors.New(fmt.Sprintf("%s No such file, but it has \"add\" action in p4 status", localPath))
+		}
+		depotFile, err := p4CMD("-Ztag", "-F", "%depotFile%", "where", filePath)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		pathElements := strings.Split(strings.Split(strings.TrimSpace(depotFile), "...")[0], "/")
+		for i := 4; i < len(pathElements)-1; i++ {
+			relativeFilePath += pathElements[i] + "/"
+		}
+		relativeFilePath += pathElements[len(pathElements)-1]
+
+		patches = append(patches, strings.Replace(fileDiff, strings.Split(localPath, "...")[0], relativeFilePath, 1))
 	}
 
 	return patches, nil
 }
 
 func getFileDiff(diffPath string) (fileDiff string, err error) {
-	//var file *os.File
-	//
-	//	file, err = os.Open(diffPath)
-	//	if err != nil {
-	//		return "", errors.Trace(err)
-	//	}
-	//
-	//defer file.Close()
 	data, err := ioutil.ReadFile(diffPath)
 
 	diff := difflib.UnifiedDiff{
