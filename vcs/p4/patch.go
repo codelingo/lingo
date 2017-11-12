@@ -1,13 +1,13 @@
 package p4
 
 import (
+	"fmt"
 	"github.com/juju/errors"
+	"github.com/pmezard/go-difflib/difflib"
+	"io/ioutil"
 	"regexp"
 	"runtime"
 	"strings"
-	"fmt"
-	"github.com/pmezard/go-difflib/difflib"
-	"io/ioutil"
 )
 
 // Todo(Junyu) add patch function for added and removed files
@@ -44,9 +44,39 @@ func (r *Repo) Patches() ([]string, error) {
 }
 
 func stagedAndUnstagedPatch() (string, error) {
-	out, err := p4CMD("diff", "-du")
+	var relativeFilePath = ""
+	diff, err := p4CMD("diff", "-du")
 	if err != nil {
 		return "", errors.Trace(err)
+	}
+	out, err := p4CMD("-Ztag", "-F", "%action% %depotFile%", "status")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	reg := regexp.MustCompile("(?m)^edit .+")
+	filePaths := reg.FindAllString(out, -1)
+	if len(filePaths) == 0 {
+		return "", nil
+	}
+
+	for _, filePath := range filePaths {
+		out, err := p4CMD("where", filePath)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		localPath := strings.Split(strings.TrimSpace(out), " ")[2]
+		depotFile, err := p4CMD("-Ztag", "-F", "%depotFile%", "where", filePath)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		pathElements := strings.Split(strings.Split(strings.TrimSpace(depotFile), "...")[0], "/")
+		for i := 4; i < len(pathElements)-1; i++ {
+			relativeFilePath += pathElements[i] + "/"
+		}
+		relativeFilePath += pathElements[len(pathElements)-1]
+		strings.Replace(diff, strings.Split(filePath, "...")[0], relativeFilePath, 1)
+		strings.Replace(diff, strings.Split(localPath, "...")[0], relativeFilePath, 1)
 	}
 	return out, nil
 }
@@ -83,39 +113,39 @@ func newFiles() ([]string, error) {
 	// todo (Junyu) add windows version
 	if runtime.GOOS != "windows" {
 		for _, filePath := range filePaths {
-			filePath = strings.Split(filePath,"add ")[1]
+			filePath = strings.Split(filePath, "add ")[1]
 			out, err := p4CMD("where", filePath)
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
-			localPath := strings.Split(strings.TrimSpace(out)," ")[2]
+			localPath := strings.Split(strings.TrimSpace(out), " ")[2]
 			fileDiff, err := getFileDiff(localPath)
 			if err != nil {
 				fmt.Println(err.Error())
 				return nil, errors.Trace(err)
 			}
 			fmt.Println(fileDiff)
-			if strings.TrimSpace(fileDiff)=="" {
-				return nil, errors.New(fmt.Sprintf("%s No such file, but it has \"add\" action in p4 status",localPath))
+			if strings.TrimSpace(fileDiff) == "" {
+				return nil, errors.New(fmt.Sprintf("%s No such file, but it has \"add\" action in p4 status", localPath))
 			}
 			depotFile, err := p4CMD("-Ztag", "-F", "%depotFile%", "where", filePath)
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
-			pathElements := strings.Split(strings.Split(strings.TrimSpace(depotFile),"...")[0],"/")
-			for i:=4; i<len(pathElements)-1; i++{
-				relativeFilePath += pathElements[i]+"/"
+			pathElements := strings.Split(strings.Split(strings.TrimSpace(depotFile), "...")[0], "/")
+			for i := 4; i < len(pathElements)-1; i++ {
+				relativeFilePath += pathElements[i] + "/"
 			}
 			relativeFilePath += pathElements[len(pathElements)-1]
 
-			patches = append(patches,strings.Replace(fileDiff,strings.Split(localPath,"...")[0],relativeFilePath,1))
+			patches = append(patches, strings.Replace(fileDiff, strings.Split(localPath, "...")[0], relativeFilePath, 1))
 		}
 	}
 
 	return patches, nil
 }
 
-func getFileDiff(diffPath string) (fileDiff string, err error){
+func getFileDiff(diffPath string) (fileDiff string, err error) {
 	//var file *os.File
 	//
 	//	file, err = os.Open(diffPath)
