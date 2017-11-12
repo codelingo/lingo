@@ -82,8 +82,9 @@ func stagedAndUnstagedPatch() (string, error) {
 }
 
 // deletedFile creates a slice of custom patch strings about the deleted files
-// ie. delete //stream/main/hello.cpp
+// ie. delete hello.cpp
 func deletedFiles() ([]string, error) {
+	var relativeFilePath = ""
 	out, err := p4CMD("-Ztag", "-F", "%action% %depotFile%", "status")
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -92,6 +93,20 @@ func deletedFiles() ([]string, error) {
 	matches := reg.FindAllString(out, -1)
 	if len(matches) == 0 {
 		return nil, nil
+	}
+
+	for _, match := range matches {
+		filePath := strings.Split(match, " ")[1]
+		depotFile, err := p4CMD("-Ztag", "-F", "%depotFile%", "where", filePath)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		pathElements := strings.Split(strings.Split(strings.TrimSpace(depotFile), "...")[0], "/")
+		for i := 4; i < len(pathElements)-1; i++ {
+			relativeFilePath += pathElements[i] + "/"
+		}
+		relativeFilePath += pathElements[len(pathElements)-1]
+		strings.Replace(match, filePath, relativeFilePath, 1)
 	}
 	return matches, nil
 }
