@@ -6,7 +6,6 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 	"io/ioutil"
 	"regexp"
-	"runtime"
 	"strings"
 )
 
@@ -61,6 +60,7 @@ func stagedAndUnstagedPatch() (string, error) {
 	}
 
 	for _, filePath := range filePaths {
+		filePath = strings.Split(filePath, "edit ")[1]
 		out, err := p4CMD("where", filePath)
 		if err != nil {
 			return "", errors.Trace(err)
