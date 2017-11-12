@@ -78,7 +78,7 @@ func stagedAndUnstagedPatch() (string, error) {
 		strings.Replace(diff, strings.Split(filePath, "...")[0], relativeFilePath, 1)
 		strings.Replace(diff, strings.Split(localPath, "...")[0], relativeFilePath, 1)
 	}
-	return out, nil
+	return diff, nil
 }
 
 // deletedFile creates a slice of custom patch strings about the deleted files
