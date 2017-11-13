@@ -38,7 +38,6 @@ func (r *Repo) Patches() ([]string, error) {
 	for _, file := range files {
 		patches = append(patches, file)
 	}
-
 	return patches, nil
 }
 
@@ -165,7 +164,7 @@ func getFileDiff(diffPath string) (fileDiff string, err error) {
 		B:        difflib.SplitLines(string(data)),
 		FromFile: "/dev/null",
 		ToFile:   diffPath,
-		Context:  3,
+		Context:  0,
 	}
 	text, _ := difflib.GetUnifiedDiffString(diff)
 	return text, nil
