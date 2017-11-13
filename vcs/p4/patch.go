@@ -43,6 +43,11 @@ func (r *Repo) Patches() ([]string, error) {
 
 func stagedAndUnstagedPatch() (string, error) {
 	var relativeFilePath = ""
+	_, err := p4CMD("reconcile", "-e")
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
 	diff, err := p4CMD("diff", "-du")
 	if err != nil {
 		return "", errors.Trace(err)
