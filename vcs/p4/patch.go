@@ -19,7 +19,7 @@ func (r *Repo) Patches() ([]string, error) {
 		return nil, errors.Trace(err)
 	}
 	// Don't add a patch for empty diffs
-	if !strings.Contains(diffPatch, "File(s) not opened") {
+	if !strings.Contains(diffPatch, "File(s) not opened") && diffPatch!="" {
 		patches = append(patches, diffPatch)
 	}
 
