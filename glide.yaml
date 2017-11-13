@@ -47,6 +47,7 @@ import:
 - package: github.com/opentracing/opentracing-go
   version: ~1.0.2
 - package: github.com/waigani/diffparser
+- package: github.com/pmezard/go-difflib
 - package: go.uber.org/zap
   version: ~1.5.0
 - package: golang.org/x/net
