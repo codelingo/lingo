@@ -378,7 +378,6 @@ test:
 staging:
   flow:
     address: 104.155.184.194
-    port: "9008"
   gitserver:
     remote:
       host: git.junyuzhu.com
@@ -386,15 +385,10 @@ staging:
       port: "80"
       protocol: http
     tls: "false"
-  grpc_port: "9002"
   p4server:
     remote:
-      depot:
-        name: depot
       host: 35.188.92.59
       name: codelingo_dev
-      port: "30166"
-      protocol: http
   platform:
     addr: 104.155.184.194
   website:
