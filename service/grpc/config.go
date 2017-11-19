@@ -26,7 +26,7 @@ func GetGcloudEndpointCtx() (context.Context, error) {
 
 	ctx := context.Background()
 
-	if env == "all" {
+	if env == "all" || env == "staging" {
 		cfg, err := commonConfig.Platform()
 		if err != nil {
 			return nil, errors.Trace(err)
