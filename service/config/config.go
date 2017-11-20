@@ -215,6 +215,10 @@ func newCfgInfo(infoMap interface{}) (*cfgInfo, error) {
 	}, nil
 }
 
+func (fc *FileConfig) GetEnv() (string, error) {
+	return fc.config.GetEnv()
+}
+
 func (fc *FileConfig) GetAll(key string) (map[string]interface{}, error) {
 	keys := strings.Split(key, ".")
 
