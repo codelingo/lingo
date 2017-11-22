@@ -139,9 +139,8 @@ func (r *Repo) OwnerAndNameFromRemote() (string, string, error) {
 	return repoOwner, filepath.Base(dir), nil
 }
 
-// AssertNotTracked checks for the existence of the appropriate
-// codelingo remote to avoid duplications on GOGS.
-func (r *Repo) AssertNotTracked() error {
+// satisfy the repo interface
+func (r *Repo) AssertNotTracked(x, y string) error {
 	return nil
 }
 

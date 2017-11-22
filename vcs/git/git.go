@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -44,6 +45,16 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 		return "", "", errors.Annotate(err, out)
 	}
 	return remoteName, remoteAddr, nil
+}
+
+func updateRemote(addr, remote, repoOwner, dir string) error {
+	remoteAddr := fmt.Sprintf("%s/%s/%s.git", addr, repoOwner, filepath.Base(dir))
+
+	out, err := gitCMD("remote", "set-url", remote, remoteAddr)
+	if err != nil {
+		return errors.Annotate(err, out)
+	}
+	return nil
 }
 
 func gogsClientForCurrentUser() (*gogs.Client, error) {
@@ -133,7 +144,7 @@ func (r *Repo) OwnerAndNameFromRemote() (string, string, error) {
 
 // AssertNotTracked checks for the existence of the appropriate
 // codelingo remote to avoid duplications on GOGS.
-func (r *Repo) AssertNotTracked() error {
+func (r *Repo) AssertNotTracked(repoOwner, repoName string) error {
 	platCfg, err := config.Platform()
 	if err != nil {
 		return errors.Trace(err)
@@ -149,9 +160,17 @@ func (r *Repo) AssertNotTracked() error {
 		return errors.Annotate(err, out)
 	}
 
+	addr, err := platCfg.GitServerAddr()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
 	parts := strings.Split(out, "\n")
 	for _, p := range parts {
 		if p == remote {
+			if err := updateRemote(addr, remote, repoOwner, repoName); err != nil {
+				return errors.Trace(err)
+			}
 			return errors.Errorf("%s git remote already exists", r)
 		}
 	}

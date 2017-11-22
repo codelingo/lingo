@@ -11,7 +11,7 @@ type Repo interface {
 	CreateRemote(name string) error
 	Exists(name string) (bool, error)
 	OwnerAndNameFromRemote() (string, string, error)
-	AssertNotTracked() error
+	AssertNotTracked(string, string) error
 	WorkingDir() (string, error)
 	ReadFile(filename string) (string, error)
 	Clone(path, url string) error
@@ -21,8 +21,8 @@ type Repo interface {
 }
 
 const (
-	NotAuthedErr Error   = "not logged into CodeLingo"
-	Git          Type = iota
+	NotAuthedErr Error = "not logged into CodeLingo"
+	Git          Type  = iota
 	P4
 )
 
@@ -31,4 +31,3 @@ type Error string
 func (v Error) Error() string {
 	return string(v)
 }
-

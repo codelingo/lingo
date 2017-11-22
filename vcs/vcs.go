@@ -121,7 +121,7 @@ func InitRepo(vcsType Type, repo Repo) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	if err = repo.AssertNotTracked(); err != nil {
+	if err = repo.AssertNotTracked(repoOwner, dir); err != nil {
 		// TODO (benjamin-rood): Check the error type
 		return errors.Trace(err)
 	}
