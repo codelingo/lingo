@@ -16,6 +16,7 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	commonConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/juju/errors"
+	"github.com/howeyc/gopass"
 	"golang.org/x/crypto/ssh/terminal"
 	"syscall"
 )
@@ -124,10 +125,20 @@ func setupLingo(c *cli.Context) (string, error) {
 
 	if password == "" {
 		fmt.Print("Enter User-Token:")
-		byt, err := terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			return "", errors.Trace(err)
+		cmd := exec.Command("bash", "-c", "/usr/bin/pwd")
+		var byt []byte
+		if err := cmd.Run(); err != nil{
+			byt, err = terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				return "", errors.Trace(err)
+			}
+		} else{
+			byt, err = gopass.GetPasswd()
+			if err != nil {
+				return "", errors.Trace(err)
+			}
 		}
+
 		password = string(byt)
 		fmt.Println("")
 	}
