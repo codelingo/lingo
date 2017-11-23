@@ -125,6 +125,10 @@ func setupLingo(c *cli.Context) (string, error) {
 
 	if password == "" {
 		fmt.Print("Enter User-Token:")
+
+		// If pwd can be executed,this is an Unix-like shell (i.e. GitBash)
+		// If it runs into an error (i.e. Windows Command Prompt)
+		// use terminal instead of gopass package to read password
 		cmd := exec.Command("bash", "-c", "/usr/bin/pwd")
 		var byt []byte
 		if err := cmd.Run(); err != nil{
