@@ -15,8 +15,10 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	commonConfig "github.com/codelingo/lingo/app/util/common/config"
-	"github.com/howeyc/gopass"
 	"github.com/juju/errors"
+	"github.com/howeyc/gopass"
+	"golang.org/x/crypto/ssh/terminal"
+	"syscall"
 )
 
 // TODO(waigani) add a quick-start cmd with --dry-run flag that: inits git,
@@ -123,10 +125,24 @@ func setupLingo(c *cli.Context) (string, error) {
 
 	if password == "" {
 		fmt.Print("Enter User-Token:")
-		byt, err := gopass.GetPasswd()
-		if err != nil {
-			return "", errors.Trace(err)
+
+		// If pwd can be executed,this is an Unix-like shell (i.e. GitBash)
+		// If it runs into an error (i.e. Windows Command Prompt)
+		// use terminal instead of gopass package to read password
+		cmd := exec.Command("bash", "-c", "/usr/bin/pwd")
+		var byt []byte
+		if err := cmd.Run(); err != nil{
+			byt, err = terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				return "", errors.Trace(err)
+			}
+		} else{
+			byt, err = gopass.GetPasswd()
+			if err != nil {
+				return "", errors.Trace(err)
+			}
 		}
+
 		password = string(byt)
 		fmt.Println("")
 	}
