@@ -94,7 +94,7 @@ func deletedFiles() ([]string, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	reg := regexp.MustCompile("(?m)^delete .+")
+	reg := regexp.MustCompile("(?m)^.*delete .+")
 	matches := reg.FindAllString(out, -1)
 	if len(matches) == 0 {
 		return nil, nil
@@ -111,7 +111,8 @@ func deletedFiles() ([]string, error) {
 			relativeFilePath += pathElements[i] + "/"
 		}
 		relativeFilePath += pathElements[len(pathElements)-1]
-		matches[k] = strings.Replace(match, filePath, relativeFilePath, 1)
+		matches[k] = strings.Replace(match, match, fmt.Sprintf("delete %s",relativeFilePath), 1)
+		relativeFilePath=""
 	}
 	return matches, nil
 }
@@ -124,7 +125,7 @@ func newFiles() ([]string, error) {
 		return nil, errors.Trace(err)
 	}
 
-	reg := regexp.MustCompile("(?m)^add .+")
+	reg := regexp.MustCompile("(?m)^.*add .+")
 	filePaths := reg.FindAllString(out, -1)
 	if len(filePaths) == 0 {
 		return nil, nil
