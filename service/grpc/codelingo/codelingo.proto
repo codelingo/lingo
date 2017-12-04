@@ -122,7 +122,6 @@ message SessionReply {
 // The request message containing the CLQL source code.
 message QueryRequest {
     dotlingo.Dotlingo dotlingo = 1;
-    map<string, MetaDatum> metadata = 2;
 }
 
 // Possible values correspond with in platform/controller/graphdb/query/result
