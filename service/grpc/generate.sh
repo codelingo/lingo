@@ -18,4 +18,4 @@
 mkdir -p codelingo
 
 # go
-protoc codelingo.proto --go_out=plugins=grpc:codelingo/
+protoc $GOPATH/src/github.com/codelingo/lingo/service/grpc/codelingo/codelingo.proto -I=$GOPATH/src --go_out=plugins=grpc:$GOPATH/src/
