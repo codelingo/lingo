@@ -29,12 +29,9 @@
 
 syntax = "proto3";
 
-option java_multiple_files = true;
-option java_package = "io.codelingo.grpc.cl";
-option java_outer_classname = "CodeLingoProto";
-option objc_class_prefix = "CLW";
-
 package codelingo;
+
+import "github.com/codelingo/clql/dotlingo/dotlingo.proto";
 
 // The query service definition.
 service CodeLingo {
@@ -124,9 +121,7 @@ message SessionReply {
 
 // The request message containing the CLQL source code.
 message QueryRequest {
-    Fact factTree = 1;
-    repeated Lexicon lexicons = 2;
-    map<string, MetaDatum> metadata = 3;
+    dotlingo.Dotlingo dotlingo = 1;
 }
 
 // Possible values correspond with in platform/controller/graphdb/query/result
@@ -136,52 +131,6 @@ message MetaDatum {
         int64 int = 2;
         bool bool = 3;
     }
-}
-
-message Fact {
-    string Namespace = 1;
-    string Name = 2;
-    string LexiconID = 3;
-    bool Negated = 4;
-    message DepthRange {
-        uint64 Max = 1;
-        uint64 Min = 2;
-    }
-    DepthRange Depth = 5;
-    bool Yield = 6;
-    Argument Arg = 7;
-}
-
-message Argument {
-    oneof arg {
-        string stringarg = 1;
-        string regexarg = 2;
-        string vararg = 3;
-        IntComparison Intcomparisonarg = 4;
-        FloatComparison floatcomparisonarg = 5;
-        FactSet factlistarg = 6;
-    }
-}
-
-message IntComparison {
-    int64 value = 1;
-    string comparison = 2;
-}
-
-message FloatComparison {
-    float value = 1;
-    string comparison = 2;
-}
-
-// TODO: resolve naming conflict with FactList
-message FactSet {
-    repeated Fact list = 1;
-}
-
-message Lexicon {
-    string version = 1;
-    string owner = 2;
-    string name = 3;
 }
 
 // The query response.

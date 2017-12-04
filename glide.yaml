@@ -54,10 +54,13 @@ import:
   subpackages:
   - context
 - package: google.golang.org/grpc
-  version: ~1.5.1
+  version: ^1.7.2
   subpackages:
   - credentials
   - grpclog
 - package: gopkg.in/check.v1
 - package: gopkg.in/yaml.v1
 - package: gopkg.in/yaml.v2
+- package: github.com/codelingo/clql
+  repo: git@github.com:codelingo/clql.git
+  version: origin/master
