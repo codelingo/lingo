@@ -32,6 +32,7 @@ syntax = "proto3";
 package codelingo;
 
 import "github.com/codelingo/clql/dotlingo/dotlingo.proto";
+import "github.com/codelingo/clql/inner/inner.proto";
 
 // The query service definition.
 service CodeLingo {
@@ -121,7 +122,9 @@ message SessionReply {
 
 // The request message containing the CLQL source code.
 message QueryRequest {
-    dotlingo.Dotlingo dotlingo = 1;
+    inner.Fact fact = 1;
+    repeated dotlingo.Lexicon lexicons = 2;
+    map<string, MetaDatum> metadata = 3;
 }
 
 // Possible values correspond with in platform/controller/graphdb/query/result
