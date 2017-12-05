@@ -176,9 +176,10 @@
   revision = "2fe0e88cf2321d801acedd2b4f0d7f63735fb732"
 
 [[projects]]
+  branch = "master"
   name = "github.com/juju/utils"
   packages = [".","clock"]
-  revision = "bdb77b07e7e3f77463d10d2b554cd1b7a78009a2"
+  revision = "4d9b38694f1e441c16421e2320f2b2fbd97fa597"
 
 [[projects]]
   branch = "master"
