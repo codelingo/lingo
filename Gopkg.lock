@@ -52,8 +52,8 @@
 [[projects]]
   branch = "master"
   name = "github.com/codelingo/clql"
-  packages = ["dotlingo","inner","util"]
-  revision = "663c9499b452d4bd706a4c98d256654b9a6e953b"
+  packages = ["dotlingo","inner"]
+  revision = "a6cf478672bf397a45ddcf95466f39df20c46a07"
   source = "git@github.com:codelingo/clql.git"
 
 [[projects]]
