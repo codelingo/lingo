@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/codelingo/lingo/app/util"
 	"google.golang.org/grpc/grpclog"
 
 	"github.com/briandowns/spinner"
@@ -65,7 +66,7 @@ func (l *logger) Printf(format string, args ...interface{}) {
 			l.reconnect()
 		}
 	} else {
-		fmt.Printf(format, args...)
+		util.Logger.Debugf(format, args...)
 	}
 
 }
