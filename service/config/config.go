@@ -16,7 +16,7 @@ import (
 
 func (c *Config) GetEnv() (string, error) {
 	// return test when running go test
-	if isTest, _ := regexp.MatchString("/_test/", os.Args[0]); isTest {
+	if isTest, _ := regexp.MatchString("/_test/", os.Args[0]); isTest || os.Args[0] == "./debug.test" {
 		return "test", nil
 	}
 

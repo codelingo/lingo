@@ -25,7 +25,7 @@ import (
 func init() {
 	// TODO(waigani) use config/flags to set level etc
 
-	zlog, err := zap.NewDevelopment()
+	zlog, err := zap.NewProduction()
 	if err != nil {
 		// yes panic, this is a developer error.
 		panic(errors.ErrorStack(err))
