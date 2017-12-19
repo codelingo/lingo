@@ -58,7 +58,10 @@ func (r require) Verify() error {
 		if err != nil {
 			if outdated {
 				// Don't error, just warn
-				fmt.Println("Warning: " + err.Error())
+				// TODO(waigani) use below and https://godoc.org/go.uber.org/zap/zapcore#NewConsoleEncoder
+				// util.Logger.Warn(err.Error())
+				fmt.Fprint(os.Stderr, err.Error(), "\n")
+
 				return nil
 			} else {
 				return errors.Trace(err)
@@ -183,7 +186,9 @@ func verifyLingoHome() error {
 	if _, err := os.Stat(scriptsHome); os.IsNotExist(err) {
 		err := os.MkdirAll(scriptsHome, 0775)
 		if err != nil {
-			fmt.Printf("WARNING: could not create scripts directory: %v \n", err)
+			// TODO(waigani) use below and https://godoc.org/go.uber.org/zap/zapcore#NewConsoleEncoder
+			// util.Logger.Warn("could not create scripts directory:", err.Error())
+			fmt.Fprint(os.Stderr, "could not create scripts directory:", err.Error())
 		}
 	}
 
