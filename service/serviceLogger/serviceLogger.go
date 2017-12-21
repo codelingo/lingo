@@ -105,5 +105,5 @@ func (l *logger) reconnect() {
 
 // Println prints to the logger.
 func (l *logger) Println(args ...interface{}) {
-	l.Println(args...)
+	fmt.Println(args...)
 }
