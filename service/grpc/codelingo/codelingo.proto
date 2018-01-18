@@ -136,14 +136,22 @@ message MetaDatum {
 
 // The query response.
 message QueryReply {
-    string id = 1;
+    string uid = 1;
     repeated string kind = 2;
-    message DataList {
-        repeated string data = 1;
+    message DataField {
+        oneof prop {
+            string stringProp = 1;
+            bool boolProp = 2;
+            int64 int64Prop = 3;
+            float floatProp = 4;
+        }
     }
-    map<string, DataList> data = 3;
-    map<string, DataList> metadata = 4;
-    string error = 5;
+    map<string, DataField> data = 3;
+    string error = 4;
+    int64 depth = 5; // The depth at which this was found relative to its parent.
+
+    string factName = 6;
+    repeated QueryReply children = 7;
 }
 
 // The request message containing the files or directories to review.
