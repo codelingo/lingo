@@ -24,7 +24,6 @@ import (
 	"github.com/codelingo/kit/sd"
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service/serviceLogger"
-	"github.com/codelingo/platform/controller/graphdb/query/result"
 	"github.com/juju/errors"
 
 	"github.com/opentracing/opentracing-go"
@@ -139,7 +138,7 @@ func Review(req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
 	return issuec, nil
 }
 
-func (c client) Query(ctx context.Context, queryc chan *codelingo.QueryRequest) (chan *result.ResultNode, chan error) {
+func (c client) Query(ctx context.Context, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, chan error) {
 	return nil, nil
 }
 

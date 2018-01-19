@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/codelingo/lingo/service/grpc/codelingo"
-	"github.com/codelingo/platform/controller/graphdb/query/result"
 )
 
 type Message string
@@ -20,7 +19,7 @@ type Issuec chan *codelingo.Issue
 
 type CodeLingoService interface {
 	Session(*SessionRequest) (string, error)
-	Query(context.Context, chan *codelingo.QueryRequest) (chan *result.ResultNode, chan error)
+	Query(context.Context, chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, chan error)
 	Review(context.Context, *ReviewRequest) (Issuec, Messagec, Ingestc, error)
 	ListLexicons() ([]string, error)
 	ListFacts(owner, name, version string) (map[string][]string, error)
