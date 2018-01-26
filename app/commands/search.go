@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/codelingo/lingo/service/grpc/codelingo"
+
 	"github.com/juju/errors"
 
-	"github.com/codelingo/flow/backend/service/client"
-	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
+	"github.com/codelingo/platform/flow/service/client"
+	"github.com/codelingo/platform/flow/service/flow"
 
 	"github.com/codegangsta/cli"
 )
@@ -93,7 +95,7 @@ func searchCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	results := []*flow.Result{}
+	results := []*codelingo.QueryReply{}
 
 l:
 	for {
@@ -119,7 +121,7 @@ l:
 	return msg, errors.Trace(err)
 }
 
-func OutputResults(results []*flow.Result, format, outputFile string) (string, error) {
+func OutputResults(results []*codelingo.QueryReply, format, outputFile string) (string, error) {
 	var data []byte
 	var err error
 	switch format {
