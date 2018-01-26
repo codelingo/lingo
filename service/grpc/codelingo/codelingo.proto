@@ -147,7 +147,7 @@ message QueryReply {
         }
         repeated inner.Decorator decorators = 5;
     }
-    map<string, DataField> data = 3;
+    map<string, DataField> data = 3; // TODO: change name to properties
     string error = 4;
     int64 depth = 5; // The depth at which this was found relative to its parent.
 
