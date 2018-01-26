@@ -3,10 +3,14 @@ package commands
 import (
 	"strings"
 
-	"github.com/juju/errors"
-
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/util"
+
+	"github.com/juju/errors"
 )
+
+// "github.com/codelingo/lingo/app/util"
+// "go.uber.org/zap"
 
 type lingoCMD struct {
 	isSubCMD bool
@@ -54,6 +58,15 @@ func Before(c *cli.Context) error {
 	if args.Present() {
 		currentCMDName = args.First()
 		flags = args.Tail()
+
+		for _, flag := range flags {
+			if flag == "--debug" {
+				err := util.SetDebugLogger()
+				if err != nil {
+					return errors.Trace(err)
+				}
+			}
+		}
 
 		// TODO(waigani) This is a manual hack to validate subcommands. Why is
 		// c.Command.Name empty?

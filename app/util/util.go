@@ -32,7 +32,16 @@ func init() {
 	}
 
 	Logger = zlog.Sugar()
+}
 
+// Use dev logger rather than prod
+func SetDebugLogger() error {
+	zlog, err := zap.NewDevelopment()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	Logger = zlog.Sugar()
+	return nil
 }
 
 var Logger *zap.SugaredLogger
