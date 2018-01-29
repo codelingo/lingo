@@ -3,8 +3,8 @@ package commands
 import (
 	"fmt"
 
-	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/platform/flow/service/flow"
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
