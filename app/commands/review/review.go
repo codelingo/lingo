@@ -19,7 +19,11 @@ import (
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/server"
 
+	"context"
 	"github.com/juju/errors"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error) {
@@ -30,12 +34,21 @@ func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error
 
 	c := client.NewFlowClient(conn)
 
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	ctx, err := grpcclient.GetGcloudEndpointCtx()
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
+	ctx, cancel := context.WithCancel(ctx)
+	// Cancel the context passed to the platform on exit.
+	sigc := make(chan os.Signal, 2)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigc
+		cancel()
+		os.Exit(1)
+	}()
 
-	issuec, errorc, err := c.Review(newCtx, req)
+	issuec, errorc, err := c.Review(ctx, req)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
