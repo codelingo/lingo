@@ -13,7 +13,11 @@ import (
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 
+	"context"
 	"github.com/codegangsta/cli"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func init() {
@@ -60,11 +64,11 @@ func searchAction(ctx *cli.Context) {
 	fmt.Println(msg)
 }
 
-func searchCMD(ctx *cli.Context) (string, error) {
+func searchCMD(cliCtx *cli.Context) (string, error) {
 	defer util.Logger.Sync()
 	util.Logger.Debugw("searchCMD called")
 
-	args := ctx.Args()
+	args := cliCtx.Args()
 	if len(args) == 0 {
 		return "", errors.New("Please specify the filepath to a .lingo file.")
 	}
@@ -81,12 +85,21 @@ func searchCMD(ctx *cli.Context) (string, error) {
 
 	c := client.NewFlowClient(conn)
 
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	ctx, err := grpcclient.GetGcloudEndpointCtx()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
+	ctx, cancel := context.WithCancel(ctx)
+	// Cancel the context passed to the platform on exit.
+	sigc := make(chan os.Signal, 2)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigc
+		cancel()
+		os.Exit(1)
+	}()
 
-	resultc, errorc, err := c.Search(newCtx, &flow.SearchRequest{
+	resultc, errorc, err := c.Search(ctx, &flow.SearchRequest{
 		Dotlingo: string(dotlingo),
 	})
 	if err != nil {
@@ -115,7 +128,7 @@ l:
 		}
 	}
 
-	msg, err := OutputResults(results, ctx.String("format"), ctx.String("output"))
+	msg, err := OutputResults(results, cliCtx.String("format"), cliCtx.String("output"))
 	return msg, errors.Trace(err)
 }
 
