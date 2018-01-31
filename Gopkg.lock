@@ -52,7 +52,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/codelingo/clql"
-  packages = ["dotlingo","inner"]
+  packages = ["inner"]
   revision = "a6cf478672bf397a45ddcf95466f39df20c46a07"
   source = "git@github.com:codelingo/clql.git"
 
@@ -379,6 +379,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6a0f3dfba117c5e0e02f416246b68c3d84e1481fa388ff3f02122e06b937138f"
+  inputs-digest = "8cf0ada78da644bcc4e604fd40b1414e0da68362ebb6ee8b56cb04c5fa94a394"
   solver-name = "gps-cdcl"
   solver-version = 1
