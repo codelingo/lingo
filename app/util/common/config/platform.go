@@ -274,10 +274,10 @@ all:
     addr: codelingo.io
     port: "80"
   platform:
-    addr: 104.197.199.153
+    addr: 35.224.248.201
     port: "80"
   flow:
-    address: 104.197.199.153
+    address: 35.224.248.201
     port: "9008"
   grpc_port: "9002"
   gitserver:
