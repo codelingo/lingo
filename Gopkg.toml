@@ -43,10 +43,6 @@ ignored = ["github.com/codelingo/lingo/_examples"]
   source = "git@github.com:codelingo/clql.git"
 
 [[constraint]]
-  name = "github.com/codelingo/flow"
-  source = "git@github.com:codelingo/flow.git"
-
-[[constraint]]
   name = "github.com/codelingo/kit"
 
 [[constraint]]

@@ -60,16 +60,6 @@
   source = "git@github.com:codelingo/clql.git"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/codelingo/flow"
-  packages = [
-    "backend/service/client",
-    "backend/service/flow"
-  ]
-  revision = "ccbf50efd8fca02b6bf73148b5e4b54e421a866a"
-  source = "git@github.com:codelingo/flow.git"
-
-[[projects]]
   branch = "cl-pubsub"
   name = "github.com/codelingo/kit"
   packages = [
@@ -85,7 +75,11 @@
 
 [[projects]]
   name = "github.com/codelingo/platform"
-  packages = ["controller/graphdb/query/result"]
+  packages = [
+    "controller/graphdb/query/result",
+    "flow/service/client",
+    "flow/service/flowengine"
+  ]
   revision = "1f747dc9c2043c57b4972999ac2bb04b5ad7e7ac"
   source = "git@github.com:codelingo/platform.git"
 
@@ -412,6 +406,7 @@
   packages = [
     ".",
     "balancer",
+    "balancer/base",
     "balancer/roundrobin",
     "codes",
     "connectivity",
@@ -426,15 +421,14 @@
     "peer",
     "resolver",
     "resolver/dns",
-    "resolver/manual",
     "resolver/passthrough",
     "stats",
     "status",
     "tap",
     "transport"
   ]
-  revision = "be077907e29fdb945d351e4284eb5361e7f8924e"
-  version = "v1.8.1"
+  revision = "6b51017f791ae1cfbec89c52efdf444b13b550ef"
+  version = "v1.9.2"
 
 [[projects]]
   name = "gopkg.in/VividCortex/ewma.v1"
@@ -505,6 +499,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8cf0ada78da644bcc4e604fd40b1414e0da68362ebb6ee8b56cb04c5fa94a394"
+  inputs-digest = "9ac135af9cc1394b6fea3c7785ce4245efea59c06974e0927da665d67b9d5fca"
   solver-name = "gps-cdcl"
   solver-version = 1
