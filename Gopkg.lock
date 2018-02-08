@@ -4,7 +4,10 @@
 [[projects]]
   branch = "master"
   name = "github.com/Azure/go-ansiterm"
-  packages = [".","winterm"]
+  packages = [
+    ".",
+    "winterm"
+  ]
   revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
 
 [[projects]]
@@ -59,21 +62,31 @@
 [[projects]]
   branch = "master"
   name = "github.com/codelingo/flow"
-  packages = ["backend/service/client","backend/service/flow"]
+  packages = [
+    "backend/service/client",
+    "backend/service/flow"
+  ]
   revision = "ccbf50efd8fca02b6bf73148b5e4b54e421a866a"
   source = "git@github.com:codelingo/flow.git"
 
 [[projects]]
   branch = "cl-pubsub"
   name = "github.com/codelingo/kit"
-  packages = ["endpoint","log","pubsub","pubsub/rabbitmq","sd","sd/lb","transport/grpc"]
+  packages = [
+    "endpoint",
+    "log",
+    "pubsub",
+    "pubsub/rabbitmq",
+    "sd",
+    "sd/lb",
+    "transport/grpc"
+  ]
   revision = "c018bc7cb9f8cb76a507497c3b4fc9cea7003e77"
 
 [[projects]]
-  branch = "master"
   name = "github.com/codelingo/platform"
   packages = ["controller/graphdb/query/result"]
-  revision = "22dab5229c7a87ee4be5662d76d793290cc30b24"
+  revision = "1f747dc9c2043c57b4972999ac2bb04b5ad7e7ac"
   source = "git@github.com:codelingo/platform.git"
 
 [[projects]]
@@ -84,7 +97,33 @@
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = ["api/types","api/types/blkiodev","api/types/container","api/types/filters","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/versions","opts","pkg/archive","pkg/fileutils","pkg/homedir","pkg/idtools","pkg/ioutils","pkg/jsonmessage","pkg/longpath","pkg/mount","pkg/pools","pkg/stdcopy","pkg/system","pkg/term","pkg/term/windows"]
+  packages = [
+    "api/types",
+    "api/types/blkiodev",
+    "api/types/container",
+    "api/types/filters",
+    "api/types/mount",
+    "api/types/network",
+    "api/types/registry",
+    "api/types/strslice",
+    "api/types/swarm",
+    "api/types/swarm/runtime",
+    "api/types/versions",
+    "opts",
+    "pkg/archive",
+    "pkg/fileutils",
+    "pkg/homedir",
+    "pkg/idtools",
+    "pkg/ioutils",
+    "pkg/jsonmessage",
+    "pkg/longpath",
+    "pkg/mount",
+    "pkg/pools",
+    "pkg/stdcopy",
+    "pkg/system",
+    "pkg/term",
+    "pkg/term/windows"
+  ]
   revision = "fe8aac6f5ae413a967adb0adad0b54abdfb825c4"
 
 [[projects]]
@@ -137,7 +176,13 @@
 
 [[projects]]
   name = "github.com/golang/protobuf"
-  packages = ["proto","ptypes","ptypes/any","ptypes/duration","ptypes/timestamp"]
+  packages = [
+    "proto",
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
+    "ptypes/timestamp"
+  ]
   revision = "98fa357170587e470c5f27d3c3ea0947b71eb455"
 
 [[projects]]
@@ -172,13 +217,19 @@
 [[projects]]
   branch = "master"
   name = "github.com/juju/testing"
-  packages = [".","checkers"]
+  packages = [
+    ".",
+    "checkers"
+  ]
   revision = "2fe0e88cf2321d801acedd2b4f0d7f63735fb732"
 
 [[projects]]
   branch = "master"
   name = "github.com/juju/utils"
-  packages = [".","clock"]
+  packages = [
+    ".",
+    "clock"
+  ]
   revision = "4d9b38694f1e441c16421e2320f2b2fbd97fa597"
 
 [[projects]]
@@ -217,18 +268,27 @@
 
 [[projects]]
   name = "github.com/opencontainers/image-spec"
-  packages = ["specs-go","specs-go/v1"]
+  packages = [
+    "specs-go",
+    "specs-go/v1"
+  ]
   revision = "d60099175f88c47cd379c4738d158884749ed235"
   version = "v1.0.1"
 
 [[projects]]
   name = "github.com/opencontainers/runc"
-  packages = ["libcontainer/system","libcontainer/user"]
+  packages = [
+    "libcontainer/system",
+    "libcontainer/user"
+  ]
   revision = "91e979501348cb4cb13b5fb4437cc5d9ecd94b5d"
 
 [[projects]]
   name = "github.com/opentracing/opentracing-go"
-  packages = [".","log"]
+  packages = [
+    ".",
+    "log"
+  ]
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
   version = "v1.0.2"
 
@@ -276,32 +336,69 @@
 
 [[projects]]
   name = "go.uber.org/zap"
-  packages = [".","buffer","internal/bufferpool","internal/color","internal/exit","zapcore"]
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore"
+  ]
   revision = "9d9d6135afe89b6fc4a05e9a8552526caba38048"
   version = "v1.5.0"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["pbkdf2","ssh/terminal"]
+  packages = [
+    "pbkdf2",
+    "ssh/terminal"
+  ]
   revision = "94eea52f7b742c7cbe0b03b22f0c4c8631ece122"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  packages = [
+    "context",
+    "context/ctxhttp",
+    "http2",
+    "http2/hpack",
+    "idna",
+    "internal/timeseries",
+    "lex/httplex",
+    "trace"
+  ]
   revision = "a8b9294777976932365dabb6640cf1468d95c70f"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
+  packages = [
+    "unix",
+    "windows"
+  ]
   revision = "8b4580aae2a0dd0c231a45d3ccb8434ff533b840"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
-  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable"
+  ]
   revision = "57961680700a5336d15015c8c50686ca5ba362a4"
 
 [[projects]]
@@ -312,7 +409,30 @@
 
 [[projects]]
   name = "google.golang.org/grpc"
-  packages = [".","balancer","balancer/roundrobin","codes","connectivity","credentials","encoding","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","resolver","resolver/dns","resolver/manual","resolver/passthrough","stats","status","tap","transport"]
+  packages = [
+    ".",
+    "balancer",
+    "balancer/roundrobin",
+    "codes",
+    "connectivity",
+    "credentials",
+    "encoding",
+    "grpclb/grpc_lb_v1/messages",
+    "grpclog",
+    "internal",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/manual",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap",
+    "transport"
+  ]
   revision = "be077907e29fdb945d351e4284eb5361e7f8924e"
   version = "v1.8.1"
 
@@ -361,7 +481,13 @@
 [[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
-  packages = [".","bson","internal/json","internal/sasl","internal/scram"]
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
+  ]
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
