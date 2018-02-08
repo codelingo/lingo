@@ -7,11 +7,11 @@ import (
 
 	"github.com/juju/errors"
 
-	"github.com/codelingo/flow/backend/service/client"
-	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
+	"github.com/codelingo/platform/flow/service/client"
+	flow "github.com/codelingo/platform/flow/service/flowengine"
 
 	"context"
 	"github.com/codegangsta/cli"

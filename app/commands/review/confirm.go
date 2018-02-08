@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/codelingo/flow/backend/service/flow"
 	"github.com/codelingo/lingo/app/util"
+	flow "github.com/codelingo/platform/flow/service/flowengine"
 	"github.com/fatih/color"
 	"github.com/waigani/diffparser"
 )
