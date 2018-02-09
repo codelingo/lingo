@@ -14,10 +14,11 @@ import (
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 
 	"context"
-	"github.com/codegangsta/cli"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/codegangsta/cli"
 )
 
 func init() {
@@ -116,7 +117,7 @@ l:
 				break l
 			}
 
-			util.Logger.Debugw(err.Error())
+			util.Logger.Error(err.Error())
 			util.Logger.Sync()
 
 		case result, ok := <-resultc:
