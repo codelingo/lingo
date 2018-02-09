@@ -20,10 +20,11 @@ import (
 	flow "github.com/codelingo/platform/flow/service/flowengine"
 
 	"context"
-	"github.com/juju/errors"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/juju/errors"
 )
 
 func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error) {
@@ -125,7 +126,7 @@ l:
 			}
 
 			defer util.Logger.Sync()
-			util.Logger.Debug("Review error: ", err.Error())
+			util.Logger.Error("Review error: ", err.Error())
 		case iss, ok := <-issuec:
 			if !keepAll {
 				spnr.Stop()
