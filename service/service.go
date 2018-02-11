@@ -628,7 +628,7 @@ func New() (server.CodeLingoService, error) {
 	describeFactFactory := grpcclient.MakeDescribeFactEndpointFactory(tracer, tracingLogger, tlsOpt)
 	latestClientVersionFactory := grpcclient.MakeLatestClientVersionFactory(tracer, tracingLogger, tlsOpt)
 
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	newCtx, err := grpcclient.AddGcloudApiKeyToCtx(context.Background())
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
