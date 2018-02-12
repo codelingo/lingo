@@ -7,7 +7,7 @@ import (
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/vcs"
-	"github.com/codelingo/platform/flow/service/flow"
+	flow "github.com/codelingo/platform/flow/service/flowengine"
 
 	"github.com/codelingo/lingo/app/commands/review"
 	"github.com/codelingo/lingo/app/util"

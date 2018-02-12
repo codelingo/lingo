@@ -52,16 +52,9 @@
 [[projects]]
   branch = "master"
   name = "github.com/codelingo/clql"
-  packages = ["dotlingo","inner"]
+  packages = ["inner"]
   revision = "a6cf478672bf397a45ddcf95466f39df20c46a07"
   source = "git@github.com:codelingo/clql.git"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/codelingo/flow"
-  packages = ["backend/service/client","backend/service/flow"]
-  revision = "ccbf50efd8fca02b6bf73148b5e4b54e421a866a"
-  source = "git@github.com:codelingo/flow.git"
 
 [[projects]]
   branch = "cl-pubsub"
@@ -70,10 +63,9 @@
   revision = "c018bc7cb9f8cb76a507497c3b4fc9cea7003e77"
 
 [[projects]]
-  branch = "master"
   name = "github.com/codelingo/platform"
-  packages = ["controller/graphdb/query/result"]
-  revision = "22dab5229c7a87ee4be5662d76d793290cc30b24"
+  packages = ["flow/service/client","flow/service/flowengine"]
+  revision = "1f747dc9c2043c57b4972999ac2bb04b5ad7e7ac"
   source = "git@github.com:codelingo/platform.git"
 
 [[projects]]
@@ -312,9 +304,9 @@
 
 [[projects]]
   name = "google.golang.org/grpc"
-  packages = [".","balancer","balancer/roundrobin","codes","connectivity","credentials","encoding","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","resolver","resolver/dns","resolver/manual","resolver/passthrough","stats","status","tap","transport"]
-  revision = "be077907e29fdb945d351e4284eb5361e7f8924e"
-  version = "v1.8.1"
+  packages = [".","balancer","balancer/base","balancer/roundrobin","codes","connectivity","credentials","encoding","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","resolver","resolver/dns","resolver/passthrough","stats","status","tap","transport"]
+  revision = "6b51017f791ae1cfbec89c52efdf444b13b550ef"
+  version = "v1.9.2"
 
 [[projects]]
   name = "gopkg.in/VividCortex/ewma.v1"
@@ -379,6 +371,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6a0f3dfba117c5e0e02f416246b68c3d84e1481fa388ff3f02122e06b937138f"
+  inputs-digest = "6a262ce0a6cc82e0159c750f15669d3e3fb899b015ec59b87250b3968094b0e1"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/codelingo/lingo/app/util"
-	"github.com/codelingo/platform/flow/service/flow"
+	flow "github.com/codelingo/platform/flow/service/flowengine"
 	"github.com/fatih/color"
 	"github.com/waigani/diffparser"
 )

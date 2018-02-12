@@ -17,7 +17,12 @@ import (
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/platform/flow/service/client"
-	"github.com/codelingo/platform/flow/service/flow"
+	flow "github.com/codelingo/platform/flow/service/flowengine"
+
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/juju/errors"
 )
@@ -27,15 +32,29 @@ func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
-
 	c := client.NewFlowClient(conn)
 
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	// Cancel the context passed to the platform on exit.
+	ctx, cancel := context.WithCancel(context.Background())
+	sigc := make(chan os.Signal, 2)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigc
+		cancel()
+		os.Exit(1)
+	}()
+
+	// Create context with metadata
+	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+	ctx, err = grpcclient.AddUsernameToCtx(ctx)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
 
-	issuec, errorc, err := c.Review(newCtx, req)
+	issuec, errorc, err := c.Review(ctx, req)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
@@ -112,7 +131,7 @@ l:
 			}
 
 			defer util.Logger.Sync()
-			util.Logger.Debug("Review error: ", err.Error())
+			util.Logger.Error("Review error: ", err.Error())
 		case iss, ok := <-issuec:
 			if !keepAll {
 				spnr.Stop()

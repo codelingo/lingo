@@ -82,29 +82,13 @@ func (c client) Session(req *server.SessionRequest) (string, error) {
 	return r.Key, nil
 }
 
-func Review(req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
+func Review(ctx context.Context, req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
 	cc, err := GrpcConnection(LocalClient, PlatformServer)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	client := codelingo.NewCodeLingoClient(cc)
-
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	ctx, cancel := context.WithCancel(newCtx)
-	// Cancel the context passed to the platform on exit.
-	sigc := make(chan os.Signal, 2)
-	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigc
-		cancel()
-		os.Exit(1)
-	}()
-
 	stream, err := client.Review(ctx)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
@@ -142,9 +126,9 @@ func (c client) Query(ctx context.Context, queryc chan *codelingo.QueryRequest) 
 	return nil, nil
 }
 
-func Query(cc *grpc.ClientConn, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
+func Query(ctx context.Context, cc *grpc.ClientConn, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
 	client := codelingo.NewCodeLingoClient(cc)
-	resultc, err := runQuery(client, queryc)
+	resultc, err := runQuery(ctx, client, queryc)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -228,23 +212,7 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 	return cc, nil
 }
 
-func runQuery(client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	ctx, cancel := context.WithCancel(newCtx)
-
-	// Cancel the context passed to the platform on exit.
-	sigc := make(chan os.Signal, 2)
-	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigc
-		cancel()
-		os.Exit(1)
-	}()
-
+func runQuery(ctx context.Context, client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
 	stream, err := client.Query(ctx)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
@@ -659,7 +627,7 @@ func New() (server.CodeLingoService, error) {
 	describeFactFactory := grpcclient.MakeDescribeFactEndpointFactory(tracer, tracingLogger, tlsOpt)
 	latestClientVersionFactory := grpcclient.MakeLatestClientVersionFactory(tracer, tracingLogger, tlsOpt)
 
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	newCtx, err := grpcclient.AddGcloudApiKeyToCtx(context.Background())
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

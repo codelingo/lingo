@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/codelingo/lingo/service/grpc/codelingo"
-
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
+	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/platform/flow/service/client"
-	"github.com/codelingo/platform/flow/service/flow"
+	flow "github.com/codelingo/platform/flow/service/flowengine"
+
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/codegangsta/cli"
 )
@@ -62,11 +66,11 @@ func searchAction(ctx *cli.Context) {
 	fmt.Println(msg)
 }
 
-func searchCMD(ctx *cli.Context) (string, error) {
+func searchCMD(cliCtx *cli.Context) (string, error) {
 	defer util.Logger.Sync()
 	util.Logger.Debugw("searchCMD called")
 
-	args := ctx.Args()
+	args := cliCtx.Args()
 	if len(args) == 0 {
 		return "", errors.New("Please specify the filepath to a .lingo file.")
 	}
@@ -83,12 +87,27 @@ func searchCMD(ctx *cli.Context) (string, error) {
 
 	c := client.NewFlowClient(conn)
 
-	newCtx, err := grpcclient.GetGcloudEndpointCtx()
+	// Cancel the context passed to the platform on exit.
+	ctx, cancel := context.WithCancel(context.Background())
+	sigc := make(chan os.Signal, 2)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigc
+		cancel()
+		os.Exit(1)
+	}()
+
+	// Create context with metadata
+	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	ctx, err = grpcclient.AddUsernameToCtx(ctx)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	resultc, errorc, err := c.Search(newCtx, &flow.SearchRequest{
+	resultc, errorc, err := c.Search(ctx, &flow.SearchRequest{
 		Dotlingo: string(dotlingo),
 	})
 	if err != nil {
@@ -105,7 +124,7 @@ l:
 				break l
 			}
 
-			util.Logger.Debugw(err.Error())
+			util.Logger.Error(err.Error())
 			util.Logger.Sync()
 
 		case result, ok := <-resultc:
@@ -117,7 +136,7 @@ l:
 		}
 	}
 
-	msg, err := OutputResults(results, ctx.String("format"), ctx.String("output"))
+	msg, err := OutputResults(results, cliCtx.String("format"), cliCtx.String("output"))
 	return msg, errors.Trace(err)
 }
 
