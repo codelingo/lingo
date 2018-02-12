@@ -32,15 +32,10 @@ func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
-
 	c := client.NewFlowClient(conn)
 
-	ctx, err := grpcclient.GetGcloudEndpointCtx()
-	if err != nil {
-		return nil, nil, errors.Trace(err)
-	}
-	ctx, cancel := context.WithCancel(ctx)
 	// Cancel the context passed to the platform on exit.
+	ctx, cancel := context.WithCancel(context.Background())
 	sigc := make(chan os.Signal, 2)
 	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -48,6 +43,16 @@ func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error
 		cancel()
 		os.Exit(1)
 	}()
+
+	// Create context with metadata
+	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+	ctx, err = grpcclient.AddUsernameToCtx(ctx)
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
 
 	issuec, errorc, err := c.Review(ctx, req)
 	if err != nil {

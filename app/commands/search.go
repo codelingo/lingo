@@ -86,12 +86,8 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 
 	c := client.NewFlowClient(conn)
 
-	ctx, err := grpcclient.GetGcloudEndpointCtx()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-	ctx, cancel := context.WithCancel(ctx)
 	// Cancel the context passed to the platform on exit.
+	ctx, cancel := context.WithCancel(context.Background())
 	sigc := make(chan os.Signal, 2)
 	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -99,6 +95,16 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 		cancel()
 		os.Exit(1)
 	}()
+
+	// Create context with metadata
+	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	ctx, err = grpcclient.AddUsernameToCtx(ctx)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
 
 	resultc, errorc, err := c.Search(ctx, &flow.SearchRequest{
 		Dotlingo: string(dotlingo),
