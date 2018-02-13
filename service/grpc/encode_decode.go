@@ -25,9 +25,6 @@ func encodeQueryRequest(ctx context.Context, request interface{}) (interface{}, 
 
 func decodeQueryResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	resp := response.(*codelingo.QueryReply)
-	if true {
-		return nil, errors.New("Is this even used lmao?")
-	}
 	return resp, nil
 }
 
@@ -148,27 +145,27 @@ func decodeLatestClientVersionResponse(ctx context.Context, resp interface{}) (i
 }
 
 // Not related to kit
-func ToPropData(prop interface{}) (*codelingo.QueryReply_DataField, error) {
-	res := &codelingo.QueryReply_DataField{}
+func ToPropData(prop interface{}) (*codelingo.DataField, error) {
+	res := &codelingo.DataField{}
 	switch p := prop.(type) {
 	case string:
-		res.Prop = &codelingo.QueryReply_DataField_StringProp{
+		res.Prop = &codelingo.DataField_StringProp{
 			StringProp: p,
 		}
 	case bool:
-		res.Prop = &codelingo.QueryReply_DataField_BoolProp{
+		res.Prop = &codelingo.DataField_BoolProp{
 			BoolProp: p,
 		}
 	case int:
-		res.Prop = &codelingo.QueryReply_DataField_Int64Prop{
+		res.Prop = &codelingo.DataField_Int64Prop{
 			Int64Prop: int64(p),
 		}
 	case float32:
-		res.Prop = &codelingo.QueryReply_DataField_FloatProp{
+		res.Prop = &codelingo.DataField_FloatProp{
 			FloatProp: p,
 		}
 	case float64:
-		res.Prop = &codelingo.QueryReply_DataField_FloatProp{
+		res.Prop = &codelingo.DataField_FloatProp{
 			FloatProp: float32(p),
 		}
 	default:
@@ -177,15 +174,15 @@ func ToPropData(prop interface{}) (*codelingo.QueryReply_DataField, error) {
 	return res, nil
 }
 
-func FromPropData(field *codelingo.QueryReply_DataField) (interface{}, error) {
+func FromPropData(field *codelingo.DataField) (interface{}, error) {
 	switch p := field.Prop.(type) {
-	case *codelingo.QueryReply_DataField_StringProp:
+	case *codelingo.DataField_StringProp:
 		return p.StringProp, nil
-	case *codelingo.QueryReply_DataField_BoolProp:
+	case *codelingo.DataField_BoolProp:
 		return p.BoolProp, nil
-	case *codelingo.QueryReply_DataField_Int64Prop:
+	case *codelingo.DataField_Int64Prop:
 		return int(p.Int64Prop), nil
-	case *codelingo.QueryReply_DataField_FloatProp:
+	case *codelingo.DataField_FloatProp:
 		return p.FloatProp, nil
 	default:
 		return nil, errors.Errorf("Invalid property type: %v", p)
