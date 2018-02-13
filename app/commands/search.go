@@ -10,6 +10,7 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
+	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/platform/flow/service/client"
 	flow "github.com/codelingo/platform/flow/service/flowengine"
 
@@ -113,7 +114,7 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	results := []*flow.Result{}
+	results := []*codelingo.QueryReply{}
 
 l:
 	for {
@@ -139,7 +140,7 @@ l:
 	return msg, errors.Trace(err)
 }
 
-func OutputResults(results []*flow.Result, format, outputFile string) (string, error) {
+func OutputResults(results []*codelingo.QueryReply, format, outputFile string) (string, error) {
 	var data []byte
 	var err error
 	switch format {

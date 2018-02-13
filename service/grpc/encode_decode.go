@@ -3,6 +3,7 @@ package grpc
 import (
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/lingo/service/server"
+	"github.com/juju/errors"
 	"golang.org/x/net/context"
 )
 
@@ -24,18 +25,7 @@ func encodeQueryRequest(ctx context.Context, request interface{}) (interface{}, 
 
 func decodeQueryResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	resp := response.(*codelingo.QueryReply)
-
-	dataMap := map[string][]string{}
-	for key, datum := range resp.Data {
-		dataMap[key] = datum.Data
-	}
-
-	return server.QueryResponse{
-		ID:    resp.Id,
-		Kind:  resp.Kind,
-		Data:  dataMap,
-		Error: resp.Error,
-	}, nil
+	return resp, nil
 }
 
 func encodeReviewRequest(ctx context.Context, request interface{}) (interface{}, error) {
@@ -152,4 +142,49 @@ func decodeLatestClientVersionResponse(ctx context.Context, resp interface{}) (i
 	return &codelingo.LatestClientVersionReply{
 		Version: version,
 	}, nil
+}
+
+// Not related to kit
+func ToPropData(prop interface{}) (*codelingo.DataField, error) {
+	res := &codelingo.DataField{}
+	switch p := prop.(type) {
+	case string:
+		res.Prop = &codelingo.DataField_StringProp{
+			StringProp: p,
+		}
+	case bool:
+		res.Prop = &codelingo.DataField_BoolProp{
+			BoolProp: p,
+		}
+	case int:
+		res.Prop = &codelingo.DataField_Int64Prop{
+			Int64Prop: int64(p),
+		}
+	case float32:
+		res.Prop = &codelingo.DataField_FloatProp{
+			FloatProp: p,
+		}
+	case float64:
+		res.Prop = &codelingo.DataField_FloatProp{
+			FloatProp: float32(p),
+		}
+	default:
+		return nil, errors.Errorf("Invalid property type: %v", p)
+	}
+	return res, nil
+}
+
+func FromPropData(field *codelingo.DataField) (interface{}, error) {
+	switch p := field.Prop.(type) {
+	case *codelingo.DataField_StringProp:
+		return p.StringProp, nil
+	case *codelingo.DataField_BoolProp:
+		return p.BoolProp, nil
+	case *codelingo.DataField_Int64Prop:
+		return int(p.Int64Prop), nil
+	case *codelingo.DataField_FloatProp:
+		return p.FloatProp, nil
+	default:
+		return nil, errors.Errorf("Invalid property type: %v", p)
+	}
 }
