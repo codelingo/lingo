@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -62,17 +63,23 @@ func writeDotLingoToCurrentDir(c *cli.Context) (string, error) {
 }
 
 func writeDotLingo(cfgPath string) error {
+	// TODO: Language argument to specify query.
 	defaultDotLingo := util.DotLingo{
-		Lexicons: []string{
-			"codelingo/common as _",
-		},
 		Tenets: []util.Tenet{
 			{
-				Name:    "find-funcs",
-				Doc:     "Example tenet that finds all functions.",
-				Comment: "This is a function, but you probably already knew that.",
-				Match: `
-<func
+				Bots: map[string]util.Bot{
+					"codelingo/clair": {
+
+						Name:    "find-funcs",
+						Doc:     "Example tenet that finds all functions.",
+						Comment: "This is a function, but you probably already knew that.",
+					},
+				},
+				Query: `
+import codelingo/ast/common/0.0.0
+
+@ clair.comment
+common.func({depth: any})
 `[1:],
 			},
 		},
@@ -81,6 +88,9 @@ func writeDotLingo(cfgPath string) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+
+	// Our syntax requires unorthodox extra double space. TODO: fix.
+	byt = bytes.Replace(byt, []byte("\n"), []byte("\n  "), -1)
 
 	// add comment to file
 	// TODO(waigani) comments seem to cause a "corrupt patch" error, removing this for now.
