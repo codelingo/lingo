@@ -358,13 +358,16 @@ func DesiredTenetCfgPath(c *cli.Context) string {
 }
 
 type DotLingo struct {
-	Lexicons []string `yaml:"lexicons"`
-	Tenets   []Tenet
+	Tenets []Tenet
 }
 
 type Tenet struct {
+	Bots  map[string]Bot
+	Query string
+}
+
+type Bot struct {
 	Name    string
 	Doc     string
 	Comment string
-	Match   string
 }
