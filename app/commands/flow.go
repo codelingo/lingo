@@ -11,6 +11,13 @@ func init() {
 		Name:   "flow",
 		Usage:  "Explains what flows are and how to use them.",
 		Action: flowAction,
+		Subcommands: []cli.Command{
+			{
+				Name:   "list",
+				Usage:  "Shows available flows",
+				Action: flowListAction,
+			},
+		},
 	}, false)
 }
 
@@ -24,5 +31,26 @@ func flowAction(ctx *cli.Context) {
 
 func flow(ctx *cli.Context) error {
 	fmt.Println("TOOD: explain flows and how to use them.")
+	return nil
+}
+
+func flowListAction(ctx *cli.Context) {
+	err := flowList(ctx)
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+}
+
+func flowList(ctx *cli.Context) error {
+	// TODO: discovery layer
+	availableFlows := []string{
+		"codelingo/search",
+		"codelingo/review",
+	}
+	for _, flow := range availableFlows {
+		fmt.Printf("- %s\n", flow)
+	}
+
 	return nil
 }
