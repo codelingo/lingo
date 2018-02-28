@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/codelingo/lingo/app/util"
-	flow "github.com/codelingo/platform/flow/service/flowengine"
+	flowengine "github.com/codelingo/platform/flow/service/flowengine"
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
@@ -71,11 +71,11 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	issuec, errorc, err := review.RequestReview(&flow.ReviewRequest{
+	issuec, errorc, err := review.RequestReview(&flowengine.ReviewRequest{
 		Host:     opts.Host,
 		Hostname: opts.HostName,
 		// TODO (Junyu) separate it into two separate fields
-		OwnerOrDepot: &flow.ReviewRequest_Owner{opts.Owner},
+		OwnerOrDepot: &flowengine.ReviewRequest_Owner{opts.Owner},
 		Repo:         opts.Name,
 		// Sha and patches are defined by the PR
 		IsPullRequest: true,
