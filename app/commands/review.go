@@ -25,6 +25,7 @@ const (
 
 func init() {
 	register(&cli.Command{
+		Hidden:      true,
 		Name:        "review",
 		Usage:       "Review code following tenets in .lingo.",
 		Subcommands: cli.Commands{*pullRequestCmd},

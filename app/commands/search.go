@@ -24,6 +24,7 @@ import (
 
 func init() {
 	register(&cli.Command{
+		Hidden:      true,
 		Name:        "search",
 		Usage:       "Search code following queries in .lingo.",
 		Subcommands: cli.Commands{*pullRequestCmd},
