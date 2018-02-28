@@ -48,7 +48,7 @@ func lexiconAction(ctx *cli.Context) {
 }
 
 func lexicon(ctx *cli.Context) error {
-	fmt.Println("TODO: explain lexicons and how to use them.")
+	fmt.Println("A lexicon is a collection of facts used to describe a domain of knowledge.")
 	return nil
 }
 

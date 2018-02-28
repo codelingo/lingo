@@ -45,7 +45,7 @@ func flowAction(ctx *cli.Context) {
 }
 
 func flow(ctx *cli.Context) error {
-	fmt.Println("TODO: explain flows and how to use them.")
+	fmt.Println("Flow is an automated workflow.")
 	return nil
 }
 
