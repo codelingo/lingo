@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/juju/errors"
 )
 
 func init() {
@@ -21,6 +22,14 @@ func init() {
 						Name:  util.InstalledFlg.String(),
 						Usage: "Only show installed flows",
 					},
+					cli.StringFlag{
+						Name:  util.FormatFlg.String(),
+						Usage: "The format for the output. Can be listed (default) or \"json\" encoded.",
+					},
+					cli.StringFlag{
+						Name:  util.OutputFlg.String(),
+						Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
+					},
 				},
 			},
 		},
@@ -36,7 +45,7 @@ func flowAction(ctx *cli.Context) {
 }
 
 func flow(ctx *cli.Context) error {
-	fmt.Println("TOOD: explain flows and how to use them.")
+	fmt.Println("TODO: explain flows and how to use them.")
 	return nil
 }
 
@@ -59,8 +68,9 @@ func flowList(ctx *cli.Context) error {
 		// TODO: filter by installed here
 	}
 
-	for _, flow := range availableFlows {
-		fmt.Printf("- %s\n", flow)
+	err := outputBytes(ctx.String("output"), getFormat(ctx.String("format"), availableFlows))
+	if err != nil {
+		return errors.Trace(err)
 	}
 
 	return nil
