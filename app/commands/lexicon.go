@@ -4,39 +4,55 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"strings"
-
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
-
-	"path/filepath"
-
 	"github.com/juju/errors"
-
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func init() {
 	register(&cli.Command{
-		Name:   "list-lexicons",
-		Usage:  "List available lexicons.",
-		Action: listLexiconsAction,
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:  util.FormatFlg.String(),
-				Usage: "The format for the output. Can be listed (default) or \"json\" encoded.",
-			},
-			cli.StringFlag{
-				Name:  util.OutputFlg.String(),
-				Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
+		Name:   "lexicon",
+		Usage:  "Explain what lexicons are and how to use them.",
+		Action: lexiconAction,
+		Subcommands: []cli.Command{
+			{
+				Name:   "list",
+				Usage:  "List available lexicons.",
+				Action: lexiconListAction,
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  util.FormatFlg.String(),
+						Usage: "The format for the output. Can be listed (default) or \"json\" encoded.",
+					},
+					cli.StringFlag{
+						Name:  util.OutputFlg.String(),
+						Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
+					},
+				},
 			},
 		},
 	}, false, versionRq)
 }
 
-func listLexiconsAction(ctx *cli.Context) {
+func lexiconAction(ctx *cli.Context) {
+	err := lexicon(ctx)
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+}
+
+func lexicon(ctx *cli.Context) error {
+	fmt.Println("TODO: explain lexicons and how to use them.")
+	return nil
+}
+
+func lexiconListAction(ctx *cli.Context) {
 	err := listLexicons(ctx)
 	if err != nil {
 		util.OSErr(err)
@@ -50,6 +66,7 @@ func listLexicons(ctx *cli.Context) error {
 		return errors.Trace(err)
 	}
 
+	// TODO: discovery layer
 	lexicons, err := svc.ListLexicons()
 	if err != nil {
 		return errors.Trace(err)
