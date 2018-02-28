@@ -4,48 +4,237 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/util"
+	commonConfig "github.com/codelingo/lingo/app/util/common/config"
+	serviceConfig "github.com/codelingo/lingo/service/config"
+	"github.com/howeyc/gopass"
+	"github.com/juju/errors"
+	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	utilConfig "github.com/codelingo/lingo/app/util/common/config"
-
-	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/util"
-	commonConfig "github.com/codelingo/lingo/app/util/common/config"
-	"github.com/juju/errors"
-	"github.com/howeyc/gopass"
-	"golang.org/x/crypto/ssh/terminal"
 	"syscall"
 )
 
-// TODO(waigani) add a quick-start cmd with --dry-run flag that: inits git,
-// inits lingo, sets up auth and register's repo with CodeLingo platform.
+const (
+	websiteAddr      = "website.addr"
+	platformAddr     = "platform.addr"
+	flowAddr         = "flow.address"
+	gitServerAddr    = "gitserver.remote.host"
+	p4ServerAddr     = "p4server.remote.host"
+	messagequeueAddr = "messagequeue.address.host"
+)
 
 func init() {
 	register(&cli.Command{
-		Name:   "setup",
-		Usage:  "Configure the lingo tool for the current environment on this machine.",
-		Action: setupLingoAction,
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:  "username",
-				Usage: "Set the username of the lingo user.",
+		Name:   "config",
+		Usage:  "Show summary of config",
+		Action: configAction,
+		Subcommands: []cli.Command{
+			{
+				Name:   "env",
+				Usage:  "Show the current environment.",
+				Action: configEnvAction,
+				Subcommands: []cli.Command{
+					{
+						Name:   "use",
+						Usage:  "Use the given environment.",
+						Action: useEnvAction,
+					},
+				},
 			},
-			cli.StringFlag{
-				Name:  "token",
-				Usage: "Set the token of the lingo user.",
-			},
-			cli.BoolFlag{
-				Name:  "keep-creds",
-				Usage: "Preserves existing credentials (if present).",
+			{
+				Name:   "setup",
+				Usage:  "Configure the lingo tool for the current environment on this machine.",
+				Action: setupLingoAction,
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  "username",
+						Usage: "Set the username of the lingo user.",
+					},
+					cli.StringFlag{
+						Name:  "token",
+						Usage: "Set the token of the lingo user.",
+					},
+					cli.BoolFlag{
+						Name:  "keep-creds",
+						Usage: "Preserves existing credentials (if present).",
+					},
+				},
 			},
 		},
-		// TODO(waigani) docs on username and token
-
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "ip",
+				Usage: "Set the IP of the OnPrem Platform.",
+			},
+		},
 	}, false, homeRq, configRq)
+}
+
+func configAction(ctx *cli.Context) {
+	err := showConfig(ctx)
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+}
+
+func showConfig(ctx *cli.Context) error {
+	username, err := getUsername()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	env, err := getEnv()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	fmt.Printf(`Username: %s
+Environment: %s
+`, username, env)
+
+	return nil
+}
+
+func useEnvAction(ctx *cli.Context) {
+	err := useEnv(ctx)
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+}
+
+func useEnv(ctx *cli.Context) error {
+	var err error
+	switch len(ctx.Args()) {
+	case 0:
+		err = errors.New("Error: An environment value must be specified: `lingo use-env <env>`")
+		return err
+	case 1:
+		// Success case
+		break
+	default:
+		err = errors.New("Error: Only 1 environment value can be specified: `lingo use-env <env>`")
+		return err
+	}
+
+	configsHome, err := util.ConfigHome()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	newEnv := ctx.Args()[0]
+	envFilepath := filepath.Join(configsHome, commonConfig.EnvCfgFile)
+
+	cfg := serviceConfig.New(envFilepath)
+	err = cfg.SetEnv(newEnv)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	if newEnv == "onprem" {
+		ip := ctx.String("ip")
+		if ip == "" {
+			fmt.Print("Enter the Platform IP: ")
+			fmt.Scanln(&ip)
+		}
+		cfg, err := commonConfig.Platform()
+		if err != nil {
+			return errors.Trace(err)
+		}
+		if err := cfg.Set(websiteAddr, ip); err != nil {
+			return errors.Trace(err)
+		}
+		if err := cfg.Set(platformAddr, ip); err != nil {
+			return errors.Trace(err)
+		}
+		if err := cfg.Set(flowAddr, ip); err != nil {
+			return errors.Trace(err)
+		}
+		if err := cfg.Set(gitServerAddr, ip); err != nil {
+			return errors.Trace(err)
+		}
+		if err := cfg.Set(p4ServerAddr, ip); err != nil {
+			return errors.Trace(err)
+		}
+		if err := cfg.Set(messagequeueAddr, ip); err != nil {
+			return errors.Trace(err)
+		}
+	}
+	fmt.Printf("Success! Environment set to '%v'.\n", newEnv)
+
+	return nil
+}
+
+func configEnvAction(ctx *cli.Context) {
+	err := configEnv(ctx)
+	if err != nil {
+		util.OSErr(err)
+		return
+	}
+}
+
+func configEnv(ctx *cli.Context) error {
+	env, err := getEnv()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	fmt.Println(env)
+
+	return nil
+}
+
+func getEnv() (string, error) {
+	configsHome, err := util.ConfigHome()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	envFilepath := filepath.Join(configsHome, commonConfig.EnvCfgFile)
+	cfg := serviceConfig.New(envFilepath)
+	env, err := cfg.GetEnv()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return env, nil
+}
+
+func getUsername() (string, error) {
+	authCfg, err := commonConfig.Auth()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	// TODO: have a single CodeLingo username instead of using repo usernames
+	for i := 0; i < 3; i++ {
+		var username string
+		var err error
+
+		switch i {
+		case 0:
+			username, err = authCfg.GetGitUserName()
+		case 1:
+			username, err = authCfg.GetP4UserName()
+		default:
+			fmt.Println("Warning: username not set yet. Run `lingo config setup` to set your username.")
+			username, err = "", nil
+		}
+
+		if err != nil {
+			if strings.Contains(err.Error(), "Could not find value") {
+				continue
+			} else {
+				return "", errors.Trace(err)
+			}
+		}
+
+		return username, nil
+	}
+
+	return "", nil
 }
 
 func setupLingoAction(c *cli.Context) {
@@ -64,7 +253,7 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	platConfig, err := utilConfig.Platform()
+	platConfig, err := commonConfig.Platform()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -131,12 +320,12 @@ func setupLingo(c *cli.Context) (string, error) {
 		// use terminal instead of gopass package to read password
 		cmd := exec.Command("bash", "-c", "/usr/bin/pwd")
 		var byt []byte
-		if err := cmd.Run(); err != nil{
+		if err := cmd.Run(); err != nil {
 			byt, err = terminal.ReadPassword(int(syscall.Stdin))
 			if err != nil {
 				return "", errors.Trace(err)
 			}
-		} else{
+		} else {
 			byt, err = gopass.GetPasswd()
 			if err != nil {
 				return "", errors.Trace(err)
