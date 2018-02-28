@@ -88,6 +88,10 @@ var (
 		"directory",
 		"w",
 	}
+	InstalledFlg = flagName{
+		Long:  "installed",
+		Short: "i",
+	}
 )
 
 func (f *flagName) String() string {

@@ -16,6 +16,12 @@ func init() {
 				Name:   "list",
 				Usage:  "Shows available flows",
 				Action: flowListAction,
+				Flags: []cli.Flag{
+					cli.BoolFlag{
+						Name:  util.InstalledFlg.String(),
+						Usage: "Only show installed flows",
+					},
+				},
 			},
 		},
 	}, false)
@@ -48,6 +54,11 @@ func flowList(ctx *cli.Context) error {
 		"codelingo/search",
 		"codelingo/review",
 	}
+
+	if ctx.IsSet(util.InstalledFlg.Long) {
+		// TODO: filter by installed here
+	}
+
 	for _, flow := range availableFlows {
 		fmt.Printf("- %s\n", flow)
 	}
