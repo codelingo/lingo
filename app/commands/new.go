@@ -19,7 +19,7 @@ import (
 
 func init() {
 	register(&cli.Command{
-		Name:   "new",
+		Name:   "init",
 		Usage:  "Create a .lingo file in the current directory.",
 		Action: newLingoAction,
 	}, false, vcsRq, versionRq)

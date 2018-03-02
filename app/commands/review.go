@@ -7,7 +7,7 @@ import (
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/vcs"
-	flow "github.com/codelingo/platform/flow/service/flowengine"
+	flowengine "github.com/codelingo/platform/flow/service/flowengine"
 
 	"github.com/codelingo/lingo/app/commands/review"
 	"github.com/codelingo/lingo/app/util"
@@ -25,6 +25,7 @@ const (
 
 func init() {
 	register(&cli.Command{
+		Hidden:      true,
 		Name:        "review",
 		Usage:       "Review code following tenets in .lingo.",
 		Subcommands: cli.Commands{*pullRequestCmd},
@@ -158,7 +159,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 	addr := ""
-	issuec := make(chan *flow.Issue)
+	issuec := make(chan *flowengine.Issue)
 	errorc := make(chan error)
 	switch vcsTypeStr {
 	case vcsGit:
@@ -171,10 +172,10 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 
-		issuec, errorc, err = review.RequestReview(&flow.ReviewRequest{
+		issuec, errorc, err = review.RequestReview(&flowengine.ReviewRequest{
 			Host:         addr,
 			Hostname:     hostname,
-			OwnerOrDepot: &flow.ReviewRequest_Owner{owner},
+			OwnerOrDepot: &flowengine.ReviewRequest_Owner{owner},
 			Repo:         name,
 			Sha:          sha,
 			Patches:      patches,
@@ -200,10 +201,10 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 		name = owner + "/" + name
-		issuec, errorc, err = review.RequestReview(&flow.ReviewRequest{
+		issuec, errorc, err = review.RequestReview(&flowengine.ReviewRequest{
 			Host:         addr,
 			Hostname:     hostname,
-			OwnerOrDepot: &flow.ReviewRequest_Depot{depot},
+			OwnerOrDepot: &flowengine.ReviewRequest_Depot{depot},
 			Repo:         name,
 			Sha:          sha,
 			Patches:      patches,

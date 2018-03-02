@@ -25,6 +25,7 @@ USAGE:
 
 func init() {
 	register(&cli.Command{
+		Hidden: true,
 		Name:   "query-from-offset",
 		Usage:  "Generate CLQL query to match code in a specific section of a file.",
 		Action: pathFromOffsetAction,

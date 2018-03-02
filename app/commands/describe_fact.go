@@ -14,6 +14,7 @@ import (
 
 func init() {
 	register(&cli.Command{
+		Hidden: true,
 		Name:   "describe-fact",
 		Usage:  "Describe a fact belonging to a given lexicon.",
 		Action: describeFactAction,

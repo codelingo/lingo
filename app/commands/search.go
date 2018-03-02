@@ -12,7 +12,7 @@ import (
 	grpcclient "github.com/codelingo/lingo/service/grpc"
 	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/codelingo/platform/flow/service/client"
-	flow "github.com/codelingo/platform/flow/service/flowengine"
+	flowengine "github.com/codelingo/platform/flow/service/flowengine"
 
 	"context"
 	"os"
@@ -24,6 +24,7 @@ import (
 
 func init() {
 	register(&cli.Command{
+		Hidden:      true,
 		Name:        "search",
 		Usage:       "Search code following queries in .lingo.",
 		Subcommands: cli.Commands{*pullRequestCmd},
@@ -107,7 +108,7 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	resultc, errorc, err := c.Search(ctx, &flow.SearchRequest{
+	resultc, errorc, err := c.Search(ctx, &flowengine.SearchRequest{
 		Dotlingo: string(dotlingo),
 	})
 	if err != nil {
