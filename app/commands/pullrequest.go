@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/codelingo/lingo/app/util"
-	flowengine "github.com/codelingo/platform/flow/service/flowengine"
+	flowengine "github.com/codelingo/platform/flow/rpc/flowengine"
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/commands/review"
