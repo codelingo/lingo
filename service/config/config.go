@@ -25,7 +25,7 @@ func (c *Config) GetEnv() (string, error) {
 		// TODO (emersonwood): These need to be output in a end user error func; see #170
 		if strings.Contains(err.Error(), "lingo-current-env: no such file or directory") {
 			// Trying to read lingo client
-			return "", errors.Errorf("Failed to read '%v'. Please run `lingo use-env <env>` to set the environment.", c.envFile)
+			return "", errors.Errorf("Failed to read '%v'. Please run `lingo config env use <env>` to set the environment.", c.envFile)
 		} else if strings.Contains(err.Error(), "platform-current-env: no such file or directory") {
 			// Trying to read platform
 			return "", errors.Errorf("Failed to read '%v'. Please run `sudo ln -s <absolute-path-to-platform>/platform-current-env %v` if the file doesn't exist.", c.envFile, c.envFile)

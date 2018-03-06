@@ -88,11 +88,11 @@ func (r require) HelpMsg() string {
 	case dotLingoRq:
 		return "run `$ lingo init`"
 	case authRq:
-		return "run `$ lingo auth`"
+		return "run `$ lingo config setup`"
 	case homeRq:
-		return "run `$ lingo init`"
+		return "run `$ lingo config setup`"
 	case configRq:
-		return "run `$ lingo init`"
+		return "run `$ lingo config setup`"
 	}
 
 	return fmt.Sprintf("unknown require type %d", r)
@@ -120,7 +120,7 @@ func verifyVCS() error {
 
 func verifyAuth() error {
 
-	errMsg := "Authentication failed. Please run `lingo setup`."
+	errMsg := "Authentication failed. Please run `lingo config setup`."
 	authCfg, err := utilConfig.Auth()
 	if err != nil {
 		return errors.Annotate(err, errMsg)
@@ -265,7 +265,7 @@ func verifyConfig() error {
 	return nil
 }
 
-const missingConfigError string = "Could not get %s config. Please run `lingo setup`."
+const missingConfigError string = "Could not get %s config. Please run `lingo config setup`."
 
 func verifyClientVersion() error {
 	vCfg, err := utilConfig.Version()
