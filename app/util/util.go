@@ -96,7 +96,7 @@ func userFacingErrMsg(mainErr error) string {
 	message := mainErr.Error()
 	switch {
 	case repoNotFound.MatchString(message):
-		return "please run `lingo setup`"
+		return "please run `lingo config setup`"
 	case strings.Contains(message, "error: There is no language called:"):
 		// TODO(waigani) refactor to use regex
 		lang := strings.Split(message, ":")[4]

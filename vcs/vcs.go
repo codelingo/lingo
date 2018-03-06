@@ -177,7 +177,7 @@ func getRepoOwner(vcsType Type) (string, error) {
 		}
 	}
 	if repoOwner == "" {
-		return "", errors.New("Please run lingo setup")
+		return "", errors.New("Please run `lingo config setup`")
 	}
 	return repoOwner, nil
 }
