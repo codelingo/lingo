@@ -90,7 +90,12 @@ message PathsFromOffsetReply {
 }
 
 message Path {
-    repeated string nodes = 1;
+    repeated GenFact facts = 1;
+}
+
+message GenFact {
+    string factName = 1;
+    map<string, string> properties = 2;
 }
 
 message ListFactsRequest {

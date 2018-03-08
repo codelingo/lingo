@@ -23,10 +23,17 @@ func EncodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (inter
 	response := codelingo.PathsFromOffsetReply{
 		Paths: []*codelingo.Path{},
 	}
+
 	for _, path := range pathsResponse.Paths {
-		response.Paths = append(response.Paths, &codelingo.Path{
-			Nodes: path,
-		})
+		clPath := &codelingo.Path{}
+		for _, fact := range path.Facts {
+			clPath.Facts = append(clPath.Facts, &codelingo.GenFact{
+				FactName:   fact.FactName,
+				Properties: fact.Properties,
+			})
+		}
+
+		response.Paths = append(response.Paths, clPath)
 	}
 
 	return response, nil

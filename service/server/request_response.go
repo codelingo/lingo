@@ -30,7 +30,16 @@ type PathsFromOffsetResponse struct {
 	// fact, property, branch, leaf, kind, statement, query, path, node ...
 	// We need to define Tenets to guide this.
 
-	Paths [][]string
+	Paths []*Path
+}
+
+type Path struct {
+	Facts []*GenFact
+}
+
+type GenFact struct {
+	FactName   string
+	Properties map[string]string
 }
 
 // QueryRequest is the business domain type for a Query method request.
@@ -41,8 +50,8 @@ type QueryRequest struct {
 // QueryResponse is the business domain type for a Query method response.
 type QueryResponse struct {
 	// Id of the result node found by the query
-	ID    string `json:"result"`
-	// The list of kinds that 
+	ID string `json:"result"`
+	// The list of kinds that
 	Kind  []string
 	Data  map[string][]string
 	Error string

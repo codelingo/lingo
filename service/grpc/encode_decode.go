@@ -124,9 +124,16 @@ func encodePathsFromOffsetRequest(ctx context.Context, req interface{}) (interfa
 
 func decodePathsFromOffsetResponse(ctx context.Context, resp interface{}) (interface{}, error) {
 	pathsResponse := resp.(*codelingo.PathsFromOffsetReply)
-	paths := [][]string{}
+	paths := []*server.Path{}
 	for _, path := range pathsResponse.Paths {
-		paths = append(paths, path.Nodes)
+		serverPath := &server.Path{}
+		for _, fact := range path.Facts {
+			serverPath.Facts = append(serverPath.Facts, &server.GenFact{
+				FactName:   fact.FactName,
+				Properties: fact.Properties,
+			})
+		}
+		paths = append(paths, serverPath)
 	}
 	return server.PathsFromOffsetResponse{
 		Paths: paths,
