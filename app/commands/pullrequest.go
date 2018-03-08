@@ -9,6 +9,7 @@ import (
 
 	"github.com/codelingo/lingo/app/commands/review"
 
+	"context"
 	"github.com/codegangsta/cli"
 )
 
@@ -56,22 +57,23 @@ func reviewPullRequestAction(ctx *cli.Context) {
 	fmt.Println(msg)
 }
 
-func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
-	if l := len(ctx.Args()); l != 1 {
+func reviewPullRequestCMD(cliCtx *cli.Context) (string, error) {
+	if l := len(cliCtx.Args()); l != 1 {
 		return "", errors.Errorf("expected one arg, got %d", l)
 	}
 
-	dotlingo, err := review.ReadDotLingo(ctx)
+	dotlingo, err := review.ReadDotLingo(cliCtx)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	opts, err := review.ParsePR(ctx.Args()[0])
+	opts, err := review.ParsePR(cliCtx.Args()[0])
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	issuec, errorc, err := review.RequestReview(&flowengine.ReviewRequest{
+	ctx, cancel := util.UserCancelContext(context.Background())
+	issuec, errorc, err := review.RequestReview(ctx, &flowengine.ReviewRequest{
 		Host:     opts.Host,
 		Hostname: opts.HostName,
 		// TODO (Junyu) separate it into two separate fields
@@ -86,7 +88,7 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	issues, err := review.ConfirmIssues(issuec, errorc, ctx.Bool("keep-all"), ctx.String("save"))
+	issues, err := review.ConfirmIssues(cancel, issuec, errorc, cliCtx.Bool("keep-all"), cliCtx.String("save"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -96,7 +98,7 @@ func reviewPullRequestCMD(ctx *cli.Context) (string, error) {
 		return "Done! No issues found.\n", nil
 	}
 
-	msg, err := review.MakeReport(issues, ctx.String("format"), ctx.String("save"))
+	msg, err := review.MakeReport(issues, cliCtx.String("format"), cliCtx.String("save"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}

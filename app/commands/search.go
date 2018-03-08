@@ -15,9 +15,6 @@ import (
 	flowengine "github.com/codelingo/platform/flow/rpc/flowengine"
 
 	"context"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/codegangsta/cli"
 )
@@ -87,16 +84,7 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	c := client.NewFlowClient(conn)
-
-	// Cancel the context passed to the platform on exit.
-	ctx, cancel := context.WithCancel(context.Background())
-	sigc := make(chan os.Signal, 2)
-	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigc
-		cancel()
-		os.Exit(1)
-	}()
+	ctx, cancel := util.UserCancelContext(context.Background())
 
 	// Create context with metadata
 	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
@@ -122,18 +110,30 @@ l:
 		select {
 		case err, ok := <-errorc:
 			if !ok {
-				break l
+				errorc = nil
+				break
 			}
 
-			util.Logger.Error(err.Error())
-			util.Logger.Sync()
-
+			// Abort search
+			cancel()
+			util.Logger.Debugf("Search error: %s", errors.ErrorStack(err))
+			return "", errors.Trace(err)
 		case result, ok := <-resultc:
 			if !ok {
-				break l
+				resultc = nil
+				break
+			}
+
+			if result.Error != "" {
+				cancel()
+				util.Logger.Debugf("Search error in issue: %s", errors.ErrorStack(err))
+				return "", errors.New(result.Error)
 			}
 
 			results = append(results, result)
+		}
+		if resultc == nil && errorc == nil {
+			break l
 		}
 	}
 
