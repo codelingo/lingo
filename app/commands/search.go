@@ -126,7 +126,6 @@ l:
 
 			if result.Error != "" {
 				cancel()
-				util.Logger.Debugf("Search error in issue: %s", errors.ErrorStack(err))
 				return "", errors.New(result.Error)
 			}
 

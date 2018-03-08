@@ -139,7 +139,6 @@ l:
 			if iss.Err != "" {
 				// Abort review
 				cancel()
-				util.Logger.Debugf("Review error on issue: %s", errors.ErrorStack(err))
 				return nil, errors.New(iss.Err)
 			}
 
