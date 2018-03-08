@@ -1,16 +1,16 @@
 package commands
 
 import (
+	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/app/util/common/config"
 	servConf "github.com/codelingo/lingo/service/config"
-	"fmt"
-	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
-	"strings"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func init() {
@@ -30,7 +30,7 @@ func init() {
 func updateAction(ctx *cli.Context) {
 	err := update(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 	}
 }
 
@@ -52,12 +52,12 @@ func update(ctx *cli.Context) error {
 		if outdated {
 			return errors.New("Your client is out of date. Please download and install the latest binary from https://github.com/codelingo/lingo/releases")
 			/*
-			TODO: Implement automatic download & install when client release becomes public.
-			1. Prompt user to auto download / install.
-			2. Download latest binary into temp folder.
-			3. Install binary whilst this client is still running.
-			4. Exit this client so new client can be loaded.
-			5. Either prompt user to run `lingo update` or do it automatically somehow?
+				TODO: Implement automatic download & install when client release becomes public.
+				1. Prompt user to auto download / install.
+				2. Download latest binary into temp folder.
+				3. Install binary whilst this client is still running.
+				4. Exit this client so new client can be loaded.
+				5. Either prompt user to run `lingo update` or do it automatically somehow?
 			*/
 		} else {
 			return errors.Trace(err)
@@ -146,7 +146,6 @@ func updateClientConfigs(configDefaults string) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-
 
 	err = replaceConfigFiles(configUpdates)
 	if err != nil {

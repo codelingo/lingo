@@ -38,7 +38,7 @@ func init() {
 func describeFactAction(ctx *cli.Context) {
 	err := describeFact(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }

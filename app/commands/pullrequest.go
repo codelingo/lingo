@@ -50,7 +50,7 @@ func reviewPullRequestAction(ctx *cli.Context) {
 	if err != nil {
 		// Debugging
 		// print(errors.ErrorStack(err))
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 	fmt.Println(msg)

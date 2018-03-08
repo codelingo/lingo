@@ -78,8 +78,13 @@ func OpenFileCmd(editor, filename string, line int64) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
+// TODO: sort out user facing errors
 func OSErr(err error) {
 	Stderr.Write([]byte(userFacingErrMsg(err) + "\n"))
+}
+
+func FatalOSErr(err error) {
+	OSErr(err)
 	Exiter(1)
 }
 

@@ -60,7 +60,7 @@ func searchAction(ctx *cli.Context) {
 		// Debugging
 		util.Logger.Debugw("searchAction", "err_stack", errors.ErrorStack(err))
 
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 
