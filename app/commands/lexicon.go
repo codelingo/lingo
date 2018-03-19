@@ -61,7 +61,7 @@ func init() {
 func lexiconAction(ctx *cli.Context) {
 	err := lexicon(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }
@@ -74,7 +74,7 @@ func lexicon(ctx *cli.Context) error {
 func lexiconListAction(ctx *cli.Context) {
 	err := listLexicons(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }
@@ -154,7 +154,7 @@ func getFilePath(path string) (string, error) {
 func listFactsAction(ctx *cli.Context) {
 	err := listFacts(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }

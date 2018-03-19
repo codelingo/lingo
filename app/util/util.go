@@ -19,7 +19,9 @@ import (
 	goDocker "github.com/fsouza/go-dockerclient"
 	"github.com/juju/errors"
 
+	"github.com/codelingo/lexicon/lib/util"
 	"go.uber.org/zap"
+	"gopkg.in/fatih/color.v1"
 )
 
 func init() {
@@ -78,8 +80,19 @@ func OpenFileCmd(editor, filename string, line int64) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func OSErr(err error) {
-	Stderr.Write([]byte(userFacingErrMsg(err) + "\n"))
+// TODO: sort out user facing errors
+func UserFacingError(err error) {
+	if err == nil {
+		util.Logger.Debugf("got a nil error - this shouldn't be happening: %s", errors.ErrorStack(err))
+		return
+	}
+	errColor := color.New(color.FgHiRed).SprintfFunc()
+	msg := errColor("%s", userFacingErrMsg(err))
+	Stderr.Write([]byte(msg + "\n"))
+}
+
+func FatalOSErr(err error) {
+	UserFacingError(err)
 	Exiter(1)
 }
 

@@ -39,7 +39,7 @@ func init() {
 func flowAction(ctx *cli.Context) {
 	err := flow(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }
@@ -52,7 +52,7 @@ func flow(ctx *cli.Context) error {
 func flowListAction(ctx *cli.Context) {
 	err := flowList(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }

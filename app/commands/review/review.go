@@ -20,29 +20,16 @@ import (
 	flow "github.com/codelingo/platform/flow/rpc/flowengine"
 
 	"context"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/juju/errors"
 )
 
-func RequestReview(req *flow.ReviewRequest) (chan *flow.Issue, chan error, error) {
+func RequestReview(ctx context.Context, req *flow.ReviewRequest) (chan *flow.Issue, chan error, error) {
 	conn, err := service.GrpcConnection(service.LocalClient, service.FlowServer)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
 	c := client.NewFlowClient(conn)
-
-	// Cancel the context passed to the platform on exit.
-	ctx, cancel := context.WithCancel(context.Background())
-	sigc := make(chan os.Signal, 2)
-	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigc
-		cancel()
-		os.Exit(1)
-	}()
 
 	// Create context with metadata
 	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
@@ -105,21 +92,25 @@ func ReadDotLingo(ctx *cli.Context) (string, error) {
 	return string(dotlingo), nil
 }
 
-func ConfirmIssues(issuec chan *flow.Issue, errorc chan error, keepAll bool, saveToFile string) ([]*flow.Issue, error) {
+func ConfirmIssues(cancel context.CancelFunc, issuec chan *flow.Issue, errorc chan error, keepAll bool, saveToFile string) ([]*flow.Issue, error) {
+	defer util.Logger.Sync()
+
 	var confirmedIssues []*flow.Issue
 	spnr := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spnr.Start()
+	defer spnr.Stop()
 
 	output := saveToFile == ""
 	cfm, err := NewConfirmer(output, keepAll, nil)
 	if err != nil {
+		cancel()
 		return nil, errors.Trace(err)
 	}
 
 	// If user is manually confirming reviews, set a long timeout.
 	timeout := time.After(time.Hour * 1)
 	if keepAll {
-		timeout = time.After(time.Second * 30)
+		timeout = time.After(time.Minute * 5)
 	}
 
 l:
@@ -127,21 +118,27 @@ l:
 		select {
 		case err, ok := <-errorc:
 			if !ok {
+				errorc = nil
 				break
 			}
 
-			defer util.Logger.Sync()
-			util.Logger.Error("Review error: ", err.Error())
+			// Abort review
+			cancel()
+			util.Logger.Debugf("Review error: %s", errors.ErrorStack(err))
+			return nil, errors.Trace(err)
 		case iss, ok := <-issuec:
 			if !keepAll {
 				spnr.Stop()
 			}
-
 			if !ok {
-				break l
+				issuec = nil
+				break
 			}
 
+			// TODO: remove errors from issues; there's a separate channel for that
 			if iss.Err != "" {
+				// Abort review
+				cancel()
 				return nil, errors.New(iss.Err)
 			}
 
@@ -153,7 +150,11 @@ l:
 				spnr.Restart()
 			}
 		case <-timeout:
+			cancel()
 			return nil, errors.New("timed out waiting for issue")
+		}
+		if issuec == nil && errorc == nil {
+			break l
 		}
 	}
 

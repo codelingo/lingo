@@ -14,6 +14,7 @@ import (
 
 	"os"
 
+	"context"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/common/config"
 )
@@ -86,26 +87,26 @@ func reviewAction(ctx *cli.Context) {
 			// Debugging
 			util.Logger.Debugw("reviewAction", "err_stack", errors.ErrorStack(err))
 		}
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 
 	fmt.Println(msg)
 }
 
-func reviewCMD(ctx *cli.Context) (string, error) {
-	if ctx.IsSet("debug") {
-		defer util.Logger.Sync()
+func reviewCMD(cliCtx *cli.Context) (string, error) {
+	defer util.Logger.Sync()
+	if cliCtx.IsSet("debug") {
 		util.Logger.Debugw("reviewCMD called")
 	}
-	dir := ctx.String("directory")
+	dir := cliCtx.String("directory")
 	if dir != "" {
 		if err := os.Chdir(dir); err != nil {
 			return "", errors.Trace(err)
 		}
 	}
 
-	dotlingo, err := review.ReadDotLingo(ctx)
+	dotlingo, err := review.ReadDotLingo(cliCtx)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -158,12 +159,13 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	addr := ""
+
+	ctx, cancel := util.UserCancelContext(context.Background())
 	issuec := make(chan *flowengine.Issue)
 	errorc := make(chan error)
 	switch vcsTypeStr {
 	case vcsGit:
-		addr, err = cfg.GitServerAddr()
+		addr, err := cfg.GitServerAddr()
 		if err != nil {
 			return "", errors.Trace(err)
 		}
@@ -172,7 +174,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 
-		issuec, errorc, err = review.RequestReview(&flowengine.ReviewRequest{
+		issuec, errorc, err = review.RequestReview(ctx, &flowengine.ReviewRequest{
 			Host:         addr,
 			Hostname:     hostname,
 			OwnerOrDepot: &flowengine.ReviewRequest_Owner{owner},
@@ -188,7 +190,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 	case vcsP4:
-		addr, err = cfg.P4ServerAddr()
+		addr, err := cfg.P4ServerAddr()
 		if err != nil {
 			return "", errors.Trace(err)
 		}
@@ -201,7 +203,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 		name = owner + "/" + name
-		issuec, errorc, err = review.RequestReview(&flowengine.ReviewRequest{
+		issuec, errorc, err = review.RequestReview(ctx, &flowengine.ReviewRequest{
 			Host:         addr,
 			Hostname:     hostname,
 			OwnerOrDepot: &flowengine.ReviewRequest_Depot{depot},
@@ -220,7 +222,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return "", errors.New("invalid VCS found.")
 	}
 
-	issues, err := review.ConfirmIssues(issuec, errorc, !ctx.Bool("interactive"), ctx.String("output"))
+	issues, err := review.ConfirmIssues(cancel, issuec, errorc, !cliCtx.Bool("interactive"), cliCtx.String("output"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -229,7 +231,7 @@ func reviewCMD(ctx *cli.Context) (string, error) {
 		return fmt.Sprintf("Done! No issues found.\n"), nil
 	}
 
-	msg, err := review.MakeReport(issues, ctx.String("format"), ctx.String("output"))
+	msg, err := review.MakeReport(issues, cliCtx.String("format"), cliCtx.String("output"))
 	return msg, errors.Trace(err)
 }
 

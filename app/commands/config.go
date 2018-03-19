@@ -78,7 +78,7 @@ func init() {
 func configAction(ctx *cli.Context) {
 	err := showConfig(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }
@@ -103,7 +103,7 @@ Environment: %s
 func useEnvAction(ctx *cli.Context) {
 	err := useEnv(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }
@@ -172,7 +172,7 @@ func useEnv(ctx *cli.Context) error {
 func configEnvAction(ctx *cli.Context) {
 	err := configEnv(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }
@@ -240,7 +240,7 @@ func getUsername() (string, error) {
 func setupLingoAction(c *cli.Context) {
 	username, err := setupLingo(c)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 	}
 
 	fmt.Println("Success! CodeLingo user set to", username)

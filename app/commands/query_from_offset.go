@@ -35,7 +35,7 @@ func init() {
 func pathFromOffsetAction(ctx *cli.Context) {
 	err := pathFromOffset(ctx)
 	if err != nil {
-		util.OSErr(err)
+		util.FatalOSErr(err)
 		return
 	}
 }
