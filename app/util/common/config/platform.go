@@ -380,15 +380,15 @@ staging:
     address: 104.155.184.194
   gitserver:
     remote:
-      host: git.junyuzhu.com
+      host: 104.198.235.61
       name: codelingo_staging
-      port: "80"
+      port: "3000"
       protocol: http
     tls: "false"
   p4server:
     remote:
       host: 35.188.92.59
-      name: codelingo_dev
+      name: codelingo_staging
   platform:
     addr: 104.155.184.194
   website:
