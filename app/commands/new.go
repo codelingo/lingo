@@ -1,13 +1,10 @@
 package commands
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
@@ -24,11 +21,6 @@ func init() {
 		Action: newLingoAction,
 	}, false, vcsRq, versionRq)
 }
-
-var intro = `
-# Add and configure tenets following these guidelines: http://codelingo/lingo/getting-started#the-lingo-file.
-
-`[1:]
 
 // TODO(waigani) set lingo-home flag and test init creates correct home dir.
 
@@ -63,43 +55,21 @@ func writeDotLingoToCurrentDir(c *cli.Context) (string, error) {
 }
 
 func writeDotLingo(cfgPath string) error {
-	// TODO: Language argument to specify query.
-	defaultDotLingo := util.DotLingo{
-		Tenets: []util.Tenet{
-			{
-				Bots: map[string]util.Bot{
-					"codelingo/clair": {
+	lingoSrc := `
+tenets:
+  - name: find-funcs
+    doc: Example tenet that finds all functions.
+    bots:
+      codelingo/review:
+        comments: This is a function, but you probably already knew that.
+    query: |
+      import codelingo/ast/common
 
-						Name:    "find-funcs",
-						Doc:     "Example tenet that finds all functions.",
-						Comment: "This is a function, but you probably already knew that.",
-					},
-				},
-				Query: `
-import codelingo/ast/common/0.0.0
+      @ review.comment
+      common.func({depth: any})
+`[1:]
 
-@ clair.comment
-common.func({depth: any})
-`[1:],
-			},
-		},
-	}
-	byt, err := yaml.Marshal(defaultDotLingo)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	// Our syntax requires unorthodox extra double space. TODO: fix.
-	byt = bytes.Replace(byt, []byte("\n"), []byte("\n  "), -1)
-
-	// add comment to file
-	// TODO(waigani) comments seem to cause a "corrupt patch" error, removing this for now.
-	// byt = append(byt, []byte(intro)...)
-
-	if err = ioutil.WriteFile(cfgPath, byt, 0644); err != nil {
-		return errors.Trace(err)
-	}
-	return nil
+	return errors.Trace(ioutil.WriteFile(cfgPath, []byte(lingoSrc), 0644))
 }
 
 func getCfgPath(c *cli.Context) (string, error) {

@@ -369,18 +369,3 @@ func DesiredTenetCfgPath(c *cli.Context) string {
 	// TODO(waigani) shouldn't need this - should fallback to default in flags.
 	return DefaultTenetCfgPath
 }
-
-type DotLingo struct {
-	Tenets []Tenet
-}
-
-type Tenet struct {
-	Bots  map[string]Bot
-	Query string
-}
-
-type Bot struct {
-	Name    string
-	Doc     string
-	Comment string
-}
