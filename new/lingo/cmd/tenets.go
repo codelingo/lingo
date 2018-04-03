@@ -53,7 +53,7 @@ func init() {
 
 	tenetsCmd.Flags().StringP("owner", "o", "", "List all tenet bundles of the given owner")
 	tenetsCmd.Flags().StringP("bundle", "b", "", "List all tenets of the given bundle")
-	tenetsCmd.Flags().StringP("name", "n", "", "Discribe the named tenet")
+	tenetsCmd.Flags().StringP("name", "n", "", "Describe the named tenet")
 	tenetsCmd.Flags().BoolP("intalled", "i", false, "List Tenets installed in current project")
 }
 

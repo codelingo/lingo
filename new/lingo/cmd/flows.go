@@ -50,7 +50,7 @@ func init() {
 	// flowsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	flowsCmd.Flags().StringP("owner", "o", "", "List all flows of the given owner")
-	flowsCmd.Flags().StringP("name", "n", "", "Discribe the named flow")
+	flowsCmd.Flags().StringP("name", "n", "", "Describe the named flow")
 	flowsCmd.Flags().BoolP("intalled", "i", false, "List Flows installed in current project")
 
 }

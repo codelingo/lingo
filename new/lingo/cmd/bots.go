@@ -50,7 +50,7 @@ func init() {
 	// botsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	botsCmd.Flags().StringP("owner", "o", "", "List all lexicons of the given owner")
-	botsCmd.Flags().StringP("name", "n", "", "Discribe the named bot")
+	botsCmd.Flags().StringP("name", "n", "", "Describe the named bot")
 	botsCmd.Flags().BoolP("intalled", "i", false, "List Bots used in current project")
 
 }
