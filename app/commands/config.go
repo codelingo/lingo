@@ -26,6 +26,7 @@ const (
 	gitServerAddr    = "gitserver.remote.host"
 	p4ServerAddr     = "p4server.remote.host"
 	messagequeueAddr = "messagequeue.address.host"
+	baseDiscoveryURL = "https://raw.githubusercontent.com/codelingo/hub/master/"
 )
 
 func init() {
