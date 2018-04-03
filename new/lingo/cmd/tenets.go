@@ -1,4 +1,4 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2018 CODELINGO LTD hello@codelingo.io
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	// "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,7 @@ var tenetsCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := listTenets(cmd, args); err != nil {
-			fmt.Println(err.Error())
+			fmt.Fprint(os.Stderr, err.Error())
 		}
 	},
 }
@@ -62,7 +63,8 @@ func listTenets(cmd *cobra.Command, args []string) error {
 	bundle := cmd.Flag("bundle").Value.String()
 	name := cmd.Flag("name").Value.String()
 
-	url := "https://raw.githubusercontent.com/codelingo/hub/master/tenets/lingo_tenets.yaml"
+	baseTenetURL := baseDiscoveryURL + "tenets"
+	url := baseTenetURL + "/lingo_tenets.yaml"
 	switch {
 	case name != "":
 
@@ -73,18 +75,18 @@ func listTenets(cmd *cobra.Command, args []string) error {
 		if bundle == "" {
 			return errors.New("bundle flag must be set")
 		}
-		url = fmt.Sprintf("https://raw.githubusercontent.com/codelingo/hub/master/tenets/%s/%s/%s/.lingo",
-			owner, bundle, name)
+		url = fmt.Sprintf("%s/%s/%s/%s/.lingo",
+			baseTenetURL, owner, bundle, name)
 	case bundle != "":
 		if owner == "" {
 			return errors.New("owner flag must be set")
 		}
-		url = fmt.Sprintf("https://raw.githubusercontent.com/codelingo/hub/master/tenets/%s/%s/lingo_bundle.yaml",
-			owner, bundle)
+		url = fmt.Sprintf("%s/%s/%s/lingo_bundle.yaml",
+			baseTenetURL, owner, bundle)
 
 	case owner != "":
-		url = fmt.Sprintf("https://raw.githubusercontent.com/codelingo/hub/master/tenets/%s/lingo_owner.yaml",
-			owner)
+		url = fmt.Sprintf("%s/%s/lingo_owner.yaml",
+			baseTenetURL, owner)
 	}
 	resp, err := http.Get(url)
 	if err != nil {

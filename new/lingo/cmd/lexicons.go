@@ -1,4 +1,4 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2018 CODELINGO LTD hello@codelingo.io
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 // lexiconsCmd represents the lexicons command
@@ -30,7 +31,7 @@ var lexiconsCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := listLexicons(cmd, args); err != nil {
-			fmt.Println(err.Error())
+			fmt.Fprint(os.Stderr, err.Error())
 		}
 	},
 }
@@ -49,8 +50,8 @@ func init() {
 	// lexiconsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	lexiconsCmd.Flags().StringP("owner", "o", "", "List all lexicons of the given owner")
-	lexiconsCmd.Flags().StringP("type", "t", "", "List all lexicons of the given lexType")
-	lexiconsCmd.Flags().StringP("name", "n", "", "Discribe the named lexicon")
+	lexiconsCmd.Flags().StringP("type", "t", "", "List all lexicons of the given type")
+	lexiconsCmd.Flags().StringP("name", "n", "", "Describe the named lexicon")
 	lexiconsCmd.Flags().BoolP("intalled", "i", false, "List Lexicons used in current project")
 
 }
@@ -61,7 +62,8 @@ func listLexicons(cmd *cobra.Command, args []string) error {
 	lexType := cmd.Flag("type").Value.String()
 	name := cmd.Flag("name").Value.String()
 
-	url := "https://raw.githubusercontent.com/codelingo/hub/master/lexicons/lingo_lexicon_type.yaml"
+	baseLexURL := baseDiscoveryURL + "lexicons"
+	url := baseLexURL + "/lingo_lexicon_type.yaml"
 	switch {
 	case name != "":
 
@@ -70,21 +72,21 @@ func listLexicons(cmd *cobra.Command, args []string) error {
 		}
 
 		if lexType == "" {
-			return errors.New("lexType flag must be set")
+			return errors.New("type flag must be set")
 		}
-		url = fmt.Sprintf("https://raw.githubusercontent.com/codelingo/hub/master/lexicons/%s/%s/%s/lingo_lexicon.yaml",
-			lexType, owner, name)
+		url = fmt.Sprintf("%s/%s/%s/%s/lingo_lexicon.yaml",
+			baseLexURL, lexType, owner, name)
 
 	case owner != "":
 		if lexType == "" {
-			return errors.New("lexType flag must be set")
+			return errors.New("type flag must be set")
 		}
-		url = fmt.Sprintf("https://raw.githubusercontent.com/codelingo/hub/master/lexicons/%s/%s/lingo_owner.yaml",
-			lexType, owner)
+		url = fmt.Sprintf("%s/%s/%s/lingo_owner.yaml",
+			baseLexURL, lexType, owner)
 	case lexType != "":
 
-		url = fmt.Sprintf("https://raw.githubusercontent.com/codelingo/hub/master/lexicons/%s/lingo_lexicons.yaml",
-			lexType)
+		url = fmt.Sprintf("%s/%s/lingo_lexicons.yaml",
+			baseLexURL, lexType)
 	}
 	resp, err := http.Get(url)
 	if err != nil {
