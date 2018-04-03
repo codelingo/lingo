@@ -61,7 +61,7 @@ func listFlows(cmd *cobra.Command, args []string) error {
 	name := cmd.Flag("name").Value.String()
 
 	baseFlowURL := baseDiscoveryURL + "flows"
-	url := baseFlowURL + "/lingo_tenets.yaml"
+	url := baseFlowURL + "/lingo_flows.yaml"
 	switch {
 	case name != "":
 
