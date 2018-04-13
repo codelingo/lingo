@@ -9,6 +9,7 @@ import (
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,25 +17,28 @@ import (
 
 func init() {
 	register(&cli.Command{
-		Name:   "lexicon",
-		Usage:  "Explain what lexicons are and how to use them.",
-		Action: lexiconAction,
-		Subcommands: []cli.Command{
-			{
-				Name:   "list",
-				Usage:  "List available lexicons.",
-				Action: lexiconListAction,
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:  util.FormatFlg.String(),
-						Usage: "The format for the output. Can be listed (default) or \"json\" encoded.",
-					},
-					cli.StringFlag{
-						Name:  util.OutputFlg.String(),
-						Usage: "A filepath to output lexicon data to. If the flag is not set, outputs to cli.",
-					},
-				},
+		Name:   "lexicons",
+		Usage:  "List Lexicons",
+		Action: listLexiconsAction,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  util.OwnerFlg.String(),
+				Usage: "List all Lexicons of the given owner",
 			},
+			cli.StringFlag{
+				Name:  util.NameFlg.String(),
+				Usage: "Describe the named Lexicons",
+			},
+			cli.StringFlag{
+				Name:  util.TypeFlg.String(),
+				Usage: "List all Lexicons of the given type",
+			},
+			cli.StringFlag{
+				Name:  util.InstalledFlg.String(),
+				Usage: "List Lexicons used in current project",
+			},
+		},
+		Subcommands: []cli.Command{
 			{
 				Name:   "list-facts",
 				Usage:  "List available facts for a given lexicon.",
@@ -58,20 +62,7 @@ func init() {
 	}, false, versionRq)
 }
 
-func lexiconAction(ctx *cli.Context) {
-	err := lexicon(ctx)
-	if err != nil {
-		util.FatalOSErr(err)
-		return
-	}
-}
-
-func lexicon(ctx *cli.Context) error {
-	fmt.Println("A lexicon is a collection of facts used to describe a domain of knowledge.")
-	return nil
-}
-
-func lexiconListAction(ctx *cli.Context) {
+func listLexiconsAction(ctx *cli.Context) {
 	err := listLexicons(ctx)
 	if err != nil {
 		util.FatalOSErr(err)
@@ -80,22 +71,48 @@ func lexiconListAction(ctx *cli.Context) {
 }
 
 func listLexicons(ctx *cli.Context) error {
-	svc, err := service.New()
+	owner := ctx.String("owner")
+	lexType := ctx.String("type")
+	name := ctx.String("name")
+
+	baseLexURL := baseDiscoveryURL + "lexicons"
+	url := baseLexURL + "/lingo_lexicon_type.yaml"
+	switch {
+	case name != "":
+
+		if owner == "" {
+			return errors.New("owner flag must be set")
+		}
+
+		if lexType == "" {
+			return errors.New("type flag must be set")
+		}
+		url = fmt.Sprintf("%s/%s/%s/%s/lingo_lexicon.yaml",
+			baseLexURL, lexType, owner, name)
+
+	case owner != "":
+		if lexType == "" {
+			return errors.New("type flag must be set")
+		}
+		url = fmt.Sprintf("%s/%s/%s/lingo_owner.yaml",
+			baseLexURL, lexType, owner)
+	case lexType != "":
+
+		url = fmt.Sprintf("%s/%s/lingo_lexicons.yaml",
+			baseLexURL, lexType)
+	}
+	resp, err := http.Get(url)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	// TODO: discovery layer
-	lexicons, err := svc.ListLexicons()
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = outputBytes(ctx.String("output"), getFormat(ctx.String("format"), lexicons))
-	if err != nil {
-		return errors.Trace(err)
-	}
-
+	fmt.Println(string(data))
 	return nil
 }
 

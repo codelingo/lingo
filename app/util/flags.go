@@ -92,6 +92,22 @@ var (
 		Long:  "installed",
 		Short: "i",
 	}
+	OwnerFlg = flagName{
+		Long:  "owner",
+		Short: "o",
+	}
+	NameFlg = flagName{
+		Long:  "name",
+		Short: "n",
+	}
+	TypeFlg = flagName{
+		Long:  "type",
+		Short: "t",
+	}
+	BundleFlg = flagName{
+		Long:  "bundle",
+		Short: "b",
+	}
 )
 
 func (f *flagName) String() string {
