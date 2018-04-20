@@ -1,3 +1,3 @@
 package common
 
-const ClientVersion = "0.3.12"
+const ClientVersion = "0.3.13"

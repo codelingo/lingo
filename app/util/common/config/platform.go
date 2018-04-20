@@ -274,12 +274,12 @@ all:
     addr: codelingo.io
     port: "80"
   platform:
-    addr: 35.224.248.201
+    addr: abbfcbe96441b11e8a05602f749f33b9-587558986.us-west-2.elb.amazonaws.com
     port: "80"
   flow:
-    address: 35.224.248.201
-    port: "9008"
-  grpc_port: "9002"
+    address: abbfcbe96441b11e8a05602f749f33b9-587558986.us-west-2.elb.amazonaws.com
+    port: "8008"
+  grpc_port: "8002"
   gitserver:
     tls: "false"
     remote:
