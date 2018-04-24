@@ -43,6 +43,7 @@ import (
 	// kitot "github.com/codelingo/kit/tracing/opentracing"
 
 	"github.com/codelingo/lingo/service/server"
+	"google.golang.org/grpc/keepalive"
 )
 
 type client struct {
@@ -203,8 +204,12 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 		creds := credentials.NewTLS(&tls.Config{ServerName: "", RootCAs: cp})
 		tlsOpt = grpc.WithTransportCredentials(creds)
 	}
+
+	kpOpt := grpc.WithKeepaliveParams(keepalive.ClientParameters{
+		Time: 50 * time.Second,
+	})
 	// There may be multiple instances
-	cc, err := grpc.Dial(grpcAddr, tlsOpt)
+	cc, err := grpc.Dial(grpcAddr, tlsOpt, kpOpt)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
