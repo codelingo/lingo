@@ -205,8 +205,9 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 		tlsOpt = grpc.WithTransportCredentials(creds)
 	}
 
+	// todo (junyu) Ideally this ping time interval should be 50s
 	kpOpt := grpc.WithKeepaliveParams(keepalive.ClientParameters{
-		Time: 50 * time.Second,
+		Time: 28 * time.Second,
 	})
 	// There may be multiple instances
 	cc, err := grpc.Dial(grpcAddr, tlsOpt, kpOpt)
