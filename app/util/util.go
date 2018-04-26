@@ -7,21 +7,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"text/tabwriter"
-
-	"github.com/codegangsta/cli"
-	"github.com/mitchellh/go-homedir"
-
 	"text/template"
 
+	"github.com/codegangsta/cli"
 	goDocker "github.com/fsouza/go-dockerclient"
 	"github.com/juju/errors"
-
-	"github.com/codelingo/lexicon/lib/util"
+	"github.com/mitchellh/go-homedir"
 	"go.uber.org/zap"
-	"gopkg.in/fatih/color.v1"
 )
 
 func init() {
@@ -78,53 +72,6 @@ func OpenFileCmd(editor, filename string, line int64) (*exec.Cmd, error) {
 	cmd.Stderr = os.Stderr
 
 	return cmd, nil
-}
-
-// TODO: sort out user facing errors
-func UserFacingError(err error) {
-	if err == nil {
-		util.Logger.Debugf("got a nil error - this shouldn't be happening: %s", errors.ErrorStack(err))
-		return
-	}
-	errColor := color.New(color.FgHiRed).SprintfFunc()
-	msg := errColor("%s", userFacingErrMsg(err))
-	Stderr.Write([]byte(msg + "\n"))
-}
-
-func FatalOSErr(err error) {
-	UserFacingError(err)
-	Exiter(1)
-}
-
-func userFacingErrMsg(mainErr error) string {
-
-	repoNotFound, err := regexp.Compile("fatal: repository '.*' not found.*")
-	if err != nil {
-		// yes panic, this is a developer error.
-		panic(err)
-	}
-
-	// TODO type matching rather than string matching
-	// make err struct that can be reformed
-	message := mainErr.Error()
-	switch {
-	case repoNotFound.MatchString(message):
-		return "please run `lingo config setup`"
-	case strings.Contains(message, "error: There is no language called:"):
-		// TODO(waigani) refactor to use regex
-		lang := strings.Split(message, ":")[4]
-		lang = lang[1:]
-		return fmt.Sprintf("error: Lingo doesn't support \"%s\" yet", lang)
-		// TODO this should be more specific parse error on platform:
-		//Error in S25: $(1,), Pos(offset=38, line=7, column=2), expected one of: < ! var indent id
-	case strings.Contains(message, "expected one of: < ! var indent id"):
-		return "error: Queries must not be terminated by colons."
-	case strings.Contains(message, "error: missing yield"):
-		return "error: You must yield a result, put '<' before any fact or property."
-	case strings.Contains(message, "unknown language"):
-		return "error: Unknown Lexicon"
-	}
-	return message
 }
 
 // MustLingoHome returns the path to the user's lingo config directory or
