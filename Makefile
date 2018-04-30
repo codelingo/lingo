@@ -9,14 +9,14 @@ updateproto:
 	go get -u github.com/golang/protobuf/protoc-gen-go
 
 install:
-	# first install glide to manage deps
-	go get github.com/Masterminds/glide
+	# first install dep to manage deps
+	go get -u github.com/golang/dep/cmd/dep
 
 	# then get the latest commit
 	git pull
 	
 	# install deps
-	glide install
+	dep ensure -v
 
 	# build and install lingo
 	go install
