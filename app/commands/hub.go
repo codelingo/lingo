@@ -11,7 +11,7 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "hub",
-		Usage:  "Create a .lingo file in the current directory.",
+		Usage:  "Opens the CodeLingo Hub in your default browser.",
 		Action: hubAction,
 	}, false)
 }
