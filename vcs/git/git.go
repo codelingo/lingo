@@ -349,3 +349,37 @@ func gitCMD(args ...string) (out string, err error) {
 	// }
 	// return strings.TrimSpace(stdout), stderr, nil
 }
+
+func gitCmdInDir(dir string, args ...string) (out string, err error) {
+	cmd := exec.Command("git", args...)
+	if dir != "" {
+		cmd.Dir = dir
+	}
+	b, err := cmd.CombinedOutput()
+	out = string(b)
+	return out, errors.Annotate(err, out)
+}
+
+func (r *Repo) GetDotlingoFilepathsInDir(dir string) ([]string, error) {
+	staged, err := gitCmdInDir(dir,"ls-tree", "-r", "--name-only", "HEAD")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	unstaged, err := gitCmdInDir(dir,"ls-files", "--others", "--exclude-standard")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	files := strings.Split(staged, "\n")
+	files = append(files, strings.Split(unstaged, "\n")...)
+
+	dotlingoFilepaths := []string{}
+	for _, filepath := range files {
+		if strings.HasSuffix(filepath, ".lingo") {
+			dotlingoFilepaths = append(dotlingoFilepaths, filepath)
+		}
+	}
+
+	return dotlingoFilepaths, nil
+}

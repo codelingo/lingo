@@ -267,3 +267,51 @@ func p4CMD(args ...string) (out string, err error) {
 	b, err := cmd.CombinedOutput()
 	return string(b), errors.Annotate(err, string(b))
 }
+
+func callBash(dir string, args ...string) (out string, err error) {
+	cmd := exec.Command("bash", args...)
+	if dir != "" {
+		cmd.Dir = dir
+	}
+	b, err := cmd.CombinedOutput()
+	out = string(b)
+	return out, errors.Annotate(err, out)
+}
+
+func (r *Repo) GetDotlingoFilepathsInDir(dir string) ([]string, error) {
+	out, err := callBash(dir, "-c", "p4 client -o")
+	if err != nil {
+		return nil, errors.Annotate(err, out)
+	}
+	reg := regexp.MustCompile("(?m)^Root:.+")
+	str := reg.FindString(out)
+	root := strings.Split(str, "\t")[1]
+
+	staged, err := callBash(dir, "-c", "p4 files "+root+"/...")
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	files := strings.Split(staged, "\n")
+
+	for k, filepath := range files {
+		if strings.Contains(filepath, ".lingo") {
+			serverPath := strings.Split(filepath, "#")[0]
+			out, err := callBash(dir, "-c", "p4 where "+serverPath)
+			if err != nil {
+				return nil, errors.Annotate(err, out)
+			}
+			reg = regexp.MustCompile(root + ".+")
+			files[k] = strings.Split(reg.FindString(out), root+"/")[1]
+		}
+	}
+
+	dotlingoFilepaths := []string{}
+	for _, filepath := range files {
+		if strings.HasSuffix(filepath, ".lingo") {
+			dotlingoFilepaths = append(dotlingoFilepaths, filepath)
+		}
+	}
+
+	return dotlingoFilepaths, nil
+}
