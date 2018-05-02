@@ -96,6 +96,7 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
+	fmt.Println("Running search flow...")
 	resultc, errorc, err := c.Search(ctx, &flowengine.SearchRequest{
 		Dotlingo: string(dotlingo),
 	})
