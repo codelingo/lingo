@@ -20,7 +20,7 @@ func init() {
 		Usage:  "Update the lingo client to the latest release.",
 		Action: updateAction,
 	},
-		false,
+		false, false,
 		homeRq,
 		authRq,
 		configRq,

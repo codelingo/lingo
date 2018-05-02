@@ -29,7 +29,7 @@ func init() {
 		Name:   "query-from-offset",
 		Usage:  "Generate CLQL query to match code in a specific section of a file.",
 		Action: pathFromOffsetAction,
-	}, false, versionRq)
+	}, false, false, versionRq)
 }
 
 func pathFromOffsetAction(ctx *cli.Context) {

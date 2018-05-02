@@ -32,7 +32,7 @@ func init() {
 				Usage: "List all Tenets of the given bundle",
 			},
 		},
-	}, false)
+	}, false, true)
 }
 
 func listTenetsAction(ctx *cli.Context) {

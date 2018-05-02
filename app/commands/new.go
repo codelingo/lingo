@@ -19,7 +19,7 @@ func init() {
 		Name:   "init",
 		Usage:  "Create a .lingo file in the current directory.",
 		Action: newLingoAction,
-	}, false, vcsRq, versionRq)
+	}, false, false, vcsRq, versionRq)
 }
 
 // TODO(waigani) set lingo-home flag and test init creates correct home dir.

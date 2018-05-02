@@ -28,7 +28,7 @@ func init() {
 				Usage: "Describe the named Flow",
 			},
 		},
-	}, false)
+	}, false, true)
 }
 
 func listFlowsAction(ctx *cli.Context) {
