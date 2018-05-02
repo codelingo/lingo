@@ -19,38 +19,34 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func init() {
-	register(&cli.Command{
-		Hidden:      true,
-		Name:        "search",
-		Usage:       "Search code following queries in .lingo.",
-		Subcommands: cli.Commands{*pullRequestCmd},
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:  util.OutputFlg.String(),
-				Usage: "File to save found results to.",
-			},
-			cli.StringFlag{
-				Name:  util.FormatFlg.String(),
-				Value: "json-pretty",
-				Usage: "How to format the found results. Possible values are: json, json-pretty.",
-			},
-			// cli.BoolFlag{
-			// 	Name:  util.InteractiveFlg.String(),
-			// 	Usage: "Be prompted to confirm each issue.",
-			// },
+var searchCommand = cli.Command{
+	Name:        "search",
+	Usage:       "Search code following queries in .lingo.",
+	Subcommands: cli.Commands{*pullRequestCmd},
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  util.OutputFlg.String(),
+			Usage: "File to save found results to.",
 		},
-		Description: `
+		cli.StringFlag{
+			Name:  util.FormatFlg.String(),
+			Value: "json-pretty",
+			Usage: "How to format the found results. Possible values are: json, json-pretty.",
+		},
+	},
+	Description: `
 ""$ lingo search <filename>" .
 `[1:],
-		Action: searchAction,
-	},
-		false,
-		homeRq, authRq, configRq, versionRq,
-	)
+	Action: searchAction,
 }
 
 func searchAction(ctx *cli.Context) {
+	err := searchRequire()
+	if err != nil {
+		util.FatalOSErr(err)
+		return
+	}
+
 	msg, err := searchCMD(ctx)
 	if err != nil {
 
@@ -62,6 +58,17 @@ func searchAction(ctx *cli.Context) {
 	}
 
 	fmt.Println(msg)
+}
+
+func searchRequire() error {
+	reqs := []require{homeRq, authRq, configRq, versionRq}
+	for _, req := range reqs {
+		err := req.Verify()
+		if err != nil {
+			return errors.Trace(err)
+		}
+	}
+	return nil
 }
 
 func searchCMD(cliCtx *cli.Context) (string, error) {
