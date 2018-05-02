@@ -123,6 +123,7 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	// TODO: replace this system with nfs-like communication.
+	fmt.Println("Syncing your repo...")
 	if err = vcs.SyncRepo(vcsType, repo); err != nil {
 		return "", errors.Trace(err)
 	}
@@ -163,6 +164,15 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	ctx, cancel := util.UserCancelContext(context.Background())
 	issuec := make(chan *flowengine.Issue)
 	errorc := make(chan error)
+
+	req := &flowengine.ReviewRequest{
+		Repo:     name,
+		Sha:      sha,
+		Patches:  patches,
+		Vcs:      vcsTypeStr,
+		Dir:      workingDir,
+		Dotlingo: dotlingo,
+	}
 	switch vcsTypeStr {
 	case vcsGit:
 		addr, err := cfg.GitServerAddr()
@@ -174,21 +184,9 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 
-		issuec, errorc, err = review.RequestReview(ctx, &flowengine.ReviewRequest{
-			Host:         addr,
-			Hostname:     hostname,
-			OwnerOrDepot: &flowengine.ReviewRequest_Owner{owner},
-			Repo:         name,
-			Sha:          sha,
-			Patches:      patches,
-			Vcs:          vcsTypeStr,
-			Dir:          workingDir,
-			Dotlingo:     dotlingo,
-		})
-
-		if err != nil {
-			return "", errors.Trace(err)
-		}
+		req.Host = addr
+		req.Hostname = hostname
+		req.OwnerOrDepot = &flowengine.ReviewRequest_Owner{owner}
 	case vcsP4:
 		addr, err := cfg.P4ServerAddr()
 		if err != nil {
@@ -203,23 +201,19 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 			return "", errors.Trace(err)
 		}
 		name = owner + "/" + name
-		issuec, errorc, err = review.RequestReview(ctx, &flowengine.ReviewRequest{
-			Host:         addr,
-			Hostname:     hostname,
-			OwnerOrDepot: &flowengine.ReviewRequest_Depot{depot},
-			Repo:         name,
-			Sha:          sha,
-			Patches:      patches,
-			Vcs:          vcsTypeStr,
-			Dir:          workingDir,
-			Dotlingo:     dotlingo,
-		})
 
-		if err != nil {
-			return "", errors.Trace(err)
-		}
+		req.Host = addr
+		req.Hostname = hostname
+		req.OwnerOrDepot = &flowengine.ReviewRequest_Depot{depot}
+		req.Repo = name
 	default:
-		return "", errors.New("invalid VCS found.")
+		return "", errors.Errorf("Invalid VCS '%s'", vcsTypeStr)
+	}
+
+	fmt.Println("Running review flow...")
+	issuec, errorc, err = review.RequestReview(ctx, req)
+	if err != nil {
+		return "", errors.Trace(err)
 	}
 
 	issues, err := review.ConfirmIssues(cancel, issuec, errorc, !cliCtx.Bool("interactive"), cliCtx.String("output"))
