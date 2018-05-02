@@ -83,7 +83,7 @@ func Before(c *cli.Context) error {
 		}
 	}
 	// No requirements should be needed to show help
-	if isHelpAlias(flags) {
+	if currentCMDName == "help" || isHelpAlias(flags) {
 		return nil
 	}
 
