@@ -32,7 +32,7 @@ func init() {
 				Usage: "The version of the lexicon containing the fact. Leave empty for the latest version.",
 			},
 		},
-	}, false, versionRq)
+	}, false, false, versionRq)
 }
 
 func describeFactAction(ctx *cli.Context) {

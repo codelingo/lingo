@@ -28,7 +28,7 @@ func init() {
 				Usage: "Describe the named Bot",
 			},
 		},
-	}, false)
+	}, false, true)
 }
 
 func listBotsAction(ctx *cli.Context) {

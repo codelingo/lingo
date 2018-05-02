@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
-	"github.com/juju/errors"
 	"github.com/codelingo/lingo/vcs"
+	"github.com/juju/errors"
 	"os"
 	"path/filepath"
 )
@@ -27,8 +27,7 @@ func init() {
 				Action: listLocalTenetsAction,
 			},
 		},
-
-	}, false, vcsRq)
+	}, false, false, vcsRq)
 }
 
 func listAllAction(ctx *cli.Context) {
@@ -64,7 +63,7 @@ func listLocalFlows(c *cli.Context) (string, error) {
 	str := `Flows:
   - review
   - search`
-  return str, nil
+	return str, nil
 }
 
 func listLocalTenetsAction(ctx *cli.Context) {

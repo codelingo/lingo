@@ -15,7 +15,7 @@ func init() {
 			reviewCommand,
 			searchCommand,
 		},
-	}, false)
+	}, false, false)
 }
 
 func runAction(ctx *cli.Context) {

@@ -4,8 +4,8 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
-	"runtime"
 	"os/exec"
+	"runtime"
 )
 
 func init() {
@@ -13,7 +13,7 @@ func init() {
 		Name:   "hub",
 		Usage:  "Opens the CodeLingo Hub in your default browser.",
 		Action: hubAction,
-	}, false)
+	}, false, true)
 }
 
 func hubAction(ctx *cli.Context) {

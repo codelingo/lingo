@@ -7,14 +7,16 @@ import (
 	"github.com/codelingo/lingo/app/util"
 
 	"github.com/juju/errors"
+	"os"
 )
 
 // "github.com/codelingo/lingo/app/util"
 // "go.uber.org/zap"
 
 type lingoCMD struct {
-	isSubCMD bool
-	cmd      *cli.Command
+	isDevOnly bool
+	isSubCMD  bool
+	cmd       *cli.Command
 }
 
 var cmds = map[require][]*lingoCMD{}
@@ -31,8 +33,12 @@ func cmdRequirements(c map[require][]*lingoCMD) map[string][]require {
 	return req
 }
 
-func register(cmd *cli.Command, isSubcommand bool, req ...require) {
-	lCMD := &lingoCMD{isSubcommand, cmd}
+func register(cmd *cli.Command, isSubcommand, isDevOnly bool, req ...require) {
+	lCMD := &lingoCMD{
+		isDevOnly: isDevOnly,
+		isSubCMD:  isSubcommand,
+		cmd:       cmd,
+	}
 	cmds[baseRq] = append(cmds[baseRq], lCMD)
 	for _, r := range req {
 		cmds[r] = append(cmds[r], lCMD)
@@ -40,9 +46,11 @@ func register(cmd *cli.Command, isSubcommand bool, req ...require) {
 }
 
 func All() []cli.Command {
+	isDev := os.Getenv("LINGO_DEV_CLI") == "true"
+
 	var all []cli.Command
 	for _, lCMD := range cmds[baseRq] {
-		if !lCMD.isSubCMD {
+		if !lCMD.isSubCMD && (!lCMD.isDevOnly || (lCMD.isDevOnly && isDev)) {
 			all = append(all, *lCMD.cmd)
 		}
 	}

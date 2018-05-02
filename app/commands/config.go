@@ -73,7 +73,7 @@ func init() {
 				Usage: "Set the IP of the OnPrem Platform.",
 			},
 		},
-	}, false, homeRq, configRq)
+	}, false, false, homeRq, configRq)
 }
 
 func configAction(ctx *cli.Context) {
