@@ -31,6 +31,8 @@ func userFacingErrMsg(mainErr error) string {
 
 	switch {
 	// Connection
+	case strings.Contains(message, "all SubConns are in TransientFailure"):
+		return "Sorry, the client failed to make a connection to the server. Please check your internet connection and try again."
 	case strings.Contains(message, "transport is closing"):
 		return "Sorry, a server error occurred and the connection was broken. Please try again."
 	// Config

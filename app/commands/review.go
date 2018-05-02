@@ -24,62 +24,61 @@ const (
 	vcsP4  string = "perforce"
 )
 
-func init() {
-	register(&cli.Command{
-		Hidden:      true,
-		Name:        "review",
-		Usage:       "Review code following tenets in .lingo.",
-		Subcommands: cli.Commands{*pullRequestCmd},
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:  util.LingoFile.String(),
-				Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
-			},
-			cli.StringFlag{
-				Name:  util.DiffFlg.String(),
-				Usage: "Review only unstaged changes in the working tree.",
-			},
-			cli.StringFlag{
-				Name:  util.OutputFlg.String(),
-				Usage: "File to save found issues to.",
-			},
-			cli.StringFlag{
-				Name:  util.FormatFlg.String(),
-				Value: "json-pretty",
-				Usage: "How to format the found issues. Possible values are: json, json-pretty.",
-			},
-			cli.BoolFlag{
-				Name:  util.InteractiveFlg.String(),
-				Usage: "Be prompted to confirm each issue.",
-			},
-			cli.StringFlag{
-				Name:  util.DirectoryFlg.String(),
-				Usage: "Review a given directory.",
-			},
-			cli.BoolFlag{
-				Name:  "debug",
-				Usage: "Display debug messages",
-			},
-			// cli.BoolFlag{
-			// 	Name:  "all",
-			// 	Usage: "review all files under all directories from pwd down",
-			// },
+var reviewCommand = cli.Command{
+	Name:        "review",
+	Usage:       "Review code following tenets in .lingo.",
+	Subcommands: cli.Commands{*pullRequestCmd},
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  util.LingoFile.String(),
+			Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
 		},
-		Description: `
+		cli.StringFlag{
+			Name:  util.DiffFlg.String(),
+			Usage: "Review only unstaged changes in the working tree.",
+		},
+		cli.StringFlag{
+			Name:  util.OutputFlg.String(),
+			Usage: "File to save found issues to.",
+		},
+		cli.StringFlag{
+			Name:  util.FormatFlg.String(),
+			Value: "json-pretty",
+			Usage: "How to format the found issues. Possible values are: json, json-pretty.",
+		},
+		cli.BoolFlag{
+			Name:  util.InteractiveFlg.String(),
+			Usage: "Be prompted to confirm each issue.",
+		},
+		cli.StringFlag{
+			Name:  util.DirectoryFlg.String(),
+			Usage: "Review a given directory.",
+		},
+		cli.BoolFlag{
+			Name:  "debug",
+			Usage: "Display debug messages",
+		},
+		// cli.BoolFlag{
+		// 	Name:  "all",
+		// 	Usage: "review all files under all directories from pwd down",
+		// },
+	},
+	Description: `
 "$ lingo review" will review all code from pwd down.
 "$ lingo review <filename>" will only review named file.
 `[1:],
-		// "$ lingo review" will review any unstaged changes from pwd down.
-		// "$ lingo review [<filename>]" will review any unstaged changes in the named files.
-		// "$ lingo review --all [<filename>]" will review all code in the named files.
-		Action: reviewAction,
-	},
-		false,
-		vcsRq, homeRq, authRq, configRq, versionRq,
-	)
+	// "$ lingo review" will review any unstaged changes from pwd down.
+	// "$ lingo review [<filename>]" will review any unstaged changes in the named files.
+	// "$ lingo review --all [<filename>]" will review all code in the named files.
+	Action: reviewAction,
 }
 
 func reviewAction(ctx *cli.Context) {
+	err := reviewRequire()
+	if err != nil {
+		util.FatalOSErr(err)
+		return
+	}
 
 	msg, err := reviewCMD(ctx)
 	if err != nil {
@@ -92,6 +91,17 @@ func reviewAction(ctx *cli.Context) {
 	}
 
 	fmt.Println(msg)
+}
+
+func reviewRequire() error {
+	reqs := []require{vcsRq, homeRq, authRq, configRq, versionRq}
+	for _, req := range reqs {
+		err := req.Verify()
+		if err != nil {
+			return errors.Trace(err)
+		}
+	}
+	return nil
 }
 
 func reviewCMD(cliCtx *cli.Context) (string, error) {
