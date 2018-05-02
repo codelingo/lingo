@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands"
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
+	"github.com/juju/errors"
 	"strings"
 )
 
@@ -22,7 +24,9 @@ func New() *cli.App {
 	app.Version = common.ClientVersion
 	// TODO(waigani) once messaging is implemented, add -q flag to suppress them here.
 	// app.Flags = common.GlobalOptions
-	// app.CommandNotFound = commands.TenetCMD
+	app.CommandNotFound = func(c *cli.Context, command string) {
+		util.FatalOSErr(errors.Errorf("'%s' is not a lingo command. See 'lingo --help'.", command))
+	}
 	app.EnableBashCompletion = true
 
 	return app
