@@ -36,6 +36,9 @@ func userFacingErrMsg(mainErr error) string {
 	// Config
 	case repoNotFoundRegexp.MatchString(message):
 		return "please run `lingo config setup`"
+	// Git
+	case strings.Contains(message, "fatal: Not a git repository"):
+		return "This command can only be run in a git repository."
 	}
 
 	return message
