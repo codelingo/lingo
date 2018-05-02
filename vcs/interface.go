@@ -18,6 +18,7 @@ type Repo interface {
 	ApplyPatch(diff string) error
 	ClearChanges() error
 	CheckoutRemote(sha string) error
+	GetDotlingoFilepathsInDir(dir string) ([]string, error)
 }
 
 const (
