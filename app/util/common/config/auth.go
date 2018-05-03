@@ -127,7 +127,7 @@ func (a *authConfig) SetP4UserPassword(userPassword string) error {
 }
 
 var AuthTmpl = `
-all:
+paas:
   gitserver:
     credentials_filename: git-credentials
     user:

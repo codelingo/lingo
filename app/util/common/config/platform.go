@@ -269,7 +269,7 @@ func (p *platformConfig) MessageQueueAddr() (string, error) {
 }
 
 var PlatformTmpl = `
-all:
+paas:
   website:
     addr: codelingo.io
     port: "80"

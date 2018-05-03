@@ -221,7 +221,7 @@ func verifyConfig() error {
 
 	envCfg := filepath.Join(configsHome, utilConfig.EnvCfgFile)
 	if _, err := os.Stat(envCfg); os.IsNotExist(err) {
-		err := ioutil.WriteFile(envCfg, []byte("all"), 0644)
+		err := ioutil.WriteFile(envCfg, []byte("paas"), 0644)
 		if err != nil {
 			return errors.Annotate(err, "verifyConfig: Could not create env config")
 		}
