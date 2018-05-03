@@ -1,11 +1,2 @@
 tenets:
-  - name: find-funcs
-    doc: Example tenet that finds all functions.
-    bots:
-      codelingo/review:
-        comments: This is a function, but you probably already knew that.
-    query: |
-      import codelingo/ast/common
-
-      @ review.comment
-      common.func({depth: any})
+  - import: codelingo/go
