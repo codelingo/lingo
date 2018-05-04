@@ -254,7 +254,7 @@ func (fc *FileConfig) GetValue(key string) (string, error) {
 				return "", errors.Errorf("Invalid value found for config %q, expected `string` but got `%T`", key, v)
 			}
 			return kString, nil
-		case "all":
+		case "paas":
 			kString, ok := v.(string)
 			if !ok {
 				valErr = errors.Errorf("Invalid value found for config %q, expected `string` but got `%T`", key, v)

@@ -1,21 +1,21 @@
 package config
 
 import (
+	"fmt"
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
-	"time"
-	"fmt"
-	"path/filepath"
-	"github.com/codelingo/lingo/app/util"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"time"
 )
 
 const (
-	clientVerLatest = "client.version_latest"
+	clientVerLatest      = "client.version_latest"
 	clientVerLastChecked = "client.version_last_checked"
-	clientVerUpdated = "client.version_updated"
+	clientVerUpdated     = "client.version_updated"
 )
 
 type versionConfig struct {
@@ -49,7 +49,6 @@ func Version() (*versionConfig, error) {
 	return VersionInDir(configHome)
 }
 
-
 func CreateVersionFileInDir(dir string, overwrite bool) error {
 	vCfgFilePath := filepath.Join(dir, VersionCfgFile)
 	if _, err := os.Stat(vCfgFilePath); os.IsNotExist(err) || overwrite {
@@ -72,7 +71,7 @@ func CreateVersionFile() error {
 func (v *versionConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
 
-	var versDumpConsts = []string {
+	var versDumpConsts = []string{
 		clientVerLatest,
 		clientVerLastChecked,
 		clientVerUpdated,
@@ -99,7 +98,7 @@ func (v *versionConfig) SetClientLatestVersion(version string) error {
 	return v.Set(clientVerLatest, version)
 }
 
-func(v *versionConfig) ClientVersionLastChecked() (string, error) {
+func (v *versionConfig) ClientVersionLastChecked() (string, error) {
 	return v.GetValue(clientVerLastChecked)
 }
 
@@ -112,11 +111,11 @@ func (v *versionConfig) ClientVersionUpdated() (string, error) {
 }
 
 func (v *versionConfig) SetClientVersionUpdated(version string) error {
-	return v.SetForEnv("all", clientVerUpdated, version)
+	return v.SetForEnv("paas", clientVerUpdated, version)
 }
 
 var VersionTmpl = fmt.Sprintf(`
-all:
+paas:
   client:
     version_latest: %v
     version_last_checked: %v
