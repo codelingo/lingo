@@ -142,4 +142,7 @@ onprem:
 test:
   gitserver:
     credentials_filename: git-credentials-test
+staging:
+  gitserver:
+    credentials_filename: git-credentials-staging
 `[1:]
