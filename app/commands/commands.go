@@ -101,9 +101,8 @@ func Before(c *cli.Context) error {
 				return errors.Trace(err)
 			}
 		}
-	} else {
-		return errors.Errorf("command %q not found", currentCMDName)
 	}
+
 	return nil
 }
 
