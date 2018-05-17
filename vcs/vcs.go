@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/vcs/git"
 	"github.com/codelingo/lingo/vcs/p4"
@@ -135,7 +136,7 @@ func InitRepo(vcsType Type, repo Repo) error {
 
 func CreateRepo(repo Repo, name string) (string, error) {
 	if err := repo.CreateRemote(name); err != nil {
-		if strings.Contains(err.Error(), "already exists") {
+		if util.IsRepoExistsError(errors.Cause(err)) {
 			parts := strings.Split(name, "-")
 			num := parts[len(parts)-1]
 
@@ -151,7 +152,7 @@ func CreateRepo(repo Repo, name string) (string, error) {
 			}
 			return CreateRepo(repo, fmt.Sprintf("%s-%d", name, n+1))
 		}
-		return "", err
+		return "", errors.Trace(err)
 	}
 	return name, nil
 }
