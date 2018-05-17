@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"errors"
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/vcs"
 )
 
@@ -52,13 +52,13 @@ func (mockrepo *Repo) SetRemote(owner, name string) (string, string, error) {
 func (mockrepo *Repo) CreateRemote(name string) error {
 	switch name {
 	case "existingPkg":
-		return errors.New("already exists")
+		return util.RepoExistsError("already exists")
 	case "existingPkg-1105":
-		return errors.New("already exists")
+		return util.RepoExistsError("already exists")
 	case "existing-Pkg":
-		return errors.New("already exists")
+		return util.RepoExistsError("already exists")
 	case "existing-Pkg-0":
-		return errors.New("already exists")
+		return util.RepoExistsError("already exists")
 	}
 
 	return nil
