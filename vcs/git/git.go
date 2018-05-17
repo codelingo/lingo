@@ -13,6 +13,7 @@ import (
 
 	"github.com/juju/errors"
 
+	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common/config"
 )
 
@@ -172,18 +173,16 @@ func (r *Repo) CreateRemote(name string) error {
 	}
 
 	if _, err = gogsClient.CreateRepo(repoOpts); err != nil {
-		// util.Logger.Debugw("repo.CreateRemote",
-		// 	"Name", name,
-		// 	"Private", "true",
-		// 	"AutoInit", "false",
-		// 	"err_stack", errors.ErrorStack(err))
-		// util.Logger.Sync()
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "already exists") || strings.Contains(errMsg, "violates unique constraint") {
+			return errors.Wrap(err, util.RepoExistsError("failed to create repo, repo already exists"))
+		}
 
 		// TODO(waigani) TECHDEBT correct fix is to remove the go-gogs-client
 		// client and replace it with gogsclient in
 		// bots/clair/resource/gogsclient.go.
-		if err.Error() == "unexpected end of JSON input" {
-			err = errors.New("VCS Error: 401 Unauthorised")
+		if errMsg == "unexpected end of JSON input" {
+			return errors.Wrap(err, util.UnauthorisedRepoError("failed to create repo, user unauthorised"))
 		}
 
 		return errors.Trace(err)
@@ -361,12 +360,12 @@ func gitCmdInDir(dir string, args ...string) (out string, err error) {
 }
 
 func (r *Repo) GetDotlingoFilepathsInDir(dir string) ([]string, error) {
-	staged, err := gitCmdInDir(dir,"ls-tree", "-r", "--name-only", "HEAD")
+	staged, err := gitCmdInDir(dir, "ls-tree", "-r", "--name-only", "HEAD")
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	unstaged, err := gitCmdInDir(dir,"ls-files", "--others", "--exclude-standard")
+	unstaged, err := gitCmdInDir(dir, "ls-files", "--others", "--exclude-standard")
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

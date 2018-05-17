@@ -11,6 +11,28 @@ import (
 
 var repoNotFoundRegexp = regexp.MustCompile("fatal: repository '.*' not found.*")
 
+type RepoExistsError string
+
+func (r RepoExistsError) Error() string {
+	return string(r)
+}
+
+func IsRepoExistsError(err error) bool {
+	_, ok := err.(RepoExistsError)
+	return ok
+}
+
+type UnauthorisedRepoError string
+
+func (r UnauthorisedRepoError) Error() string {
+	return string(r)
+}
+
+func IsUnauthorisedRepoError(err error) bool {
+	_, ok := err.(UnauthorisedRepoError)
+	return ok
+}
+
 func UserFacingError(err error) {
 	if err == nil {
 		util.Logger.Debugf("got a nil error - this shouldn't be happening: %s", errors.ErrorStack(err))
@@ -26,10 +48,14 @@ func FatalOSErr(err error) {
 	Exiter(1)
 }
 
-func userFacingErrMsg(mainErr error) string {
-	message := mainErr.Error()
+func userFacingErrMsg(err error) string {
+	cause := errors.Cause(err)
+	message := err.Error()
 
 	switch {
+	// Error types
+	case IsUnauthorisedRepoError(cause):
+		return "Sorry, you are not authorised to access this repo. Please run `$ lingo config setup` to authorise yourself."
 	// Connection
 	case strings.Contains(message, "all SubConns are in TransientFailure"):
 		return "Sorry, the client failed to make a connection to the server. Please check your internet connection and try again."
