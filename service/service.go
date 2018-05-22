@@ -679,7 +679,7 @@ func buildEndpoint(tracer opentracing.Tracer, operationName string, instances []
 	// wrap result from loadbalancer.Retry() in function that handles nice printing
 	// rather than using retry() which is largely copied
 	endpoint, _ := random.Endpoint()
-	endpoint = retry(1, 10*time.Second, endpoint)
+	endpoint = retry(1, 60*time.Second, endpoint)
 
 	return endpoint
 	// return kitot.TraceClient(tracer, operationName)(endpoint)
