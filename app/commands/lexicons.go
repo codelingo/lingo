@@ -59,7 +59,7 @@ func init() {
 				},
 			},
 		},
-	}, false, true, versionRq)
+	}, false, false, versionRq)
 }
 
 func listLexiconsAction(ctx *cli.Context) {
