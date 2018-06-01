@@ -14,7 +14,7 @@ func init() {
 	register(&cli.Command{
 		Hidden: true,
 		Name:   "tooling",
-		Usage:  "Tools",
+		Usage:  "Commands under tooling are intended to support the other software such as IDEs and are not intended to be called by the user directly from the CLI",
 		Subcommands: []cli.Command{
 			{
 				Name:   "list-facts",
