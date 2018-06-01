@@ -23,15 +23,6 @@ lingo query-from-facts - Generate CLQL to match segment of code within a given f
 USAGE:
  	lingo query-from-facts <filename> <start> <end>`
 
-func init() {
-	register(&cli.Command{
-		Hidden: true,
-		Name:   "query-from-offset",
-		Usage:  "Generate CLQL query to match code in a specific section of a file.",
-		Action: pathFromOffsetAction,
-	}, false, false, versionRq)
-}
-
 func pathFromOffsetAction(ctx *cli.Context) {
 	err := pathFromOffset(ctx)
 	if err != nil {
