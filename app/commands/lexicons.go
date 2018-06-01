@@ -191,7 +191,7 @@ func listFacts(ctx *cli.Context) error {
 		owner = args[0]
 		name = args[1]
 	} else {
-		return errors.New("Please specify a properly namespaced lexicon, ie,\nlingo lexicon list-facts codelingo/go")
+		return errors.New("Please specify a properly namespaced lexicon, ie,\nlingo lexicons list-facts codelingo/go")
 	}
 
 	facts, err := svc.ListFacts(owner, name, ctx.String("version"))
