@@ -17,6 +17,7 @@ import (
 
 func init() {
 	register(&cli.Command{
+		Hidden: true,
 		Name:   "lexicons",
 		Usage:  "List Lexicons",
 		Action: listLexiconsAction,
