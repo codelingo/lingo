@@ -18,10 +18,10 @@ import (
 
 // TODO(BlakeMScurr) usage info should be generated from cli
 const usage = `
-lingo query-from-facts - Generate CLQL to match segment of code within a given file
+lingo query-from-offset - Generate CLQL to match segment of code within a given file
  
 USAGE:
- 	lingo query-from-facts <filename> <start> <end>`
+	lingo query-from-offset <filename> <start> <end>`
 
 func pathFromOffsetAction(ctx *cli.Context) {
 	err := pathFromOffset(ctx)
