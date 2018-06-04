@@ -80,13 +80,12 @@
   revision = "c537a2b52c120ceb45886b6e120b300dea4dcd23"
 
 [[projects]]
-  branch = "master"
   name = "github.com/codelingo/platform"
   packages = [
     "flow/rpc/client",
     "flow/rpc/flowengine"
   ]
-  revision = "151aa3d8795049516a7bc4effccb93a63338696c"
+  revision = "459669f569a3667fa0f49cca903c721f762b5e99"
   source = "git@github.com:codelingo/platform.git"
 
 [[projects]]
@@ -612,6 +611,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "975c1b1733d8b0074dc342721e1348c4ed1fc8519f84f07903c1db77141b975b"
+  inputs-digest = "ae94ba55a02f37c975dd41b21e0ff49781f1c56245344dfdcbc78892b062aa7f"
   solver-name = "gps-cdcl"
   solver-version = 1
