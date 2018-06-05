@@ -3,7 +3,6 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,7 +68,7 @@ func confirmAndSelfUpdate(ctx *cli.Context) error {
 	if err := selfupdate.UpdateTo(latest.AssetURL, cmdPath); err != nil {
 		return errors.Annotate(err, "Error occurred while updating binary:")
 	}
-	log.Println("Successfully updated to version", latest.Version)
+	fmt.Println("Successfully updated to version", latest.Version)
 
 	// TODO(waigani) prompt user to run config update
 
