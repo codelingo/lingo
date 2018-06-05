@@ -114,3 +114,7 @@ ignored = ["github.com/codelingo/lingo/_examples"]
 
 [[constraint]]
   name = "gopkg.in/yaml.v2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/rhysd/go-github-selfupdate"

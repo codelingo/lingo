@@ -1,16 +1,23 @@
 package commands
 
 import (
+	"bufio"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/app/util/common/config"
 	servConf "github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
-	"os"
-	"path/filepath"
-	"strings"
+	"github.com/kardianos/osext"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
+
+	"github.com/blang/semver"
 )
 
 func init() {
@@ -28,13 +35,49 @@ func init() {
 }
 
 func updateAction(ctx *cli.Context) {
-	err := update(ctx)
+	err := confirmAndSelfUpdate(ctx)
 	if err != nil {
 		util.FatalOSErr(err)
 	}
 }
 
-func update(ctx *cli.Context) error {
+func confirmAndSelfUpdate(ctx *cli.Context) error {
+	latest, found, err := selfupdate.DetectLatest("codelingo/lingo")
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	v := semver.MustParse(common.ClientVersion)
+	if !found || latest.Version.Equals(v) {
+		fmt.Println("Current version is the latest")
+		return nil
+	}
+
+	fmt.Print("Do you want to update to v", latest.Version, "? (y/n): ")
+	input, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil || (input != "y\n" && input != "n\n") {
+		return errors.New("Invalid input")
+	}
+	if input == "n\n" {
+		return nil
+	}
+
+	cmdPath, err := osext.Executable()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	if err := selfupdate.UpdateTo(latest.AssetURL, cmdPath); err != nil {
+		return errors.Annotate(err, "Error occurred while updating binary:")
+	}
+	log.Println("Successfully updated to version", latest.Version)
+
+	// TODO(waigani) prompt user to run config update
+
+	return nil
+}
+
+// Deprecated. Kept for reference until we review / refactor config updates.
+func updateOld(ctx *cli.Context) error {
 	configDefaults, err := util.ConfigDefaults()
 	if err != nil {
 		return errors.Trace(err)
