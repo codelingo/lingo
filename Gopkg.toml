@@ -20,10 +20,6 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
-[[override]]
-  name = "go.opencensus.io"
-  revision = "d79090ca8560601be0022a7c29b3a200b7248e5b"
-
 ignored = ["github.com/codelingo/lingo/_examples"]
 
 [[constraint]]
