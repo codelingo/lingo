@@ -4,6 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"syscall"
+
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	commonConfig "github.com/codelingo/lingo/app/util/common/config"
@@ -11,12 +18,6 @@ import (
 	"github.com/howeyc/gopass"
 	"github.com/juju/errors"
 	"golang.org/x/crypto/ssh/terminal"
-	"io/ioutil"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strings"
-	"syscall"
 )
 
 const (
@@ -301,7 +302,7 @@ func setupLingo(c *cli.Context) (string, error) {
 	// TODO (Junyu) set proper Perforce Username and password
 	// Prompt for user
 	if username == "" || password == "" {
-		lingoTokenAddr := "http://" + webAddr + "/lingo-token"
+		lingoTokenAddr := "http://" + webAddr + "/profile/new-token"
 		fmt.Println("Please sign in to " + lingoTokenAddr + " to generate a new Token linked with your CodeLingo User account.")
 	}
 
