@@ -15,6 +15,7 @@ import (
 	"os"
 
 	"context"
+
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/common/config"
 )
@@ -47,8 +48,8 @@ var reviewCommand = cli.Command{
 			Usage: "How to format the found issues. Possible values are: json, json-pretty.",
 		},
 		cli.BoolFlag{
-			Name:  util.InteractiveFlg.String(),
-			Usage: "Be prompted to confirm each issue.",
+			Name:  util.KeepAllFlg.String(),
+			Usage: "Keep all issues and don't be prompted to confirm each issue.",
 		},
 		cli.StringFlag{
 			Name:  util.DirectoryFlg.String(),
@@ -226,7 +227,7 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	issues, err := review.ConfirmIssues(cancel, issuec, errorc, !cliCtx.Bool("interactive"), cliCtx.String("output"))
+	issues, err := review.ConfirmIssues(cancel, issuec, errorc, cliCtx.Bool("keep-all"), cliCtx.String("output"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -235,7 +236,17 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 		return fmt.Sprintf("Done! No issues found.\n"), nil
 	}
 
-	msg, err := review.MakeReport(issues, cliCtx.String("format"), cliCtx.String("output"))
+	// Remove dicarded issues from report
+	var keptIssues []*flowengine.Issue
+	for _, issue := range issues {
+		if !issue.Discard {
+			keptIssues = append(keptIssues, issue)
+		}
+	}
+
+	// TODO(waigani) send back all issues and capture false positives.
+
+	msg, err := review.MakeReport(keptIssues, cliCtx.String("format"), cliCtx.String("output"))
 	return msg, errors.Trace(err)
 }
 
