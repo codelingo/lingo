@@ -80,9 +80,9 @@ var (
 		"version",
 		"v",
 	}
-	InteractiveFlg = flagName{
-		"interactive",
-		"i",
+	KeepAllFlg = flagName{
+		"keep-all",
+		"k",
 	}
 	DirectoryFlg = flagName{
 		"directory",
