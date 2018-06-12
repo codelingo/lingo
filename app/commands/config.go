@@ -302,7 +302,7 @@ func setupLingo(c *cli.Context) (string, error) {
 	// TODO (Junyu) set proper Perforce Username and password
 	// Prompt for user
 	if username == "" || password == "" {
-		lingoTokenAddr := "http://" + webAddr + "/profile/new-token"
+		lingoTokenAddr := "http://" + webAddr + "/setting/profile"
 		fmt.Println("Please sign in to " + lingoTokenAddr + " to generate a new Token linked with your CodeLingo User account.")
 	}
 
