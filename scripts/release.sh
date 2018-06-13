@@ -65,8 +65,7 @@ github-release release \
     --repo lingo \
     --tag $version \
     --name $version \
-    --description "$description" \
-    --pre-release
+    --description "$description"
 
 # Build and push each bin to release
 echo $v | while IFS=',' read -d';' os arch;  do 
