@@ -39,8 +39,15 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 	if err != nil {
 		return "", "", errors.Trace(err)
 	}
+
+	// Attempt to remove existing remote.
+	out, err := gitCMD("remote", "remove", remoteName)
+	if err != nil && !strings.Contains(err.Error(), "No such remote") {
+		return "", "", errors.Annotate(err, out)
+	}
+
 	remoteAddr := fmt.Sprintf("%s/%s/%s.git", addr, repoOwner, repoName)
-	out, err := gitCMD("remote", "add", remoteName, remoteAddr)
+	out, err = gitCMD("remote", "add", remoteName, remoteAddr)
 	if err != nil {
 		return "", "", errors.Annotate(err, out)
 	}
