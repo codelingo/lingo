@@ -4,12 +4,24 @@
 # Must be run from root of github.com/codelingo/lingo
 # To run:
 # $ scripts/release.sh 0.1.0
+#
+# Run `go get github.com/aktau/github-release` to install the 'github-release` binary.
 
 set -x
 if [ $# -eq 0 ]
   then
     echo "No arguments supplied, need verion"
     exit
+fi
+
+read -p "This script will stash any unstaged changes, clean the repo, and pull the latest from upstream. Continue? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    git stash
+    git clean -f -d
+    git pull upstream master
+    dep ensure
 fi
 
 version="v$1"
@@ -53,8 +65,7 @@ github-release release \
     --repo lingo \
     --tag $version \
     --name $version \
-    --description "$description" \
-    --pre-release
+    --description "$description"
 
 # Build and push each bin to release
 echo $v | while IFS=',' read -d';' os arch;  do 
