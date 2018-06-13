@@ -125,13 +125,6 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	if err := vcs.InitRepo(vcsType, repo); err != nil {
-		// TODO(waigani) use error types
-		// Note: Prior repo init is a valid state.
-		if !strings.Contains(err.Error(), "already exists") {
-			return "", errors.Trace(err)
-		}
-	}
 
 	// TODO: replace this system with nfs-like communication.
 	fmt.Println("Syncing your repo...")

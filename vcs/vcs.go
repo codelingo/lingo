@@ -74,63 +74,52 @@ func SyncRepo(vcsType Type, repo Repo) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	if syncErr := repo.Sync(repoOwner, dir); syncErr != nil {
+
+	repoName := filepath.Base(dir)
+
+	if syncErr := repo.Sync(repoOwner, repoName); syncErr != nil {
+
+		// Check if the error is due to a missing remote...
+		errStr := syncErr.Error()
+		missingLocalRemote := strings.Contains(errStr, "Could not read from remote repository")
+		missingRemote, err := regexp.MatchString("fatal: repository '.*' not found.*", errStr)
+		if err != nil {
+			return errors.Annotate(err, syncErr.Error())
+		}
+
+		// ...if not, exit...
+		if !missingRemote && !missingLocalRemote {
+
+			if strings.Contains(errStr, "src refspec HEAD does not match any") {
+
+				return errors.New("This looks like a new repository. lingo requires at least one commit to exist in the repository. Please make your first commit and try again.")
+
+			}
+
+			return errors.Trace(syncErr)
+		}
+
+		// ...otherwise attempt to set up the remote.
 		if vcsType == Git {
-			// This case is triggered when a local remote has been added but
-			// the remote repo does not exist. In this case, we create the
-			// remote and try to sync again.
-			missingRemote, err := regexp.MatchString("fatal: repository '.*' not found.*", syncErr.Error())
+
+			// create a new remote repo
+			repoName, err = CreateRepo(repo, repoName)
 			if err != nil {
 				return errors.Trace(err)
 			}
-			if missingRemote {
-				_, repoName, err := repo.OwnerAndNameFromRemote()
-				if err != nil {
-					return errors.Trace(err)
-				}
 
-				// TODO(waigani) use typed errors
-				if err := repo.CreateRemote(repoName); err != nil && !strings.HasPrefix(err.Error(), "repository already exists") {
-					return errors.Trace(err)
-				}
-				if err := repo.Sync(repoOwner, dir); err != nil {
-					return errors.Trace(err)
-				}
+			// [re]set the local remote with the new remote repo
+			_, _, err = repo.SetRemote(repoOwner, repoName)
+			if err != nil {
+				return errors.Trace(err)
+			}
+
+			// attempt to sync again
+			if err := repo.Sync(repoOwner, repoName); err != nil {
+				return errors.Trace(err)
 			}
 		}
-		return errors.Trace(syncErr)
 	}
-	return nil
-}
-
-func InitRepo(vcsType Type, repo Repo) error {
-	repoOwner, err := getRepoOwner(vcsType)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	// get the repo name, default to working directory name
-	dir, err := os.Getwd()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	repoName := filepath.Base(dir)
-
-	// TODO(benjamin-rood) Check if repo name and contents are identical.
-	// If, so this should be a no-op and only the remote needs to be set.
-	// ensure creation of distinct remote.
-	repoName, err = CreateRepo(repo, repoName)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	if err = repo.AssertNotTracked(); err != nil {
-		// TODO (benjamin-rood): Check the error type
-		return errors.Trace(err)
-	}
-	_, _, err = repo.SetRemote(repoOwner, repoName)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
 	return nil
 }
 
