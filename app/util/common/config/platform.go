@@ -180,6 +180,11 @@ func (p *platformConfig) WebSiteAddress() (string, error) {
 		return "", errors.Trace(err)
 	}
 
+	// Don't show port if they're standard HTTP
+	if port == "80" || port == "443" {
+		return addr, nil
+	}
+
 	return addr + ":" + port, nil
 }
 
