@@ -14,10 +14,16 @@ if [ $# -eq 0 ]
     exit
 fi
 
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo "Missing GITHUB_TOKEN environment variable. Set a GitHub token with access to all of the repo."
+    exit 1
+fi
+
 read -p "This script will stash any unstaged changes, clean the repo, and pull the latest from upstream. Continue? " -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
+    git fetch
     git stash
     git clean -f -d
     git pull upstream master
