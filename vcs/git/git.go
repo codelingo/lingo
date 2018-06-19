@@ -42,7 +42,7 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 
 	// Attempt to remove existing remote.
 	out, err := gitCMD("remote", "remove", remoteName)
-	if err != nil && !strings.Contains(err.Error(), "No such remote") {
+	if err != nil && !isKnownRemoteErr(err.Error()) {
 		return "", "", errors.Annotate(err, out)
 	}
 
@@ -52,6 +52,20 @@ func (r *Repo) SetRemote(repoOwner, repoName string) (string, string, error) {
 		return "", "", errors.Annotate(err, out)
 	}
 	return remoteName, remoteAddr, nil
+}
+
+func isKnownRemoteErr(errStr string) bool {
+
+	for _, subStr := range []string{
+		"No such remote",
+		"Could not remove config section",
+	} {
+		if strings.Contains(errStr, subStr) {
+			return true
+		}
+
+	}
+	return false
 }
 
 func gogsClientForCurrentUser() (*gogs.Client, error) {
