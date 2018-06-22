@@ -3,11 +3,12 @@ package commands
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
+
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
-	"strings"
 )
 
 func init() {
@@ -39,6 +40,16 @@ func init() {
 				Name:   "query-from-offset",
 				Usage:  "Generate CLQL query to match code in a specific section of a file.",
 				Action: pathFromOffsetAction,
+				Flags: []cli.Flag{
+					cli.BoolFlag{
+						Name:  "all-properties, a",
+						Usage: "List all properties of all facts in the query path",
+					},
+					cli.BoolFlag{
+						Name:  "final-fact-properties, f",
+						Usage: "List all properties of the final fact in the query path",
+					},
+				},
 			},
 		},
 	}, false, false, versionRq)

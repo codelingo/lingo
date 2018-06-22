@@ -82,11 +82,31 @@ func pathFromOffset(ctx *cli.Context) error {
 		return errors.Annotate(badArgsErr, err.Error())
 	}
 
+	filterPaths(paths, ctx)
+
 	var buf bytes.Buffer
 	json.NewEncoder(&buf).Encode(paths.Paths)
 	content := buf.Bytes()
 	outputBytes("", content)
 	return nil
+}
+
+func filterPaths(paths *server.PathsFromOffsetResponse, ctx *cli.Context) {
+	if ctx.Bool("all-properties") {
+		return
+	}
+
+	for _, path := range paths.Paths {
+		for i, fact := range path.Facts {
+			if ctx.Bool("final-fact-properties") {
+				if i+1 != len(path.Facts) {
+					fact.Properties = make(map[string]string)
+				}
+			} else {
+				fact.Properties = make(map[string]string)
+			}
+		}
+	}
 }
 
 func validateFilePath(path string) (string, error) {
