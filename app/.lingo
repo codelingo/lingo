@@ -1,0 +1,48 @@
+tenets:
+  - name: test-cli-commands
+    doc: |
+      Finds CLI commands that are not invoked in a unit test. 
+      Currently subject to variable exclusion bug, but exclude can be removed
+      to find properly tested commands.
+      https://trello.com/c/kfICgoyQ/1135-8-variable-exclusion
+
+    bots:
+      codelingo/review:
+        # TODO: comment templating https://trello.com/c/NHEISbW3/1275-comment-templating-resolves-to-the-empty-string
+        comments: This command should have a correspond unit test `testhelper.Command("cmdName",  commands.All())
+    query: |
+      import codelingo/ast/go
+
+      # Find command test
+      go.dir({depth: any}):
+        exclude:
+          go.file({depth: any}):
+            go.func_decl({depth: 1}):
+              go.field_list:
+                go.ident({depth: 2}):
+                  name: "cmdSuite"
+              go.call_expr({depth: any}):
+                go.selector_expr:
+                  go.ident:
+                    name: "testhelper"
+                  go.ident:
+                    name: "Command"
+                go.args:
+                  go.basic_lit:
+                    value: $commandName
+
+        # Find command definition
+        go.file({depth: any}):
+          go.composite_lit({depth: any}):
+            go.selector_expr:
+              go.ident:
+                name: "cli"
+              go.ident:
+                name: "Command"
+            go.elts:
+              @ review.comment
+              go.key_value_expr:
+                go.ident:
+                  name: "Name"
+                go.basic_lit:
+                  value: $commandName
