@@ -8,8 +8,7 @@ tenets:
 
     bots:
       codelingo/review:
-        # TODO: comment templating https://trello.com/c/NHEISbW3/1275-comment-templating-resolves-to-the-empty-string
-        comments: This command should have a correspond unit test `testhelper.Command("cmdName",  commands.All())
+        comments: This command should have a correspond unit test `testhelper.Command("{{cmd}}",  commands.All())
     query: |
       import codelingo/ast/go
 
@@ -29,6 +28,7 @@ tenets:
                     name: "Command"
                 go.args:
                   go.basic_lit:
+                    @ review.vars.cmd
                     value: $commandName
 
         # Find command definition
