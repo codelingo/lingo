@@ -109,9 +109,6 @@ func ConfirmIssues(cancel context.CancelFunc, issuec chan *flow.Issue, errorc ch
 
 	// If user is manually confirming reviews, set a long timeout.
 	timeout := time.After(time.Hour * 1)
-	if keepAll {
-		timeout = time.After(time.Minute * 5)
-	}
 
 l:
 	for {
