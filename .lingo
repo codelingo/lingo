@@ -1,0 +1,19 @@
+tenets:
+  - name: deprecated-dep
+    doc: Finds imports of deprecated dependencies.
+    bots:
+      # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
+      # to import lines and another for recording refactor progress
+      codelingo/review:
+        comments: Deprecated dependency, consider replacing it.
+    query: |
+      import codelingo/ast/go
+
+      go.file({depth: any}):
+        @ review.comment
+        go.import_spec({depth: 2}):
+          any_of:
+            go.basic_lit:
+              value: /^github.com\/codelingo\/platform/
+            go.basic_lit:
+              value: /^github.com\/codelingo\/kit/
