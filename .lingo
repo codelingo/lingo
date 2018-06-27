@@ -48,3 +48,53 @@ tenets:
             # and remove $callName
             go.ident: 
               name: $callName
+  - name: invalid-error-print
+    doc: |
+      Find places errors are being incorrectly output to the user.
+    bots:
+      codelingo/review:
+        comments: |
+          Errors should only be output to the user in app/util/errors.go
+    query: |
+      import (
+        codelingo/ast/go
+      )
+
+      go.file({depth: any}):
+        exclude:
+          filename: /^(\.\/)?app\/util\/errors.go$/
+        any_of:
+          go.import_spec({depth: any}): # aliased import
+            go.ident:
+              name: $packageName
+            go.basic_lit:
+              value: "fmt"
+          go.import_spec({depth: any}): # unaliased import
+            exclude:
+              go.ident
+            go.basic_lit:
+              value: "fmt"
+              value: $packageName
+        @ review.comment
+        go.call_expr({depth: any}):
+          any_of:
+            go.selector_expr:  # Calls like fmt.Print(err) or fmt.Fprint(os.Stderr, err)
+              go.ident:
+                name: $packageName
+              go.ident:
+                name: /^(P|Fp)rint.*$/
+            go.selector_expr:  # Calls like log.Print(err)
+              go.ident:
+                name: "log"
+            go.selector_expr:  # Calls like Stderr.Write(err)
+              go.ident:
+                name: "Stderr"
+              go.ident:
+                name: "Write"
+          go.args:
+            any_of:
+              go.ident({depth: any}):
+                name: "err"
+              go.ident({depth: any}):
+                type: "error"
+
