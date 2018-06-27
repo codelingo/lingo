@@ -17,3 +17,34 @@ tenets:
               value: /^github.com\/codelingo\/platform/
             go.basic_lit:
               value: /^github.com\/codelingo\/kit/
+
+  - name: platform-call
+    doc: Finds gRPC calls to platform which should be routed through the flow server.
+    bots:
+      codelingo/review:
+        comments: Please reroute this call through the flow server.
+    query: |
+      import codelingo/ast/go
+
+      # Collect methods that call endpoints sitting directly on platform
+      go.type_spec({depth: any}):
+        go.ident:
+          name: "CodeLingoService"
+        go.interface_type:
+          go.field_list:
+            go.field:
+              go.names:
+                go.ident:
+                  name: $callName
+
+      # Find locations where those methods are called on the client
+      go.file({depth: any}):
+        exclude:
+          filename: /service/
+        @ review.comment
+        go.call_expr({depth: any}):
+          go.selector_expr:
+            # TODO: improve speed by checking the type of the caller (once it's available)
+            # and remove $callName
+            go.ident: 
+              name: $callName
