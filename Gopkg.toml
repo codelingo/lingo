@@ -67,7 +67,7 @@ ignored = ["github.com/codelingo/lingo/_examples"]
 
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.7.2"
+  version = "1.12.1"
 
 [[constraint]]
   name = "gopkg.in/check.v1"
