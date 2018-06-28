@@ -35,12 +35,6 @@
   version = "1.0"
 
 [[projects]]
-  name = "github.com/cheggaaa/pb"
-  packages = ["."]
-  revision = "c112833d014c77e8bde723fd0158e3156951639f"
-  version = "v2.0.6"
-
-[[projects]]
   name = "github.com/codegangsta/cli"
   packages = ["."]
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
@@ -58,20 +52,6 @@
   packages = ["inner"]
   revision = "bbe296e1a682d3a466ae9cfde599d0f17309eebf"
   source = "git@github.com:codelingo/clql.git"
-
-[[projects]]
-  branch = "cl-pubsub"
-  name = "github.com/codelingo/kit"
-  packages = [
-    "endpoint",
-    "log",
-    "pubsub",
-    "pubsub/rabbitmq",
-    "sd",
-    "sd/lb",
-    "transport/grpc"
-  ]
-  revision = "c018bc7cb9f8cb76a507497c3b4fc9cea7003e77"
 
 [[projects]]
   branch = "master"
@@ -154,18 +134,6 @@
   packages = ["."]
   revision = "2ff310040c161b75fa19fb9b287a90a6e03c0012"
   version = "1.1"
-
-[[projects]]
-  name = "github.com/go-logfmt/logfmt"
-  packages = ["."]
-  revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
-  version = "v0.3.0"
-
-[[projects]]
-  name = "github.com/go-stack/stack"
-  packages = ["."]
-  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
-  version = "v1.7.0"
 
 [[projects]]
   branch = "master"
@@ -296,12 +264,6 @@
   revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/kr/logfmt"
-  packages = ["."]
-  revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
-
-[[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
   revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
@@ -351,15 +313,6 @@
     "libcontainer/user"
   ]
   revision = "91e979501348cb4cb13b5fb4437cc5d9ecd94b5d"
-
-[[projects]]
-  name = "github.com/opentracing/opentracing-go"
-  packages = [
-    ".",
-    "log"
-  ]
-  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
-  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/openzipkin/zipkin-go"
@@ -442,12 +395,6 @@
   packages = ["."]
   revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
   version = "v1.0.2"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/streadway/amqp"
-  packages = ["."]
-  revision = "ff791c2d22d3f1588b4e2cc71a9fba5e1da90654"
 
 [[projects]]
   name = "github.com/tcnksm/go-gitconfig"
@@ -620,46 +567,16 @@
   version = "v1.12.2"
 
 [[projects]]
-  name = "gopkg.in/VividCortex/ewma.v1"
-  packages = ["."]
-  revision = "b24eb346a94c3ba12c1da1e564dbac1b498a77ce"
-  version = "v1.1.1"
-
-[[projects]]
   branch = "v1"
   name = "gopkg.in/check.v1"
   packages = ["."]
   revision = "20d25e2804050c1cd24a7eea1e7a6447dd0e74ec"
 
 [[projects]]
-  name = "gopkg.in/cheggaaa/pb.v2"
-  packages = ["termutil"]
-  revision = "c112833d014c77e8bde723fd0158e3156951639f"
-  version = "v2.0.6"
-
-[[projects]]
   name = "gopkg.in/fatih/color.v1"
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
   version = "v1.5.0"
-
-[[projects]]
-  name = "gopkg.in/mattn/go-colorable.v0"
-  packages = ["."]
-  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
-  version = "v0.0.9"
-
-[[projects]]
-  name = "gopkg.in/mattn/go-isatty.v0"
-  packages = ["."]
-  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
-  version = "v0.0.3"
-
-[[projects]]
-  name = "gopkg.in/mattn/go-runewidth.v0"
-  packages = ["."]
-  revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
-  version = "v0.0.2"
 
 [[projects]]
   branch = "v2"
@@ -688,6 +605,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d9c35cc6d98d54bf1533549e3c54728331497700e8960126e42b55a279415612"
+  inputs-digest = "0794ed73271b755e1ea30bc3200411b382b65206dc423da9d550e3691f5fc509"
   solver-name = "gps-cdcl"
   solver-version = 1

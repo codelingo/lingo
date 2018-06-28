@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"context"
 	"github.com/blang/semver"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
@@ -323,12 +324,8 @@ func verifyClientVersion() error {
 }
 
 func latestVersion() (*semver.Version, error) {
-	svc, err := service.New()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	versionString, err := svc.LatestClientVersion()
+	ctx, _ := util.UserCancelContext(context.Background())
+	versionString, err := service.LatestClientVersion(ctx)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
