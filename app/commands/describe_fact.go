@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"strings"
 
+	"context"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
-	"github.com/codelingo/lingo/service/server"
+	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/juju/errors"
 )
 
@@ -43,15 +44,10 @@ func describeFactAction(ctx *cli.Context) {
 	}
 }
 
-func describeFact(ctx *cli.Context) error {
-	svc, err := service.New()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
+func describeFact(cliCtx *cli.Context) error {
 	var owner, name, lexicon, fact string
-	if len(ctx.Args()) > 0 {
-		lexicon = ctx.Args()[0]
+	if len(cliCtx.Args()) > 0 {
+		lexicon = cliCtx.Args()[0]
 	}
 
 	if args := strings.Split(lexicon, "/"); len(args) == 3 {
@@ -62,14 +58,15 @@ func describeFact(ctx *cli.Context) error {
 		return errors.New("Please specify a properly namespaced fact, ie,\nlingo describe-fact codelingo/go/func_decl")
 	}
 
-	description, err := svc.DescribeFact(owner, name, ctx.String("version"), fact)
+	ctx, _ := util.UserCancelContext(context.Background())
+	description, err := service.DescribeFact(ctx, owner, name, cliCtx.String("version"), fact)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	byt := getDescriptionFormat(ctx.String("format"), *description)
+	byt := getDescriptionFormat(cliCtx.String("format"), description)
 
-	err = outputBytes(ctx.String("output"), byt)
+	err = outputBytes(cliCtx.String("output"), byt)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -79,7 +76,7 @@ func describeFact(ctx *cli.Context) error {
 
 // TODO(BlakeMScurr) Refactor this and getFormat (from list_lexicons)
 // and getFactFormat (from list_facts) which have very similar logic
-func getDescriptionFormat(format string, output server.DescribeFactResponse) []byte {
+func getDescriptionFormat(format string, output *codelingo.DescribeFactReply) []byte {
 	var content []byte
 	switch format {
 	case "json":
@@ -92,7 +89,7 @@ func getDescriptionFormat(format string, output server.DescribeFactResponse) []b
 	return content
 }
 
-func formatDescription(description server.DescribeFactResponse) string {
+func formatDescription(description *codelingo.DescribeFactReply) string {
 	// TODO(BlakeMScurr) use a string builder and optimise this
 	ret := "Description:\n\t"
 	ret += description.Description
