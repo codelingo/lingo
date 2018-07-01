@@ -170,8 +170,6 @@ l:
 				return nil, errors.New(iss.Err)
 			}
 
-			// CONTINUE HERE
-
 			// TODO(waigani) attach Tenet to issue
 			// DEMOWARE hardcoding clql to one in root dir
 			dLingoStr, err := ioutil.ReadFile(".lingo")
@@ -311,46 +309,6 @@ func NewRange(filename string, startLine, endLine int) *flow.IssueRange {
 		End:   end,
 	}
 }
-
-// TODO(waigani) simplify representation of Issue.
-// https://github.com/codelingo/demo/issues/7
-// type Issue struct {
-// 	apiIssue
-// 	TenetName     string `json:"tenetName,omitempty"`
-// 	Discard       bool   `json:"discard,omitempty"`
-// 	DiscardReason string `json:"discardReason,omitempty"`
-// }
-
-// type apiIssue struct {
-// 	// The name of the issue.
-// 	TenetName     string            `json:"tenetName,omitempty"`
-// 	Discard       bool              `json:"discard,omitempty"`
-// 	DiscardReason string            `json:"discardReason,omitempty"`
-// 	Name          string            `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-// 	Position      *IssueRange       `protobuf:"bytes,2,opt,name=position" json:"position,omitempty"`
-// 	Comment       string            `protobuf:"bytes,3,opt,name=comment" json:"comment,omitempty"`
-// 	CtxBefore     string            `protobuf:"bytes,4,opt,name=ctxBefore" json:"ctxBefore,omitempty"`
-// 	LineText      string            `protobuf:"bytes,5,opt,name=lineText" json:"lineText,omitempty"`
-// 	CtxAfter      string            `protobuf:"bytes,6,opt,name=ctxAfter" json:"ctxAfter,omitempty"`
-// 	Metrics       map[string]string `protobuf:"bytes,7,rep,name=metrics" json:"metrics,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-// 	Tags          []string          `protobuf:"bytes,8,rep,name=tags" json:"tags,omitempty"`
-// 	Link          string            `protobuf:"bytes,9,opt,name=link" json:"link,omitempty"`
-// 	NewCode       bool              `protobuf:"varint,10,opt,name=newCode" json:"newCode,omitempty"`
-// 	Patch         string            `protobuf:"bytes,11,opt,name=patch" json:"patch,omitempty"`
-// 	Err           string            `protobuf:"bytes,12,opt,name=err" json:"err,omitempty"`
-// }
-
-// type IssueRange struct {
-// 	Start *Position `protobuf:"bytes,1,opt,name=start" json:"start,omitempty"`
-// 	End   *Position `protobuf:"bytes,2,opt,name=end" json:"end,omitempty"`
-// }
-
-// type Position struct {
-// 	Filename string `protobuf:"bytes,1,opt,name=filename" json:"filename,omitempty"`
-// 	Offset   int64  `protobuf:"varint,2,opt,name=Offset" json:"Offset,omitempty"`
-// 	Line     int64  `protobuf:"varint,3,opt,name=Line" json:"Line,omitempty"`
-// 	Column   int64  `protobuf:"varint,4,opt,name=Column" json:"Column,omitempty"`
-// }
 
 type Options struct {
 	// TODO(waigani) validate PullRequest

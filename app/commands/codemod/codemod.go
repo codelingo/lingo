@@ -15,14 +15,6 @@ import (
 	"github.com/codelingo/clql/inner"
 )
 
-// 1. Find node that has @ codemod.set on it
-
-// 2. Get offsets from that node
-
-// 3. Build new AST from codemod.set options
-
-// 4. Replace SRC using offsets
-
 type SRCHunk struct {
 	Filename    string
 	StartOffset int64
@@ -41,6 +33,8 @@ func toString(node interface{}) (string, error) {
 }
 
 func ClqlToSrc(clql string) (hunks map[string]string, err error) {
+	// TODO(waigani) currently only supports one hunk / @codemod.set decorator
+
 	hunks = make(map[string]string)
 	clqlQueryAST, err := inner.ParseString(clql)
 	if err != nil {
@@ -68,13 +62,6 @@ func ClqlToSrc(clql string) (hunks map[string]string, err error) {
 		// collect all nodes
 		finalASTs = append(finalASTs, astChildNode)
 	}
-
-	// TODO(waigani) only gen hunks for those with @ codemod.set decorators
-	// fset := token.NewFileSet()
-	// set fset on each hunk
-
-	// hunk.StartOffset =
-	// hunk.EndOffset =
 
 	// print asts
 	for _, node := range finalASTs {
