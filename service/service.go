@@ -259,14 +259,14 @@ func DescribeFact(ctx context.Context, owner, name, version, fact string) (*code
 	return reply, nil
 }
 
-func PathsFromOffset(ctx context.Context, req *codelingo.PathsFromOffsetRequest) (*codelingo.PathsFromOffsetReply, error) {
+func QueryFromOffset(ctx context.Context, req *codelingo.QueryFromOffsetRequest) (*codelingo.QueryFromOffsetReply, error) {
 	conn, err := GrpcConnection(LocalClient, PlatformServer)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	c := codelingo.NewCodeLingoClient(conn)
 
-	reply, err := c.PathsFromOffset(ctx, req)
+	reply, err := c.QueryFromOffset(ctx, req)
 	if err != nil {
 		return nil, err
 	}
