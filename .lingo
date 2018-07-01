@@ -1,2 +1,100 @@
 tenets:
-  - import: codelingo/go
+  - name: deprecated-dep
+    doc: Finds imports of deprecated dependencies.
+    bots:
+      # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
+      # to import lines and another for recording refactor progress
+      codelingo/review:
+        comments: Deprecated dependency, consider replacing it.
+    query: |
+      import codelingo/ast/go
+
+      go.file({depth: any}):
+        @ review.comment
+        go.import_spec({depth: 2}):
+          any_of:
+            go.basic_lit:
+              value: /^github.com\/codelingo\/platform/
+            go.basic_lit:
+              value: /^github.com\/codelingo\/kit/
+
+  - name: platform-call
+    doc: Finds gRPC calls to platform which should be routed through the flow server.
+    bots:
+      codelingo/review:
+        comments: Please reroute this call through the flow server.
+    query: |
+      import codelingo/ast/go
+
+      # Collect methods that call endpoints sitting directly on platform
+      go.type_spec({depth: any}):
+        go.ident:
+          name: "CodeLingoService"
+        go.interface_type:
+          go.field_list:
+            go.field:
+              go.names:
+                go.ident:
+                  name: $callName
+
+      # Find locations where those methods are called on the client
+      go.file({depth: any}):
+        exclude:
+          filename: /service/
+        @ review.comment
+        go.call_expr({depth: any}):
+          go.selector_expr:
+            # TODO: improve speed by checking the type of the caller (once it's available)
+            # and remove $callName
+            go.ident: 
+              name: $callName
+  - name: invalid-error-print
+    doc: |
+      Find places errors are being incorrectly output to the user.
+    bots:
+      codelingo/review:
+        comments: |
+          Errors should only be output to the user in app/util/errors.go
+    query: |
+      import (
+        codelingo/ast/go
+      )
+
+      go.file({depth: any}):
+        exclude:
+          filename: /^(\.\/)?app\/util\/errors.go$/
+        any_of:
+          go.import_spec({depth: any}): # aliased import
+            go.ident:
+              name: $packageName
+            go.basic_lit:
+              value: "fmt"
+          go.import_spec({depth: any}): # unaliased import
+            exclude:
+              go.ident
+            go.basic_lit:
+              value: "fmt"
+              value: $packageName
+        @ review.comment
+        go.call_expr({depth: any}):
+          any_of:
+            go.selector_expr:  # Calls like fmt.Print(err) or fmt.Fprint(os.Stderr, err)
+              go.ident:
+                name: $packageName
+              go.ident:
+                name: /^(P|Fp)rint.*$/
+            go.selector_expr:  # Calls like log.Print(err)
+              go.ident:
+                name: "log"
+            go.selector_expr:  # Calls like Stderr.Write(err)
+              go.ident:
+                name: "Stderr"
+              go.ident:
+                name: "Write"
+          go.args:
+            any_of:
+              go.ident({depth: any}):
+                name: "err"
+              go.ident({depth: any}):
+                type: "error"
+

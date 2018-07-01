@@ -9,10 +9,11 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"context"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
-	"github.com/codelingo/lingo/service/server"
+	"github.com/codelingo/lingo/service/grpc/codelingo"
 	"github.com/juju/errors"
 )
 
@@ -31,27 +32,23 @@ func pathFromOffsetAction(ctx *cli.Context) {
 	}
 }
 
-func pathFromOffset(ctx *cli.Context) error {
-	svc, err := service.New()
-	if err != nil {
-		return errors.Trace(err)
-	}
+func pathFromOffset(cliCtx *cli.Context) error {
 	badArgsErr := errors.New(usage)
-	if len(ctx.Args()) != 3 {
+	if len(cliCtx.Args()) != 3 {
 		return badArgsErr
 	}
 
-	file, err := validateFilePath(ctx.Args()[0])
+	file, err := validateFilePath(cliCtx.Args()[0])
 	if err != nil {
 		return errors.Annotate(badArgsErr, err.Error())
 	}
 
-	start, err := strconv.Atoi(ctx.Args()[1])
+	start, err := strconv.ParseInt(cliCtx.Args()[1], 10, 64)
 	if err != nil {
 		return errors.Annotate(badArgsErr, "start must be an integer")
 	}
 
-	end, err := strconv.Atoi(ctx.Args()[2])
+	end, err := strconv.ParseInt(cliCtx.Args()[2], 10, 64)
 	if err != nil {
 		return errors.Annotate(badArgsErr, "end must be an integer")
 	}
@@ -68,8 +65,9 @@ func pathFromOffset(ctx *cli.Context) error {
 		return errors.Trace(err)
 	}
 
+	ctx, _ := util.UserCancelContext(context.Background())
 	src := string(contents[:])
-	paths, err := svc.PathsFromOffset(&server.PathsFromOffsetRequest{
+	paths, err := service.PathsFromOffset(ctx, &codelingo.PathsFromOffsetRequest{
 		Lang:     lang,
 		Dir:      dir,
 		Filename: filename,
@@ -82,7 +80,7 @@ func pathFromOffset(ctx *cli.Context) error {
 		return errors.Annotate(badArgsErr, err.Error())
 	}
 
-	filterPaths(paths, ctx)
+	filterPaths(paths, cliCtx)
 
 	var buf bytes.Buffer
 	json.NewEncoder(&buf).Encode(paths.Paths)
@@ -91,7 +89,7 @@ func pathFromOffset(ctx *cli.Context) error {
 	return nil
 }
 
-func filterPaths(paths *server.PathsFromOffsetResponse, ctx *cli.Context) {
+func filterPaths(paths *codelingo.PathsFromOffsetReply, ctx *cli.Context) {
 	if ctx.Bool("all-properties") {
 		return
 	}

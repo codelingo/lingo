@@ -9,17 +9,13 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/cheggaaa/pb"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
-	"github.com/codelingo/lingo/service/server"
 	"github.com/codelingo/platform/flow/rpc/client"
 	flow "github.com/codelingo/platform/flow/rpc/flowengine"
 
@@ -297,106 +293,6 @@ func fullLineSRC(issue *flow.Issue, newSRC string) (string, error) {
 	}
 
 	return "", errors.Trace(scanner.Err())
-}
-
-func showIngestProgress(progressc server.Ingestc, messagec server.Messagec) error {
-	timeout := time.After(time.Second * 30)
-	var ingestTotal int
-	var ingestComplete bool
-	isIngesting := false
-
-	// ingestSteps is how far along the ingest process we are
-	var ingestSteps int
-	var err error
-
-	select {
-	case message := <-messagec:
-		msgStr := string(message)
-
-		// TODO(junyu) Currently, we are receiving queue messages from
-		// message channel to inform user about the queue and let them
-		// wait in line. Ideally, we should allow parallel tree ingestion
-		// so that the process can start immediately.
-		if msgStr == "Queue not empty" {
-			return errors.New("Queued for Ingest, try again later.")
-		}
-
-		// TODO(waigani) Currently, messagec is a mix of info and errors.
-		// Either create a separate errors channel or use log level constants.
-		if strings.HasPrefix(msgStr, "error") {
-			return errors.New(msgStr)
-		}
-
-		if msgStr != "" {
-			fmt.Println(msgStr)
-		}
-	case progress, ok := <-progressc:
-		if !ok {
-			ingestComplete = true
-			break
-		}
-
-		if !isIngesting {
-			fmt.Println("Ingesting...")
-			isIngesting = true
-		}
-
-		parts := strings.Split(progress, "/")
-		if len(parts) != 2 {
-			return errors.Errorf("ingest progress has wrong format. Expected n/n got %q", progress)
-		}
-		ingestSteps, err = strconv.Atoi(parts[0])
-		if err != nil {
-			return errors.Trace(err)
-		}
-		ingestTotal, err = strconv.Atoi(parts[1])
-		if err != nil {
-			return errors.Trace(err)
-		}
-	case <-timeout:
-		return errors.New("timed out waiting for ingest to start")
-	}
-
-	if !ingestComplete {
-		// ingest is not complete
-		if ingestSteps < ingestTotal {
-			return ingestBar(ingestSteps, ingestTotal, progressc)
-		}
-	}
-	return nil
-}
-
-func ingestBar(current, total int, progressc server.Ingestc) error {
-	ingestProgress := pb.StartNew(total)
-	var finished bool
-
-	// fast forward to where the ingest is up to.
-	for i := 0; i < current; i++ {
-		ingestProgress = ingestProgress.Increment()
-		if ingestProgress.Total() == int64(total) {
-			ingestProgress.Finish()
-			finished = true
-			break
-		}
-	}
-
-	if !finished {
-	l:
-		for {
-			timeout := time.After(time.Second * 600)
-			select {
-			case _, ok := <-progressc:
-				ingestProgress = ingestProgress.Increment()
-				if ingestProgress.Total() == int64(total) || !ok {
-					ingestProgress.Finish()
-					break l
-				}
-			case <-timeout:
-				return errors.New("timed out waiting for progress")
-			}
-		}
-	}
-	return nil
 }
 
 func NewRange(filename string, startLine, endLine int) *flow.IssueRange {

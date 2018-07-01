@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"context"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
@@ -63,15 +64,10 @@ func listFactsAction(ctx *cli.Context) {
 	}
 }
 
-func listFacts(ctx *cli.Context) error {
-	svc, err := service.New()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
+func listFacts(cliCtx *cli.Context) error {
 	var owner, name, lexicon string
-	if len(ctx.Args()) > 0 {
-		lexicon = ctx.Args()[0]
+	if len(cliCtx.Args()) > 0 {
+		lexicon = cliCtx.Args()[0]
 	}
 
 	if args := strings.Split(lexicon, "/"); len(args) == 2 {
@@ -81,14 +77,15 @@ func listFacts(ctx *cli.Context) error {
 		return errors.New("Please specify a properly namespaced lexicon, ie,\nlingo lexicons list-facts codelingo/go")
 	}
 
-	facts, err := svc.ListFacts(owner, name, ctx.String("version"))
+	ctx, _ := util.UserCancelContext(context.Background())
+	facts, err := service.ListFacts(ctx, owner, name, cliCtx.String("version"))
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	byt := getFactFormat(ctx.String("format"), facts)
+	byt := getFactFormat(cliCtx.String("format"), facts)
 
-	err = outputBytes(ctx.String("output"), byt)
+	err = outputBytes(cliCtx.String("output"), byt)
 	if err != nil {
 		return errors.Trace(err)
 	}

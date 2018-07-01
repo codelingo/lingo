@@ -57,20 +57,7 @@
   name = "github.com/codelingo/clql"
   packages = ["inner"]
   revision = "bbe296e1a682d3a466ae9cfde599d0f17309eebf"
-
-[[projects]]
-  branch = "cl-pubsub"
-  name = "github.com/codelingo/kit"
-  packages = [
-    "endpoint",
-    "log",
-    "pubsub",
-    "pubsub/rabbitmq",
-    "sd",
-    "sd/lb",
-    "transport/grpc"
-  ]
-  revision = "c018bc7cb9f8cb76a507497c3b4fc9cea7003e77"
+  source = "git@github.com:codelingo/clql.git"
 
 [[projects]]
   branch = "master"
@@ -85,6 +72,7 @@
     "flow/rpc/flowengine"
   ]
   revision = "459669f569a3667fa0f49cca903c721f762b5e99"
+  source = "git@github.com:codelingo/platform.git"
 
 [[projects]]
   branch = "master"
@@ -167,18 +155,6 @@
   packages = ["."]
   revision = "2ff310040c161b75fa19fb9b287a90a6e03c0012"
   version = "1.1"
-
-[[projects]]
-  name = "github.com/go-logfmt/logfmt"
-  packages = ["."]
-  revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
-  version = "v0.3.0"
-
-[[projects]]
-  name = "github.com/go-stack/stack"
-  packages = ["."]
-  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
-  version = "v1.7.0"
 
 [[projects]]
   name = "github.com/godbus/dbus"
@@ -395,12 +371,6 @@
   revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/kr/logfmt"
-  packages = ["."]
-  revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
-
-[[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
   revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
@@ -450,15 +420,6 @@
     "libcontainer/user"
   ]
   revision = "91e979501348cb4cb13b5fb4437cc5d9ecd94b5d"
-
-[[projects]]
-  name = "github.com/opentracing/opentracing-go"
-  packages = [
-    ".",
-    "log"
-  ]
-  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
-  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/openzipkin/zipkin-go"
@@ -547,12 +508,6 @@
   packages = ["."]
   revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
   version = "v1.0.2"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/streadway/amqp"
-  packages = ["."]
-  revision = "ff791c2d22d3f1588b4e2cc71a9fba5e1da90654"
 
 [[projects]]
   name = "github.com/tcnksm/go-gitconfig"
@@ -853,6 +808,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "117c023cd3df497cb0780f4b78f32aace0e95b3a4edb0046618de803480be0f5"
+  inputs-digest = "579864ed261d3c795a4546d4f3896fa3b7569213aa842be98a54cbe231968915"
   solver-name = "gps-cdcl"
   solver-version = 1
