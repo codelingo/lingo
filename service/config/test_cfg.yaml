@@ -8,6 +8,13 @@ all:
   grpc_port: "8002"
 dev:
   addr: localhost
+  blah:
+    gitserver:
+      remote:
+        name:
+          nested:
+            super: new-name
+            x: b
   gitserver:
     remote:
       addr: http://localhost
