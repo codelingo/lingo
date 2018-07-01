@@ -14,6 +14,7 @@ func init() {
 		Subcommands: []cli.Command{
 			reviewCommand,
 			searchCommand,
+			codemodCommand,
 		},
 	}, false, false)
 }

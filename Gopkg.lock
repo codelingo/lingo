@@ -57,7 +57,6 @@
   name = "github.com/codelingo/clql"
   packages = ["inner"]
   revision = "bbe296e1a682d3a466ae9cfde599d0f17309eebf"
-  source = "git@github.com:codelingo/clql.git"
 
 [[projects]]
   branch = "cl-pubsub"
@@ -86,13 +85,27 @@
     "flow/rpc/flowengine"
   ]
   revision = "459669f569a3667fa0f49cca903c721f762b5e99"
-  source = "git@github.com:codelingo/platform.git"
 
 [[projects]]
   branch = "master"
   name = "github.com/containerd/continuity"
   packages = ["pathdriver"]
   revision = "0cf103d319cc2d7efe085224094f466d1f8b9640"
+
+[[projects]]
+  name = "github.com/coreos/go-systemd"
+  packages = [
+    "dbus",
+    "unit"
+  ]
+  revision = "39ca1b05acc7ad1220e09f133283b8859a8b71ab"
+  version = "v17"
+
+[[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -166,6 +179,12 @@
   packages = ["."]
   revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
   version = "v1.7.0"
+
+[[projects]]
+  name = "github.com/godbus/dbus"
+  packages = ["."]
+  revision = "a389bdde4dd695d414e47b755e95e72b7826432c"
+  version = "v4.1.0"
 
 [[projects]]
   branch = "master"
@@ -249,9 +268,40 @@
   version = "v1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/juju/collections"
+  packages = ["set"]
+  revision = "90152009b5f349bb218a9bf4a6034dd8437c031b"
+
+[[projects]]
   name = "github.com/juju/errors"
   packages = ["."]
   revision = "1b5e39b83d1835fa480e0c2ddefb040ee82d58b3"
+
+[[projects]]
+  branch = "develop"
+  name = "github.com/juju/juju"
+  packages = [
+    "agent/tools",
+    "cert",
+    "controller",
+    "feature",
+    "juju/names",
+    "juju/osenv",
+    "juju/paths",
+    "mongo",
+    "network",
+    "network/debinterfaces",
+    "network/netplan",
+    "service",
+    "service/common",
+    "service/systemd",
+    "service/upstart",
+    "service/windows",
+    "tools",
+    "utils/scriptrunner"
+  ]
+  revision = "4b6238cad09c781557cc929e40fb055c4dc37075"
 
 [[projects]]
   branch = "master"
@@ -261,9 +311,47 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/juju/os"
+  packages = [
+    ".",
+    "series"
+  ]
+  revision = "cc9fc68ca9414ccda586ad2f66e72a208c3eb54d"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/juju/packaging"
+  packages = [
+    ".",
+    "commands",
+    "config",
+    "manager"
+  ]
+  revision = "ba21344fff207f4fa06b0a08bac386b179a2e6a1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/juju/proxy"
+  packages = ["."]
+  revision = "5f8741c297b47cba29f747c67f2e31e7c2a36ecb"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/juju/replicaset"
+  packages = ["."]
+  revision = "86037679224858cd82666e4877a8ac4c42cbda8b"
+
+[[projects]]
+  branch = "master"
   name = "github.com/juju/retry"
   packages = ["."]
   revision = "1998d01ba1c3eeb4a4728c4a50660025b2fe7c8f"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/juju/schema"
+  packages = ["."]
+  revision = "e4f08199aa80d3194008c0bd2e14ef5edc0e6be6"
 
 [[projects]]
   branch = "master"
@@ -279,7 +367,18 @@
   name = "github.com/juju/utils"
   packages = [
     ".",
-    "clock"
+    "arch",
+    "cert",
+    "clock",
+    "exec",
+    "featureflag",
+    "filepath",
+    "fs",
+    "os",
+    "series",
+    "set",
+    "shell",
+    "symlink"
   ]
   revision = "4d9b38694f1e441c16421e2320f2b2fbd97fa597"
 
@@ -399,6 +498,12 @@
   revision = "41c1bbb0804a2994dae69502a8c76e7c456ad45e"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/rogpeppe/fastuuid"
+  packages = ["."]
+  revision = "6724a57986aff9bff1a1770e9347036def7c89f6"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
@@ -473,6 +578,12 @@
   revision = "6198bead10008c43fcba66f16addbf23d6301ce9"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/waigani/xxx"
+  packages = ["."]
+  revision = "996d259109d1481f6cb397c495801602216175e2"
+
+[[projects]]
   name = "go.opencensus.io"
   packages = [
     "exporter/zipkin",
@@ -509,7 +620,12 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
+    "curve25519",
+    "nacl/box",
+    "nacl/secretbox",
     "pbkdf2",
+    "poly1305",
+    "salsa20/salsa",
     "ssh/terminal"
   ]
   revision = "94eea52f7b742c7cbe0b03b22f0c4c8631ece122"
@@ -543,7 +659,10 @@
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
+    "windows/registry",
+    "windows/svc",
+    "windows/svc/mgr"
   ]
   revision = "8b4580aae2a0dd0c231a45d3ccb8434ff533b840"
 
@@ -553,12 +672,18 @@
   packages = [
     "collate",
     "collate/build",
+    "encoding",
+    "encoding/internal",
+    "encoding/internal/identifier",
+    "encoding/unicode",
     "internal/colltab",
     "internal/gen",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "internal/utf8internal",
     "language",
+    "runes",
     "secure/bidirule",
     "transform",
     "unicode/bidi",
@@ -638,10 +763,38 @@
   version = "v2.0.6"
 
 [[projects]]
+  branch = "v1"
+  name = "gopkg.in/errgo.v1"
+  packages = ["."]
+  revision = "c17903c6b19d5dedb9cfba9fa314c7fae63e554f"
+
+[[projects]]
   name = "gopkg.in/fatih/color.v1"
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
   version = "v1.5.0"
+
+[[projects]]
+  branch = "v2"
+  name = "gopkg.in/juju/names.v2"
+  packages = ["."]
+  revision = "fd59336b4621bc2a70bf96d9e2f49954115ad19b"
+
+[[projects]]
+  branch = "v2-unstable"
+  name = "gopkg.in/macaroon-bakery.v2-unstable"
+  packages = [
+    "bakery",
+    "bakery/checkers",
+    "bakery/internal/macaroonpb"
+  ]
+  revision = "38b77b89a624fc1ec5b16ad83587befac27431da"
+
+[[projects]]
+  name = "gopkg.in/macaroon.v2"
+  packages = ["."]
+  revision = "bed2a428da6e56d950bed5b41fcbae3141e5b0d0"
+  version = "v2.0.0"
 
 [[projects]]
   name = "gopkg.in/mattn/go-colorable.v0"
@@ -674,6 +827,18 @@
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
+  name = "gopkg.in/retry.v1"
+  packages = ["."]
+  revision = "2d7c7c65cc71d024968d9ff4385d5e7ad3a83fcc"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "v2"
+  name = "gopkg.in/tomb.v2"
+  packages = ["."]
+  revision = "d5d1b5820637886def9eef33e03a27a9f166942c"
+
+[[projects]]
   branch = "v1"
   name = "gopkg.in/yaml.v1"
   packages = ["."]
@@ -688,6 +853,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d9c35cc6d98d54bf1533549e3c54728331497700e8960126e42b55a279415612"
+  inputs-digest = "117c023cd3df497cb0780f4b78f32aace0e95b3a4edb0046618de803480be0f5"
   solver-name = "gps-cdcl"
   solver-version = 1
