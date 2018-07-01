@@ -131,16 +131,7 @@ func processElm(astParentNode interface{}, parent *inner.Fact, childElm *inner.E
 
 	f := astParentNodeVal.FieldByName(name)
 	if f.IsValid() && f.CanSet() {
-		// xxx.Print("setting parent: " + parentKind + " field: " + name)
-		rVal := reflect.ValueOf(value)
-		if isFact {
-			// xxx.Dump(rVal)
-			f.Set(rVal)
-		} else {
-			// xxx.Dump(rVal)
-			f.Set(rVal)
-			// xxx.Dump(astParentNode)
-		}
+		f.Set(reflect.ValueOf(value))
 	} else {
 		// xxx.Print("field not found: " + name + " for parent: " + parentKind)
 	}
