@@ -10,9 +10,10 @@ import (
 	"strings"
 
 	"github.com/juju/errors"
-	"github.com/waigani/xxx"
+	//"github.com/waigani/xxx"
 
 	"github.com/codelingo/clql/inner"
+	"github.com/codelingo/lingo/app/util"
 )
 
 type SRCHunk struct {
@@ -38,7 +39,8 @@ func ClqlToSrc(clql string) (hunks map[string]string, err error) {
 	hunks = make(map[string]string)
 	clqlQueryAST, err := inner.ParseString(clql)
 	if err != nil {
-		xxx.Print(clql)
+		//xxx.Print(clql)
+		util.Logger.Infof("clql: %s", clql)
 		return nil, errors.Trace(err)
 	}
 
@@ -91,7 +93,7 @@ func processElm(astParentNode interface{}, parent *inner.Fact, childElm *inner.E
 
 	parentKind := snakeCaseToCamelCase(parent.ID.GetKind())
 	var value interface{}
-	var isFact bool
+	//var isFact bool
 	var name string
 
 	// TODO(waigani) transform name
@@ -106,7 +108,7 @@ func processElm(astParentNode interface{}, parent *inner.Fact, childElm *inner.E
 		if factory, ok := astFactory[childFactKind]; ok {
 			value = factory()
 		} else {
-			xxx.Print("need new fact: " + childFactKind)
+			util.Logger.Infof("need new fact: %s", childFactKind)
 		}
 
 		// process every child Elm of the fact, add properties to the node.
@@ -121,7 +123,7 @@ func processElm(astParentNode interface{}, parent *inner.Fact, childElm *inner.E
 		// hardcoding for now
 		name = "Name"
 
-		isFact = true
+		//isFact = true
 	}
 
 	// xxx.Print("child: " + name)

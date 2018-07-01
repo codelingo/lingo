@@ -40,7 +40,7 @@ func init() {
 			{
 				Name:   "query-from-offset",
 				Usage:  "Generate CLQL query to match code in a specific section of a file.",
-				Action: pathFromOffsetAction,
+				Action: queryFromOffsetAction,
 				Flags: []cli.Flag{
 					cli.BoolFlag{
 						Name:  "all-properties, a",
