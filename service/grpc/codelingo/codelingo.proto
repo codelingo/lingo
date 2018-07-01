@@ -41,6 +41,9 @@ service CodeLingo {
     // Reviews files
     rpc Review (stream ReviewRequest) returns (stream Issue) {}
 
+    // Modifies source code
+    rpc Codemod (stream ReviewRequest) returns (stream Issue) {}
+
     // Queries source code
     rpc Query (stream QueryRequest) returns (stream QueryReply) {}
 
