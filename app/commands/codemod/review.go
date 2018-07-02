@@ -208,11 +208,15 @@ l:
 
 			if cfm.Confirm(0, iss, confirmSRC) {
 
+				issuePos := iss.Position
+				startPos := issuePos.GetStart()
+
 				// TODO(waigani) offsets need to be based off codemod decorator, not review.
 				confirmedIssues = append(confirmedIssues, &SRCHunk{
-					StartOffset: iss.Position.GetStart().Offset,
-					EndOffset:   iss.Position.GetEnd().Offset,
+					StartOffset: startPos.Offset,
+					EndOffset:   issuePos.GetEnd().Offset,
 					SRC:         src,
+					Filename:    startPos.Filename,
 				})
 			}
 

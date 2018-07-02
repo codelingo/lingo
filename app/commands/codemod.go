@@ -111,8 +111,7 @@ func codemodCMD(cliCtx *cli.Context) (string, error) {
 		}
 	}
 
-	dotlingo, err := codemod.
-		ReadDotLingo(cliCtx)
+	dotlingo, err := codemod.ReadDotLingo(cliCtx)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -210,14 +209,12 @@ func codemodCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	fmt.Println("Running review flow...")
-	issuec, errorc, err = codemod.
-		RequestReview(ctx, req)
+	issuec, errorc, err = codemod.RequestReview(ctx, req)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	issues, err := codemod.
-		ConfirmIssues(cancel, issuec, errorc, cliCtx.Bool("keep-all"), cliCtx.String("output"))
+	issues, err := codemod.ConfirmIssues(cancel, issuec, errorc, cliCtx.Bool("keep-all"), cliCtx.String("output"))
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -227,14 +224,11 @@ func codemodCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	// Remove dicarded issues from report
-	var keptIssues []*codemod.
-		SRCHunk
+	var keptIssues []*codemod.SRCHunk
 	for _, issue := range issues {
 		if !issue.Discard {
 			keptIssues = append(keptIssues, issue)
 		}
 	}
-
-	return "", errors.Trace(codemod.
-		Write(keptIssues))
+	return "", errors.Trace(codemod.Write(keptIssues))
 }
