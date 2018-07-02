@@ -40,7 +40,7 @@ description=`cat $repoRoot/scripts/next_release_notes.md`
 lastTag=`git describe --abbrev=0 --tags`
 lastReleaseSHA=`git rev-list -n 1 $lastTag`
 # lastReleaseSHA="3284553324fb95b5bc2e592d03a7e71a2f94681f"
-changelog=`git log --oneline --decorate $lastReleaseSHA..HEAD`
+changelog=`git log --oneline --decorate --no-merges $lastReleaseSHA..HEAD`
 description="$description"$'\r'$'\r'"# Changelog"$'\r'$'\r'"$changelog"
 
 # init array
