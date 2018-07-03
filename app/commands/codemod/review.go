@@ -189,7 +189,7 @@ l:
 				return nil, errors.Trace(err)
 			}
 
-			clqlStr := "import codelingo/ast/go\n" + dLingo.Tenets[0].Bots["codelingo/codemod"]["set"].(string)
+			clqlStr := "import codelingo/ast/go\n" + iss.Comment
 
 			// support one set decorator per query.
 			srcs, err := ClqlToSrc(string(clqlStr))
