@@ -208,7 +208,7 @@ func codemodCMD(cliCtx *cli.Context) (string, error) {
 		return "", errors.Errorf("Invalid VCS '%s'", vcsTypeStr)
 	}
 
-	fmt.Println("Running review flow...")
+	fmt.Println("Running codemod flow...")
 	issuec, errorc, err = codemod.RequestReview(ctx, req)
 	if err != nil {
 		return "", errors.Trace(err)
