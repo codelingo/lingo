@@ -47,6 +47,8 @@ service CodeLingo {
     // Queries source code
     rpc Query (stream QueryRequest) returns (stream QueryReply) {}
 
+    rpc FileFromNode(Node) returns (File) {}
+
     // Lists available lexicons
     rpc ListLexicons (ListLexiconsRequest) returns (ListLexiconsReply) {}
 
@@ -58,6 +60,14 @@ service CodeLingo {
 
     // Return the latest client version for this platform
     rpc LatestClientVersion (LatestClientVersionRequest) returns (LatestClientVersionReply) {}
+}
+
+message Node {
+    string uid = 1;
+}
+
+message File {
+    string filename = 1;
 }
 
 message DescribeFactRequest {
