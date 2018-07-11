@@ -16,4 +16,4 @@ $ lingo review -i
 
 ```
 
-See [https://codelingo.io/docs/tutorials/getting-started](https://codelingo.io/docs/getting-started) for more detailed instruction
+See [https://www.codelingo.io/docs/#getting-started](https://www.codelingo.io/docs/#getting-started) for more detailed instruction
