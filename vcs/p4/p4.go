@@ -14,6 +14,7 @@ import (
 
 	"regexp"
 
+	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/app/util/common/config"
 )
 
@@ -295,7 +296,7 @@ func (r *Repo) GetDotlingoFilepathsInDir(dir string) ([]string, error) {
 	files := strings.Split(staged, "\n")
 
 	for k, filepath := range files {
-		if strings.Contains(filepath, ".lingo") {
+		if common.IsDotlingoFile(filepath) {
 			serverPath := strings.Split(filepath, "#")[0]
 			out, err := callBash(dir, "-c", "p4 where "+serverPath)
 			if err != nil {
@@ -308,7 +309,7 @@ func (r *Repo) GetDotlingoFilepathsInDir(dir string) ([]string, error) {
 
 	dotlingoFilepaths := []string{}
 	for _, filepath := range files {
-		if strings.HasSuffix(filepath, ".lingo") {
+		if common.IsDotlingoFile(filepath) {
 			dotlingoFilepaths = append(dotlingoFilepaths, filepath)
 		}
 	}
