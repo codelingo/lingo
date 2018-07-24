@@ -146,9 +146,8 @@ func verifyAuth() error {
 }
 
 func verifyDotLingo() error {
-	for _, suffix := range common.LingoSuffixes {
-		_, err := os.Stat(suffix)
-		if err == nil {
+	for filename := range common.LingoFilenames {
+		if _, err := os.Stat(filename); err == nil {
 			return nil
 		}
 	}

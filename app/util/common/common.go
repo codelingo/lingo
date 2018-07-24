@@ -1,17 +1,19 @@
 package common
 
-import "strings"
+import (
+	"path/filepath"
+)
 
 const ClientVersion = "0.4.0"
 
-var LingoSuffixes = []string{".lingo", ".lingo.yaml", ".lingo.yml"}
+var LingoFilenames = map[string]bool{
+	".lingo":      true,
+	".lingo.yaml": true,
+	".lingo.yml":  true,
+}
 
 // IsDotlingoFile returns if that given filepath has a recognised lingo extension.
-func IsDotlingoFile(filepath string) bool {
-	for _, suffix := range LingoSuffixes {
-		if strings.HasSuffix(filepath, suffix) {
-			return true
-		}
-	}
-	return false
+func IsDotlingoFile(file string) bool {
+	filename := filepath.Base(file)
+	return LingoFilenames[filename]
 }
