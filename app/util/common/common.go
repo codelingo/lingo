@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 )
 
-const ClientVersion = "0.4.0"
+const ClientVersion = "0.4.1"
 
 var LingoFilenames = map[string]bool{
 	".lingo":      true,
