@@ -146,15 +146,12 @@ func verifyAuth() error {
 }
 
 func verifyDotLingo() error {
-	_, err := os.Stat(".lingo")
-	return err
-
-	// TODO(waigani) do this properly, return
-
-	// if cfgPath, _ := common.TenetCfgPath(c); cfgPath == "" {
-	// 	return errors.Wrap(common.ErrMissingDotLingo, errors.New("ui"))
-	// }
-	// return nil
+	for filename := range common.LingoFilenames {
+		if _, err := os.Stat(filename); err == nil {
+			return nil
+		}
+	}
+	return errors.New("no lingo file found, please run `$ lingo init`")
 }
 
 func verifyLingoHome() error {

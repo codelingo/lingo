@@ -1,58 +1,52 @@
-# CodeLingo - Code Quality That Scales
 
-## Overview
+<h3 align="center"> codelingo </h3>
 
-CodeLingo helps software development teams produce better software, together. It's a platform that supports quering software as data, with CLQL (CodeLingo Query Language) and automating development workflows, called Flows.
+<p align="center">
+  <b> Automate Your Reviews on GitHub Pull Requests! </b>
+</p>
 
-Our flagship Flow is the Review Flow, which checks pull requests to a repository conform to the project specific patterns of that repository. Other Tenet bundles (including for other languages) from the community can be found under the [tenets directory](https://github.com/codelingo/hub/tree/master/tenets) in the [https://github.com/codelingo/hub](https://github.com/codelingo/hub) repository.
+<p align="center">
+  <a href="https://github.com/apps/codelingo" target="_blank">
+    <img width="295" height="38" src="https://raw.githubusercontent.com/codelingo/codelingo/master/public/img/install.png" />
+  </a>
+</p>
 
-## Quick Start: GitHub Review Flow
+# Lingo
 
-1. Install the [CodeLingo GitHub App](link)
+Lingo is a CLI tool to run [CodeLingo](https://www.codelingo.io) with any git repository on your local machine.
 
-2. Write the following .lingo.yaml to the root of your repo:
+### Quick Start
 
+In this quick start we'll review a Golang git repository on your local machine for common Go issues.
 
-      ```yaml
-      tenets:
-         - import: codelingo/go
-      ```
-
-3. Done! Every pull request will now be checked against the go Tenet bundle we imported above. 
-
-## Quick Start: Local Review Flow
-
-The Review Flow can also be run against repositories on your local machine.
-
-1. Install the [lingo CLI](github.com/codelingo/lingo)
-
-2. Run the following commands:
+After installing the [lingo tool](https://github.com/codelingo/lingo/releases/latest), set it up with the following commands:
 
 ```bash
-# Run this command from anywhere. Follow the prompts to set up CodeLingo on your machine.
+# Run this command from anywhere. Follow the prompts to set up Codelingo on your machine.
 $ lingo config setup
 
 # Run this command inside a git repository to add a default .lingo.yaml file in the current directory.
 $ lingo init
 ```
 
-3. Write the following .lingo.yaml to the root of your repo:
-
+Replace the default content of the .lingo.yaml file we generated above with:
 
 ```yaml
   tenets:
     - import: codelingo/go
 ```
 
-# Add a Tenet to the .lingo.yaml file (see https://codelingo.io/docs/concepts/tenets/#writing-custom-tenets for more info). This will be used by the following command to run a review.
-$ lingo run review
+Run the Review Flow to check your source code against the go Tenet bundle we imported above:
 
+```bash
+# Run this command from the same directory as the .lingo.yaml file or any of its sub directories.
+$ lingo run review
 ```
+
+<!-- TODO add screenshot of lingo review -->
 
 ## Slow Start
 
-See [https://codelingo.io/docs/tutorials/getting-started](https://codelingo.io/docs/getting-started) for more detailed instructions.
+Follow the [step by step guide](https://www.codelingo.io/docs/getting-started) to using lingo.
 
-## Community
-
-Find us on **[Slack](https://join.slack.com/t/codelingo/shared_invite/enQtMzY4MzA5ODYwOTYzLWVhMjI1ODU1YmM3ODAxYWUxNWU5ZTI0NWI0MGVkMmUwZDZhNWYxNGRiNWY4ZDY0NzRkMjU5YTRiYWY2N2FlMmU)** and [codelingo.io/discuss](codelingo.io/discuss)
+See and <a class="github-button" href="https://github.com/codelingo/codelingo" data-icon="octicon-star" aria-label="Star codelingo/codelingo on GitHub">star</a> the main repository at [github.com/codelingo/codelingo](https://github.com/codelingo/codelingo).
