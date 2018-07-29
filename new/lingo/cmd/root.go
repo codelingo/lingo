@@ -26,7 +26,7 @@ import (
 
 var cfgFile string
 
-const baseDiscoveryURL = "https://raw.githubusercontent.com/codelingo/hub/master/"
+const baseDiscoveryURL = "https://raw.githubusercontent.com/codelingo/codelingo/master/"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
