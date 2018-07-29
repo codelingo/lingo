@@ -55,12 +55,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/codelingo/lexicon"
-  packages = ["lib/util"]
-  revision = "c537a2b52c120ceb45886b6e120b300dea4dcd23"
-
-[[projects]]
-  branch = "master"
   name = "github.com/codelingo/platform"
   packages = [
     "flow/rpc/client",
@@ -316,19 +310,6 @@
   revision = "91e979501348cb4cb13b5fb4437cc5d9ecd94b5d"
 
 [[projects]]
-  name = "github.com/openzipkin/zipkin-go"
-  packages = [
-    ".",
-    "idgenerator",
-    "model",
-    "propagation",
-    "reporter",
-    "reporter/http"
-  ]
-  revision = "f197ec29e729f226d23370ea60f0e49b8f44ccf4"
-  version = "v0.1.0"
-
-[[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
@@ -419,14 +400,6 @@
   name = "github.com/waigani/diffparser"
   packages = ["."]
   revision = "6198bead10008c43fcba66f16addbf23d6301ce9"
-
-[[projects]]
-  name = "go.opencensus.io"
-  packages = [
-    "exporter/zipkin",
-    "trace"
-  ]
-  revision = "d79090ca8560601be0022a7c29b3a200b7248e5b"
 
 [[projects]]
   name = "go.uber.org/atomic"
@@ -606,6 +579,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "872b1335480ed8563df08cd34f745b8672af9718849508b5c0309dde41da4d4a"
+  inputs-digest = "b6862e39221cfef2801d5fc5403584ae202b174c7586fdaccc4357b8465cd043"
   solver-name = "gps-cdcl"
   solver-version = 1
