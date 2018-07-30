@@ -16,4 +16,4 @@ $ lingo review -i
 
 ```
 
-See [https://www.codelingo.io/docs/#getting-started](https://www.codelingo.io/docs/#getting-started) for more detailed instruction
+See [https://www.codelingo.io/docs/#getting-started](https://www.codelingo.io/docs/#getting-started) for a step by step guide to Tenets and Flows.
