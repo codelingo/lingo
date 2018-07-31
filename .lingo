@@ -1,7 +1,7 @@
 tenets:
   - name: deprecated-dep
     doc: Finds imports of deprecated dependencies.
-    bots:
+    flows:
       # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
       # to import lines and another for recording refactor progress
       codelingo/review:
@@ -20,7 +20,7 @@ tenets:
 
   - name: platform-call
     doc: Finds gRPC calls to platform which should be routed through the flow server.
-    bots:
+    flows:
       codelingo/review:
         comments: Please reroute this call through the flow server.
     query: |
@@ -51,7 +51,7 @@ tenets:
   - name: invalid-error-print
     doc: |
       Find places errors are being incorrectly output to the user.
-    bots:
+    flows:
       codelingo/review:
         comments: |
           Errors should only be output to the user in app/util/errors.go

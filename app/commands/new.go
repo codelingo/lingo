@@ -59,7 +59,7 @@ func writeDotLingo(cfgPath string) error {
 tenets:
   - name: find-funcs
     doc: Example tenet that finds all functions.
-    bots:
+    flows:
       codelingo/review:
         comments: This is a function, but you probably already knew that.
     query: |

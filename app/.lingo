@@ -6,7 +6,7 @@ tenets:
       to find properly tested commands.
       https://trello.com/c/kfICgoyQ/1135-8-variable-exclusion
 
-    bots:
+    flows:
       codelingo/review:
         comments: This command should have a correspond unit test `testhelper.Command("{{cmd}}",  commands.All())
     query: |

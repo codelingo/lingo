@@ -14,6 +14,7 @@ import (
 	"github.com/juju/errors"
 
 	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/app/util/common/config"
 )
 
@@ -396,7 +397,7 @@ func (r *Repo) GetDotlingoFilepathsInDir(dir string) ([]string, error) {
 
 	dotlingoFilepaths := []string{}
 	for _, filepath := range files {
-		if strings.HasSuffix(filepath, ".lingo") {
+		if common.IsDotlingoFile(filepath) {
 			dotlingoFilepaths = append(dotlingoFilepaths, filepath)
 		}
 	}
