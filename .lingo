@@ -29,13 +29,13 @@ tenets:
       # Collect methods that call endpoints sitting directly on platform
       go.type_spec({depth: any}):
         go.ident:
-          name: "CodeLingoService"
+          name == "CodeLingoService"
         go.interface_type:
           go.field_list:
             go.field:
               go.names:
                 go.ident:
-                  name: $callName
+                  name as callName
 
       # Find locations where those methods are called on the client
       go.file({depth: any}):
@@ -47,7 +47,7 @@ tenets:
             # TODO: improve speed by checking the type of the caller (once it's available)
             # and remove $callName
             go.ident: 
-              name: $callName
+              name as callName
   - name: invalid-error-print
     doc: |
       Find places errors are being incorrectly output to the user.
@@ -66,35 +66,35 @@ tenets:
         any_of:
           go.import_spec({depth: any}): # aliased import
             go.ident:
-              name: $packageName
+              name as packageName
             go.basic_lit:
-              value: "fmt"
+              value == "fmt"
           go.import_spec({depth: any}): # unaliased import
             exclude:
               go.ident
             go.basic_lit:
-              value: "fmt"
-              value: $packageName
+              value == "fmt"
+              value as packageName
         @ review.comment
         go.call_expr({depth: any}):
           any_of:
             go.selector_expr:  # Calls like fmt.Print(err) or fmt.Fprint(os.Stderr, err)
               go.ident:
-                name: $packageName
+                name as packageName
               go.ident:
                 name: /^(P|Fp)rint.*$/
             go.selector_expr:  # Calls like log.Print(err)
               go.ident:
-                name: "log"
+                name == "log"
             go.selector_expr:  # Calls like Stderr.Write(err)
               go.ident:
-                name: "Stderr"
+                name == "Stderr"
               go.ident:
-                name: "Write"
+                name == "Write"
           go.args:
             any_of:
               go.ident({depth: any}):
-                name: "err"
+                name == "err"
               go.ident({depth: any}):
-                type: "error"
+                type == "error"
 
