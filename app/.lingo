@@ -19,30 +19,30 @@ tenets:
             go.func_decl({depth: 1}):
               go.field_list:
                 go.ident({depth: 2}):
-                  name: "cmdSuite"
+                  name == "cmdSuite"
               go.call_expr({depth: any}):
                 go.selector_expr:
                   go.ident:
-                    name: "testhelper"
+                    name == "testhelper"
                   go.ident:
-                    name: "Command"
+                    name == "Command"
                 go.args:
                   go.basic_lit:
                     @ review.vars.cmd
-                    value: $commandName
+                    value as commandName
 
         # Find command definition
         go.file({depth: any}):
           go.composite_lit({depth: any}):
             go.selector_expr:
               go.ident:
-                name: "cli"
+                name == "cli"
               go.ident:
-                name: "Command"
+                name == "Command"
             go.elts:
               @ review.comment
               go.key_value_expr:
                 go.ident:
-                  name: "Name"
+                  name == "Name"
                 go.basic_lit:
-                  value: $commandName
+                  value as commandName
