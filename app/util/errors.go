@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/codelingo/lexicon/lib/util"
 	"github.com/juju/errors"
 	"gopkg.in/fatih/color.v1"
 )
@@ -35,7 +34,7 @@ func IsUnauthorisedRepoError(err error) bool {
 
 func UserFacingError(err error) {
 	if err == nil {
-		util.Logger.Debugf("got a nil error - this shouldn't be happening: %s", errors.ErrorStack(err))
+		Logger.Debugf("got a nil error - this shouldn't be happening: %s", errors.ErrorStack(err))
 		return
 	}
 	errColor := color.New(color.FgHiRed).SprintfFunc()
