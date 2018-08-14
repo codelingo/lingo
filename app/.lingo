@@ -13,14 +13,14 @@ tenets:
       import codelingo/ast/go
 
       # Find command test
-      go.dir({depth: any}):
+      go.dir(depth = any):
         exclude:
-          go.file({depth: any}):
-            go.func_decl({depth: 1}):
+          go.file(depth = any):
+            go.func_decl(depth = 1):
               go.field_list:
-                go.ident({depth: 2}):
+                go.ident(depth = 2):
                   name == "cmdSuite"
-              go.call_expr({depth: any}):
+              go.call_expr(depth = any):
                 go.selector_expr:
                   go.ident:
                     name == "testhelper"
@@ -32,8 +32,8 @@ tenets:
                     value as commandName
 
         # Find command definition
-        go.file({depth: any}):
-          go.composite_lit({depth: any}):
+        go.file(depth = any):
+          go.composite_lit(depth = any):
             go.selector_expr:
               go.ident:
                 name == "cli"
