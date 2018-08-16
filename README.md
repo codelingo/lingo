@@ -25,11 +25,11 @@ After installing the [lingo tool](https://github.com/codelingo/lingo/releases/la
 # Run this command from anywhere. Follow the prompts to set up Codelingo on your machine.
 $ lingo config setup
 
-# Run this command inside a git repository to add a default .lingo.yaml file in the current directory.
+# Run this command inside a git repository to add a default codelingo.yaml file in the current directory.
 $ lingo init
 ```
 
-Replace the default content of the .lingo.yaml file we generated above with:
+Replace the default content of the codelingo.yaml file we generated above with:
 
 ```yaml
   tenets:
@@ -39,7 +39,7 @@ Replace the default content of the .lingo.yaml file we generated above with:
 Run the Review Flow to check your source code against the go Tenet bundle we imported above:
 
 ```bash
-# Run this command from the same directory as the .lingo.yaml file or any of its sub directories.
+# Run this command from the same directory as the codelingo.yaml file or any of its sub directories.
 $ lingo run review
 ```
 

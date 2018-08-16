@@ -36,7 +36,7 @@ const (
 func (r require) String() string {
 	switch r {
 	case dotLingoRq:
-		return ".lingo"
+		return "codelingo.yaml"
 	case authRq:
 		return "authentication"
 	case homeRq:

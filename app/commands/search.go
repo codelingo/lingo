@@ -21,7 +21,7 @@ import (
 
 var searchCommand = cli.Command{
 	Name:        "search",
-	Usage:       "Search code following queries in .lingo.",
+	Usage:       "Search code following queries in codelingo.yaml.",
 	Subcommands: cli.Commands{*pullRequestCmd},
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -77,7 +77,7 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 
 	args := cliCtx.Args()
 	if len(args) == 0 {
-		return "", errors.New("Please specify the filepath to a .lingo file.")
+		return "", errors.New("Please specify the filepath to a codelingo.yaml file.")
 	}
 
 	dotlingo, err := ioutil.ReadFile(args[0])
