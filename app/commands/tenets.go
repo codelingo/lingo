@@ -60,7 +60,7 @@ func listTenets(ctx *cli.Context) error {
 		if bundle == "" {
 			return errors.New("bundle flag must be set")
 		}
-		url = fmt.Sprintf("%s/%s/%s/%s/.lingo",
+		url = fmt.Sprintf("%s/%s/%s/%s/codelingo.yaml",
 			baseTenetURL, owner, bundle, name)
 	case bundle != "":
 		if owner == "" {

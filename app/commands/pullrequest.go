@@ -20,7 +20,7 @@ var pullRequestCmd = &cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  util.LingoFile.String(),
-			Usage: "A list of .lingo files to preform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
+			Usage: "A list of codelingo.yaml files to perform the review with. If the flag is not set, codelingo.yaml files are read from the branch being reviewed.",
 		},
 		// TODO(waigani) as this is a review sub-command, it should be able to use the
 		// lingo-file flag from review.

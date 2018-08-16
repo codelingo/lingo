@@ -7,9 +7,8 @@ import (
 const ClientVersion = "0.4.1"
 
 var LingoFilenames = map[string]bool{
-	".lingo":      true,
-	".lingo.yaml": true,
-	".lingo.yml":  true,
+	"codelingo.yaml": true,
+	"codelingo.yml":  true,
 }
 
 // IsDotlingoFile returns if that given filepath has a recognised lingo extension.
