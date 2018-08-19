@@ -8,6 +8,7 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
+	"strings"
 )
 
 const (
@@ -91,7 +92,27 @@ func (a *authConfig) Dump() (map[string]interface{}, error) {
 }
 
 func (a *authConfig) GetGitCredentialsFilename() (string, error) {
-	return a.GetValue(gitCredentialFilename)
+	env, err := a.GetEnv()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	val, err := a.GetForEnv(env, gitCredentialFilename)
+	if err != nil {
+		if strings.Contains(err.Error(), "Could not find value") {
+			credName := "git-credentials-" + env
+			err = a.SetForEnv(env, gitCredentialFilename, credName)
+			if err != nil {
+				return "", errors.Trace(err)
+			}
+			return credName, nil
+		}
+		return "", errors.Trace(err)
+	}
+	str, ok := val.(string)
+	if !ok {
+		return "", errors.Errorf("unexpected value type %T", val)
+	}
+	return str, nil
 }
 
 func (a *authConfig) GetGitUserName() (string, error) {
