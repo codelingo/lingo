@@ -50,7 +50,7 @@
   branch = "master"
   name = "github.com/codelingo/clql"
   packages = ["inner"]
-  revision = "bbe296e1a682d3a466ae9cfde599d0f17309eebf"
+  revision = "aa66b02232b479dd29b79e9e9e23542e104bc374"
   source = "git@github.com:codelingo/clql.git"
 
 [[projects]]
