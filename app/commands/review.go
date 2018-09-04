@@ -230,7 +230,7 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	// Remove dicarded issues from report
-	var keptIssues []*flowengine.Issue
+	keptIssues := []*flowengine.Issue{}
 	for _, issue := range issues {
 		if !issue.Discard {
 			keptIssues = append(keptIssues, issue)
