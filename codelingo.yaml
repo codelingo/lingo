@@ -6,7 +6,7 @@ tenets:
       # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
       # to import lines and another for recording refactor progress
       codelingo/review:
-        comments: Deprecated dependency, consider replacing it.
+        comment: Deprecated dependency, consider replacing it.
     query: |
       import codelingo/ast/go
 
@@ -23,7 +23,7 @@ tenets:
     doc: Finds gRPC calls to platform which should be routed through the flow server.
     flows:
       codelingo/review:
-        comments: Please reroute this call through the flow server.
+        comment: Please reroute this call through the flow server.
     query: |
       import codelingo/ast/go
 
@@ -54,7 +54,7 @@ tenets:
       Find places errors are being incorrectly output to the user.
     flows:
       codelingo/review:
-        comments: |
+        comment: |
           Errors should only be output to the user in app/util/errors.go
     query: |
       import (

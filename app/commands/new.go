@@ -61,7 +61,7 @@ tenets:
     doc: Example tenet that finds all functions.
     flows:
       codelingo/review:
-        comments: This is a function, but you probably already knew that.
+        comment: This is a function, but you probably already knew that.
     query: |
       import codelingo/ast/common
 
