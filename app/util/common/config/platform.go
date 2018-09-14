@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,28 +11,29 @@ import (
 )
 
 const (
-	gitRemoteName          = "gitserver.remote.name"
-	gitServerHost          = "gitserver.remote.host"
-	gitServerPort          = "gitserver.remote.port"
-	gitServerProtocol      = "gitserver.remote.protocol"
-	webSiteAddr            = "website.addr"
-	webSitePort            = "website.port"
-	platformServerAddr     = "platform.addr"
-	platformServerPort     = "platform.port"
-	platformServerGrpcPort = "grpc_port"
-	flowServerGrpcPort     = "flow.port"
-	flowServerGrpcAddress  = "flow.address"
-	p4RemoteName           = "p4server.remote.name"
-	p4RemoteDepotName      = "p4server.remote.depot.name"
-	p4ServerHost           = "p4server.remote.host"
-	p4ServerPort           = "p4server.remote.port"
-	p4ServerProtocol       = "p4server.remote.protocol"
-	mqAddrProtocol         = "messagequeue.address.protocol"
-	mqAddrUsername         = "messagequeue.address.username"
-	mqAddrPassword         = "messagequeue.address.password"
-	mqAddrHost             = "messagequeue.address.host"
-	mqAddrPort             = "messagequeue.address.port"
+	websiteHTTPAddr  = "website"
+	platformGRPCAddr = "platform"
+	flowGRPCAddr     = "flow"
+
+	gitServerRemote = "gitserver.remote"
+	gitServerAddr   = "gitserver.addr"
+
+	p4RemoteName      = "p4server.remote.name"
+	p4RemoteDepotName = "p4server.remote.depot.name"
+	p4ServerHost      = "p4server.remote.host"
+	p4ServerPort      = "p4server.remote.port"
+	p4ServerProtocol  = "p4server.remote.protocol"
 )
+
+// defaultConfig is the config that is written when an existing config can't be found.
+const defaultConfig = `paas:
+  website: https://codelingo.io
+  platform: grpc-platform.codelingo.io:443
+  flow: grpc-flow.codelingo.io:443
+  gitserver:
+    addr: https://git.codelingo.io
+    remote: codelingo
+`
 
 type platformConfig struct {
 	*config.FileConfig
@@ -69,7 +69,7 @@ func Platform() (*platformConfig, error) {
 func CreatePlatformFileInDir(dir string, overwrite bool) error {
 	pCfgFilePath := filepath.Join(dir, PlatformCfgFile)
 	if _, err := os.Stat(pCfgFilePath); os.IsNotExist(err) || overwrite {
-		err := ioutil.WriteFile(pCfgFilePath, []byte(PlatformTmpl), 0644)
+		err := ioutil.WriteFile(pCfgFilePath, []byte(defaultConfig), 0644)
 		if err != nil {
 			return errors.Annotate(err, "verifyConfig: Could not create platform config")
 		}
@@ -89,21 +89,11 @@ func (p *platformConfig) Dump() (map[string]interface{}, error) {
 	keyMap := make(map[string]interface{})
 
 	var platDumpConsts = []string{
-		gitRemoteName,
-		gitServerHost,
-		gitServerPort,
-		gitServerProtocol,
-		webSiteAddr,
-		webSitePort,
-		platformServerPort,
-		platformServerAddr,
-		platformServerPort,
-		platformServerGrpcPort,
-		mqAddrProtocol,
-		mqAddrUsername,
-		mqAddrPassword,
-		mqAddrHost,
-		mqAddrPort,
+		websiteHTTPAddr,
+		platformGRPCAddr,
+		flowGRPCAddr,
+		gitServerAddr,
+		gitServerRemote,
 	}
 
 	for _, pCon := range platDumpConsts {
@@ -120,100 +110,39 @@ func (p *platformConfig) Dump() (map[string]interface{}, error) {
 }
 
 func (p *platformConfig) GitRemoteName() (string, error) {
-	return p.GetValue(gitRemoteName)
-}
-
-func (p *platformConfig) GitServerHost() (string, error) {
-	return p.GetValue(gitServerHost)
-}
-
-func (p *platformConfig) GitServerPort() (string, error) {
-	return p.GetValue(gitServerPort)
-}
-
-func (p *platformConfig) GitServerProtocol() (string, error) {
-	return p.GetValue(gitServerProtocol)
+	return p.GetValue(gitServerRemote)
 }
 
 func (p *platformConfig) GitServerAddr() (string, error) {
-
-	protocol, err := p.GitServerProtocol()
+	addr, err := p.GetValue(gitServerAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
-	host, err := p.GitServerHost()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	addr := protocol + "://" + host
-	port, err := p.GitServerPort()
-	if err != nil || port == "" {
-		return addr, nil
-	}
-	return addr + ":" + port, nil
-}
-
-func (p *platformConfig) Address() (string, error) {
-	addr, err := p.GetValue(platformServerAddr)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	port, err := p.GetValue(platformServerPort)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	return addr + ":" + port, nil
+	return addr, nil
 }
 
 func (p *platformConfig) WebSiteAddress() (string, error) {
-	addr, err := p.GetValue(webSiteAddr)
+	addr, err := p.GetValue(websiteHTTPAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
-	port, err := p.GetValue(webSitePort)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	// Don't show port if they're standard HTTP
-	if port == "80" || port == "443" {
-		return addr, nil
-	}
-
-	return addr + ":" + port, nil
+	return addr, nil
 }
 
 func (p *platformConfig) PlatformAddress() (string, error) {
-	addr, err := p.GetValue(platformServerAddr)
+	addr, err := p.GetValue(platformGRPCAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
-	port, err := p.GetValue(platformServerGrpcPort)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	return addr + ":" + port, nil
+	return addr, nil
 }
 
 func (p *platformConfig) FlowAddress() (string, error) {
-	addr, err := p.GetValue(flowServerGrpcAddress)
+	addr, err := p.GetValue(flowGRPCAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-
-	port, err := p.GetValue(flowServerGrpcPort)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	return addr + ":" + port, nil
+	return addr, nil
 }
 
 func (p *platformConfig) P4ServerAddr() (string, error) {
@@ -243,160 +172,3 @@ func (p *platformConfig) P4RemoteDepotName() (string, error) {
 	}
 	return remoteName, nil
 }
-
-func (p *platformConfig) MessageQueueAddr() (string, error) {
-	protocol, err := p.GetValue(mqAddrProtocol)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	username, err := p.GetValue(mqAddrUsername)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	password, err := p.GetValue(mqAddrPassword)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	host, err := p.GetValue(mqAddrHost)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	port, err := p.GetValue(mqAddrPort)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	return fmt.Sprintf("%s://%s:%s@%s:%s/", protocol, username, password, host, port), nil
-}
-
-var PlatformTmpl = `
-paas:
-  website:
-    addr: codelingo.io
-    port: "80"
-  platform:
-    addr: abbfcbe96441b11e8a05602f749f33b9-587558986.us-west-2.elb.amazonaws.com
-    port: "80"
-  flow:
-    address: abbfcbe96441b11e8a05602f749f33b9-587558986.us-west-2.elb.amazonaws.com
-    port: "8008"
-  grpc_port: "8002"
-  gitserver:
-    tls: "false"
-    remote:
-      host: git.codelingo.io
-      name: codelingo
-      port: "443"
-      protocol: https
-  p4server:
-    remote:
-      name: "codelingo"
-      protocol: "https"
-      host: "codelingo.io"
-      port: "30166"
-      depot:
-        name: depot
-  gcloud:
-    API_key: "AIzaSyD1YT3XQJNsnx-gjnaJYUi_SKqVKigrQAA"
-
-dev:
-  flow:
-    address: localhost
-    port: "8008"
-  website:
-    addr: 10.0.17.233
-    port: "30303"
-  platform:
-    addr: localhost
-    port: "3030"
-  gitserver:
-    tls: "false"
-    remote:
-      name: "codelingo_dev"
-      protocol: "http"
-      host: "localhost"
-      port: "3000"
-  p4server:
-    remote:
-      name: "codelingo_dev"
-      protocol: "http"
-      host: "10.0.17.233"
-      port: "30166"
-      depot:
-        name: "depot"
-
-onprem:
-  website:
-    addr: 10.0.17.233
-    port: "30303"
-  platform:
-    addr: 10.0.17.233
-    port: "30303"
-  flow:
-    address: 10.0.17.233
-    port: "30808"
-  grpc_port: "30082"
-  gitserver:
-    tls: "false"
-    remote:
-      name: "codelingo_onprem"
-      protocol: "http"
-      host: 10.0.17.233
-      port: "30300"
-  p4server:
-    remote:
-      name: "codelingo_onprem"
-      protocol: "http"
-      host: 10.0.17.233
-      port: "30166"
-      depot:
-        name: "depot"
-
-test:
-  website:
-    addr: 10.0.17.233
-    port: "30303"
-  platform:
-    addr: localhost
-    port: "3030"
-  gitserver:
-    tls: "true"
-    remote:
-      name: "codelingo_dev"
-      protocol: "http"
-      host: "localhost"
-      port: "3000"
-  p4server:
-    tls: "true"
-    remote:
-      name: "codelingo_dev"
-      protocol: "http"
-      host: "10.0.17.233"
-      port: "30166"
-      depot:
-        name: "depot"
-
-staging:
-  flow:
-    address: 104.155.184.194
-  gitserver:
-    remote:
-      host: 104.198.235.61
-      name: codelingo_staging
-      port: "3000"
-      protocol: http
-    tls: "false"
-  p4server:
-    remote:
-      host: 35.188.92.59
-      name: codelingo_staging
-  platform:
-    addr: 104.155.184.194
-  website:
-    addr: 35.202.47.222
-    port: "80"
-`[1:]

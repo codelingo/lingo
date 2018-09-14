@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -302,7 +303,7 @@ func setupLingo(c *cli.Context) (string, error) {
 	// TODO (Junyu) set proper Perforce Username and password
 	// Prompt for user
 	if username == "" || password == "" {
-		lingoTokenAddr := "http://" + webAddr + "/settings/profile"
+		lingoTokenAddr := webAddr + "/settings/profile"
 		fmt.Println("Please sign in to " + lingoTokenAddr + " to generate a new Token linked with your CodeLingo User account.")
 	}
 
@@ -366,7 +367,7 @@ func setupLingo(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	gitaddr, err := platConfig.GitServerAddr()
+	gitAddr, err := platConfig.GitServerAddr()
 	if err != nil {
 		return "", errors.Trace(err)
 	}
@@ -390,29 +391,22 @@ func setupLingo(c *cli.Context) (string, error) {
 		}
 	}
 	out, err := gitCMD("config",
-		"--global", fmt.Sprintf("credential.%s.helper", gitaddr),
+		"--global", fmt.Sprintf("credential.%s.helper", gitAddr),
 		fmt.Sprintf("store --file %s", gitCfgFile),
 	)
 	if err != nil {
 		return "", errors.Annotate(err, out)
 	}
 
-	// Get git server details
-	gitprotocol, err := platConfig.GitServerProtocol()
+	// Set git server details
+	gitUrl, err := url.Parse(gitAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	githost, err := platConfig.GitServerHost()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-	gitport, err := platConfig.GitServerPort()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
+	gitUrl.User = url.UserPassword(username, password)
+	data := []byte(gitUrl.String())
 
-	data := []byte(fmt.Sprintf("%s://%s:%s@%s%%3a%s", gitprotocol, username, password, githost, gitport))
-	// write creds to config file
+	// Write creds to config file
 	if err := ioutil.WriteFile(gitCredFile, data, 0755); err != nil {
 		return "", errors.Trace(err)
 	}
