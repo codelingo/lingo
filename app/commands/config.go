@@ -399,12 +399,12 @@ func setupLingo(c *cli.Context) (string, error) {
 	}
 
 	// Set git server details
-	gitUrl, err := url.Parse(gitAddr)
+	gitURL, err := url.Parse(gitAddr)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	gitUrl.User = url.UserPassword(username, password)
-	data := []byte(gitUrl.String())
+	gitURL.User = url.UserPassword(username, password)
+	data := []byte(gitURL.String())
 
 	// Write creds to config file
 	if err := ioutil.WriteFile(gitCredFile, data, 0755); err != nil {

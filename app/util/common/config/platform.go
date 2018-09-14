@@ -27,7 +27,7 @@ const (
 
 // defaultConfig is the config that is written when an existing config can't be found.
 const defaultConfig = `paas:
-  website: https://codelingo.io
+  website: https://www.codelingo.io
   platform: grpc-platform.codelingo.io:443
   flow: grpc-flow.codelingo.io:443
   gitserver:
