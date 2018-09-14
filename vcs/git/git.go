@@ -223,7 +223,7 @@ func (r *Repo) Sync(repoOwner string, workingDir string) error {
 		return errors.Trace(err)
 	}
 	// sync local and remote before reviewing
-	_, err = gitCMD("push", remote, "HEAD", "--force", "--no-verify")
+	_, err = gitCMD("push", "-4", remote, "HEAD", "--force", "--no-verify")
 	return errors.Trace(err)
 }
 
@@ -312,7 +312,7 @@ func (r *Repo) CheckoutRemote(sha string) error {
 	}
 
 	// fetch origin
-	if _, err = gitCMD("fetch", "origin"); err != nil {
+	if _, err = gitCMD("fetch", "-4", "origin"); err != nil {
 		return errors.Trace(err)
 	}
 

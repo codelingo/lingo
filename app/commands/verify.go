@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"context"
+
 	"github.com/blang/semver"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
@@ -311,7 +312,7 @@ func verifyClientVersion() error {
 	}
 
 	if compare < 0 {
-		return errors.New("Your client is out of date. This may result in unexpected behaviour.")
+		return errors.New("Your client is out of date. Run `lingo update` to automatically update it.")
 	} else if compare > 0 {
 		return errors.New("Your client is newer than the platform. This may result in unexpected behaviour.")
 	} else {
