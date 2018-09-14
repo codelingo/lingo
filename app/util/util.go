@@ -42,11 +42,11 @@ func SetDebugLogger() error {
 
 var Logger *zap.SugaredLogger
 
-// TODO(anyone): Change this back to '.lingo' after making config loader check if
-//               .lingo is file (not dir) before reading.
+// TODO(anyone): Change this back to 'codelingo.yaml' after making config loader check if
+//               codelingo.yaml is file (not dir) before reading.
 const (
 	defaultHome         = ".codelingo"
-	DefaultTenetCfgPath = ".lingo"
+	DefaultTenetCfgPath = "codelingo.yaml"
 )
 
 // OpenFileCmd launches the specified editor at the given filename and line

@@ -8,7 +8,7 @@ tenets:
 
     flows:
       codelingo/review:
-        comments: This command should have a correspond unit test `testhelper.Command("{{cmd}}",  commands.All())
+        comment: This command should have a correspond unit test `testhelper.Command("{{cmd}}",  commands.All())
     query: |
       import codelingo/ast/go
 

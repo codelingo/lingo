@@ -27,12 +27,12 @@ const (
 
 var reviewCommand = cli.Command{
 	Name:        "review",
-	Usage:       "Review code following tenets in .lingo.",
+	Usage:       "Review code following tenets in codelingo.yaml.",
 	Subcommands: cli.Commands{*pullRequestCmd},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  util.LingoFile.String(),
-			Usage: "A .lingo file to perform the review with. If the flag is not set, .lingo files are read from the branch being reviewed.",
+			Usage: "A codelingo.yaml file to perform the review with. If the flag is not set, codelingo.yaml files are read from the branch being reviewed.",
 		},
 		cli.StringFlag{
 			Name:  util.DiffFlg.String(),
@@ -230,7 +230,7 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	// Remove dicarded issues from report
-	var keptIssues []*flowengine.Issue
+	keptIssues := []*flowengine.Issue{}
 	for _, issue := range issues {
 		if !issue.Discard {
 			keptIssues = append(keptIssues, issue)

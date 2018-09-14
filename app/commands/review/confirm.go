@@ -1,10 +1,8 @@
 package review
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -56,7 +54,7 @@ func (c IssueConfirmer) Confirm(attempt int, issue *flow.Issue) bool {
 	var options string
 	fmt.Print("\n[o]pen")
 	if c.output {
-		fmt.Print(" [d]iscard [K]eep")
+		fmt.Print(" [d]iscard [k]eep")
 	}
 	fmt.Print(": ")
 
@@ -100,9 +98,9 @@ func (c IssueConfirmer) Confirm(attempt int, issue *flow.Issue) bool {
 
 		// TODO(waigani) only prompt for reason if we're sending to a service.
 		// https://github.com/codelingo/demo/issues/5
-		fmt.Print("reason: ")
-		in := bufio.NewReader(os.Stdin)
-		issue.DiscardReason, _ = in.ReadString('\n')
+		//fmt.Print("reason: ")
+		//in := bufio.NewReader(os.Stdin)
+		//issue.DiscardReason, _ = in.ReadString('\n')
 
 		// TODO(waigani) we are now always returning true. Need to decide
 		// how caller will deal with removing isseus, ie. KeptIssues vs AllIssues,

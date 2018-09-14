@@ -17,7 +17,7 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "init",
-		Usage:  "Create a .lingo file in the current directory.",
+		Usage:  "Create a codelingo.yaml file in the current directory.",
 		Action: newLingoAction,
 	}, false, false, vcsRq, versionRq)
 }
@@ -29,7 +29,7 @@ func newLingoAction(ctx *cli.Context) {
 		util.FatalOSErr(err)
 		return
 	}
-	fmt.Println("Success! A .lingo file has been written in the current directory. Edit it with your editor of choice to get started writing Tenets.")
+	fmt.Println("Success! A codelingo.yaml file has been written in the current directory. Edit it with your editor of choice to get started writing Tenets.")
 
 }
 
@@ -48,7 +48,7 @@ func writeDotLingoToCurrentDir(c *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 	if _, err := os.Stat(cfgPath); err == nil {
-		return "", errors.Errorf(".lingo file already exists: %q", cfgPath)
+		return "", errors.Errorf("codelingo.yaml file already exists: %q", cfgPath)
 	}
 
 	return cfgPath, writeDotLingo(cfgPath)
@@ -61,7 +61,7 @@ tenets:
     doc: Example tenet that finds all functions.
     flows:
       codelingo/review:
-        comments: This is a function, but you probably already knew that.
+        comment: This is a function, but you probably already knew that.
     query: |
       import codelingo/ast/common
 

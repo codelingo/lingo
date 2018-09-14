@@ -1,11 +1,12 @@
 tenets:
+  - import: codelingo/go
   - name: deprecated-dep
     doc: Finds imports of deprecated dependencies.
     flows:
       # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
       # to import lines and another for recording refactor progress
       codelingo/review:
-        comments: Deprecated dependency, consider replacing it.
+        comment: Deprecated dependency, consider replacing it.
     query: |
       import codelingo/ast/go
 
@@ -14,15 +15,17 @@ tenets:
         go.import_spec(depth = 2):
           any_of:
             go.basic_lit:
-              value: /^github.com\/codelingo\/platform/
+              value as platformValue
+              regex(/^github.com\/codelingo\/platform/, platformValue)
             go.basic_lit:
-              value: /^github.com\/codelingo\/kit/
+              value as kitValue
+              regex(/^github.com\/codelingo\/kit/, kitValue)
 
   - name: platform-call
     doc: Finds gRPC calls to platform which should be routed through the flow server.
     flows:
       codelingo/review:
-        comments: Please reroute this call through the flow server.
+        comment: Please reroute this call through the flow server.
     query: |
       import codelingo/ast/go
 
@@ -40,7 +43,8 @@ tenets:
       # Find locations where those methods are called on the client
       go.file(depth = any):
         exclude:
-          filename: /service/
+          filename as serviceFilename
+          regex(/service/, serviceFilename)
         @ review.comment
         go.call_expr(depth = any):
           go.selector_expr:
@@ -53,7 +57,7 @@ tenets:
       Find places errors are being incorrectly output to the user.
     flows:
       codelingo/review:
-        comments: |
+        comment: |
           Errors should only be output to the user in app/util/errors.go
     query: |
       import (
@@ -62,7 +66,8 @@ tenets:
 
       go.file(depth = any):
         exclude:
-          filename: /^(\.\/)?app\/util\/errors.go$/
+          filename as errorsFilename
+          regex(/^(\.\/)?app\/util\/errors.go$/, errorsFilename)
         any_of:
           go.import_spec(depth = any): # aliased import
             go.ident:
@@ -82,7 +87,8 @@ tenets:
               go.ident:
                 name as packageName
               go.ident:
-                name: /^(P|Fp)rint.*$/
+                name as printName
+                regex(/^(P|Fp)rint.*$/, printName)
             go.selector_expr:  # Calls like log.Print(err)
               go.ident:
                 name == "log"

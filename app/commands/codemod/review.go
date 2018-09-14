@@ -106,7 +106,7 @@ func MakeReport(issues []*flow.Issue, format, outputFile string) (string, error)
 	return string(data), nil
 }
 
-// Read a .lingo file from a filepath argument
+// Read a codelingo.yaml file from a filepath argument
 func ReadDotLingo(ctx *cli.Context) (string, error) {
 	var dotlingo []byte
 
@@ -172,7 +172,7 @@ l:
 
 			// TODO(waigani) attach Tenet to issue
 			// DEMOWARE hardcoding clql to one in root dir
-			dLingoStr, err := ioutil.ReadFile(".lingo")
+			dLingoStr, err := ioutil.ReadFile("codelingo.yaml")
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
