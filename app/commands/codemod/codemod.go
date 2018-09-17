@@ -4,16 +4,10 @@ import (
 	"bytes"
 	"go/ast"
 	"go/format"
-	//"go/printer"
 	"go/token"
-	"reflect"
 	"strings"
 
 	"github.com/juju/errors"
-	//"github.com/waigani/xxx"
-
-	"github.com/codelingo/clql/inner"
-	"github.com/codelingo/lingo/app/util"
 )
 
 type SRCHunk struct {
@@ -34,111 +28,113 @@ func toString(node interface{}) (string, error) {
 }
 
 func ClqlToSrc(clql string) (hunks map[string]string, err error) {
+	return nil, errors.New("currently unavailable; WIP flow")
+
 	// TODO(waigani) currently only supports one hunk / @codemod.set decorator
 
-	hunks = make(map[string]string)
-	clqlQueryAST, err := inner.ParseString(clql)
-	if err != nil {
-		//xxx.Print(clql)
-		util.Logger.Infof("clql: %s", clql)
-		return nil, errors.Trace(err)
-	}
-
-	root := clqlQueryAST.GetFactTree()
-
-	var finalASTs []interface{}
-	for _, child := range root.GetChildren() {
-		childFact := child.GetFact()
-		if namespace := childFact.ID.GetNamespace(); namespace != "go" {
-			return nil, errors.Errorf("expected go namespace, got: %s", namespace)
-
-		}
-		// build ast node from fact.
-		parentKind := snakeCaseToCamelCase(childFact.ID.GetKind())
-		astChildNode := astFactory[parentKind]()
-
-		// add all properties to node.
-		for _, grandChild := range childFact.GetChildren() {
-			processElm(astChildNode, childFact, grandChild, hunks)
-		}
-		// collect all nodes
-		finalASTs = append(finalASTs, astChildNode)
-	}
-
-	// print asts
-	for _, node := range finalASTs {
-
-		// funcDeclNode := node.(*ast.FuncDecl)
-		// funcDeclNode.Body = new(ast.BlockStmt)
-		// funcDeclNode.Type = new(ast.FuncType)
-		//	funcDeclNode.Doc = new(ast.CommentGroup)
-		// funcDeclNode.Recv = new(ast.FieldList)
-		//	funcDeclNode.Doc = new(ast.CommentGroup)
-
-		//	xxx.Dump(node)
-
-		src, err := toString(node)
-
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-
-		// DEMOWARE(waigani) hardcoding to default key for now.
-		hunks["_default"] = src
-	}
-	return hunks, nil
+	//hunks = make(map[string]string)
+	//clqlQueryAST, err := inner.ParseString(clql)
+	//if err != nil {
+	//	//xxx.Print(clql)
+	//	util.Logger.Infof("clql: %s", clql)
+	//	return nil, errors.Trace(err)
+	//}
+	//
+	//root := clqlQueryAST.GetFactTree()
+	//
+	//var finalASTs []interface{}
+	//for _, child := range root.GetChildren() {
+	//	childFact := child.GetFact()
+	//	if namespace := childFact.ID.GetNamespace(); namespace != "go" {
+	//		return nil, errors.Errorf("expected go namespace, got: %s", namespace)
+	//
+	//	}
+	//	// build ast node from fact.
+	//	parentKind := snakeCaseToCamelCase(childFact.ID.GetKind())
+	//	astChildNode := astFactory[parentKind]()
+	//
+	//	// add all properties to node.
+	//	for _, grandChild := range childFact.GetChildren() {
+	//		processElm(astChildNode, childFact, grandChild, hunks)
+	//	}
+	//	// collect all nodes
+	//	finalASTs = append(finalASTs, astChildNode)
+	//}
+	//
+	//// print asts
+	//for _, node := range finalASTs {
+	//
+	//	// funcDeclNode := node.(*ast.FuncDecl)
+	//	// funcDeclNode.Body = new(ast.BlockStmt)
+	//	// funcDeclNode.Type = new(ast.FuncType)
+	//	//	funcDeclNode.Doc = new(ast.CommentGroup)
+	//	// funcDeclNode.Recv = new(ast.FieldList)
+	//	//	funcDeclNode.Doc = new(ast.CommentGroup)
+	//
+	//	//	xxx.Dump(node)
+	//
+	//	src, err := toString(node)
+	//
+	//	if err != nil {
+	//		return nil, errors.Trace(err)
+	//	}
+	//
+	//	// DEMOWARE(waigani) hardcoding to default key for now.
+	//	hunks["_default"] = src
+	//}
+	//return hunks, nil
 }
 
-func processElm(astParentNode interface{}, parent *inner.Fact, childElm *inner.Element, srcs map[string]string) {
-
-	parentKind := snakeCaseToCamelCase(parent.ID.GetKind())
-	var value interface{}
-	//var isFact bool
-	var name string
-
-	// TODO(waigani) transform name
-	if prop := childElm.GetProperty(); prop != nil {
-		name = snakeCaseToCamelCase(prop.Name)
-		value = propertyConvert(parentKind, name, prop)
-	}
-
-	if childFact := childElm.GetFact(); childFact != nil {
-
-		childFactKind := snakeCaseToCamelCase(childFact.ID.GetKind())
-		if factory, ok := astFactory[childFactKind]; ok {
-			value = factory()
-		} else {
-			util.Logger.Infof("need new fact: %s", childFactKind)
-		}
-
-		// process every child Elm of the fact, add properties to the node.
-		for _, grandChildElm := range childFact.GetChildren() {
-			processElm(value, childFact, grandChildElm, srcs)
-		}
-
-		// TODO(waigani) transform name
-		name = snakeCaseToCamelCase(childFact.GetID().GetKind())
-
-		// TODO(waigani) workout parent field name by matching fact types
-		// hardcoding for now
-		name = "Name"
-
-		//isFact = true
-	}
-
-	// xxx.Print("child: " + name)
-
-	// set the ast field
-	astParentNodeVal := reflect.ValueOf(astParentNode).Elem()
-
-	f := astParentNodeVal.FieldByName(name)
-	if f.IsValid() && f.CanSet() {
-		f.Set(reflect.ValueOf(value))
-	} else {
-		// xxx.Print("field not found: " + name + " for parent: " + parentKind)
-	}
-
-}
+//func processElm(astParentNode interface{}, parent *inner.Fact, childElm *inner.Element, srcs map[string]string) {
+//
+//	parentKind := snakeCaseToCamelCase(parent.ID.GetKind())
+//	var value interface{}
+//	//var isFact bool
+//	var name string
+//
+//	// TODO(waigani) transform name
+//	if prop := childElm.GetProperty(); prop != nil {
+//		name = snakeCaseToCamelCase(prop.Name)
+//		value = propertyConvert(parentKind, name, prop)
+//	}
+//
+//	if childFact := childElm.GetFact(); childFact != nil {
+//
+//		childFactKind := snakeCaseToCamelCase(childFact.ID.GetKind())
+//		if factory, ok := astFactory[childFactKind]; ok {
+//			value = factory()
+//		} else {
+//			util.Logger.Infof("need new fact: %s", childFactKind)
+//		}
+//
+//		// process every child Elm of the fact, add properties to the node.
+//		for _, grandChildElm := range childFact.GetChildren() {
+//			processElm(value, childFact, grandChildElm, srcs)
+//		}
+//
+//		// TODO(waigani) transform name
+//		name = snakeCaseToCamelCase(childFact.GetID().GetKind())
+//
+//		// TODO(waigani) workout parent field name by matching fact types
+//		// hardcoding for now
+//		name = "Name"
+//
+//		//isFact = true
+//	}
+//
+//	// xxx.Print("child: " + name)
+//
+//	// set the ast field
+//	astParentNodeVal := reflect.ValueOf(astParentNode).Elem()
+//
+//	f := astParentNodeVal.FieldByName(name)
+//	if f.IsValid() && f.CanSet() {
+//		f.Set(reflect.ValueOf(value))
+//	} else {
+//		// xxx.Print("field not found: " + name + " for parent: " + parentKind)
+//	}
+//
+//}
 
 var astFactory = map[string]func() interface{}{
 	"Decls": func() interface{} {
@@ -167,16 +163,16 @@ var astFactory = map[string]func() interface{}{
 	},
 }
 
-func propertyConvert(parent, field string, in *inner.Property) interface{} {
-
-	switch parent + "." + field {
-	case "Ident.NamePos":
-		return token.Pos(in.GetInt())
-	}
-
-	return in.GetString_()
-
-}
+//func propertyConvert(parent, field string, in *inner.Property) interface{} {
+//
+//	switch parent + "." + field {
+//	case "Ident.NamePos":
+//		return token.Pos(in.GetInt())
+//	}
+//
+//	return in.GetString_()
+//
+//}
 
 func snakeCaseToCamelCase(inputUnderScoreStr string) (camelCase string) {
 	isToUpper := false

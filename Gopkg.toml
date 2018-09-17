@@ -13,14 +13,6 @@ ignored = ["github.com/codelingo/lingo/_examples"]
   version = "~1.20.0"
 
 [[constraint]]
-  name = "github.com/codelingo/clql"
-  source = "git@github.com:codelingo/clql.git"
-
-[[constraint]]
-  name = "github.com/codelingo/platform"
-  source = "git@github.com:codelingo/platform.git"
-
-[[constraint]]
   name = "github.com/fatih/color"
   version = "~1.5.0"
 
@@ -30,9 +22,6 @@ ignored = ["github.com/codelingo/lingo/_examples"]
 
 [[constraint]]
   name = "github.com/gogits/go-gogs-client"
-
-[[constraint]]
-  name = "github.com/golang/protobuf"
 
 [[constraint]]
   name = "github.com/hishboy/gocommons"

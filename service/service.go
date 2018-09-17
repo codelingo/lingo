@@ -6,22 +6,21 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"sync"
 
 	"github.com/codelingo/lingo/app/util/common/config"
-	"github.com/codelingo/lingo/service/grpc/codelingo"
+	rpc "github.com/codelingo/rpc/service"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-func Review(ctx context.Context, req *codelingo.ReviewRequest) (chan *codelingo.Issue, error) {
+func Review(ctx context.Context, req *rpc.ReviewRequest) (chan *rpc.Issue, error) {
 	cc, err := GrpcConnection(LocalClient, PlatformServer)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	client := codelingo.NewCodeLingoClient(cc)
+	client := rpc.NewCodeLingoClient(cc)
 	stream, err := client.Review(ctx)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
@@ -36,14 +35,14 @@ func Review(ctx context.Context, req *codelingo.ReviewRequest) (chan *codelingo.
 		errors.Trace(err)
 	}
 
-	issuec := make(chan *codelingo.Issue)
+	issuec := make(chan *rpc.Issue)
 	go func() {
 		for {
 			in, err := stream.Recv()
 
 			if err != nil {
 				if err != io.EOF {
-					issuec <- &codelingo.Issue{Err: err.Error()}
+					issuec <- &rpc.Issue{Err: err.Error()}
 				}
 				close(issuec)
 				return
@@ -53,16 +52,6 @@ func Review(ctx context.Context, req *codelingo.ReviewRequest) (chan *codelingo.
 	}()
 
 	return issuec, nil
-}
-
-func Query(ctx context.Context, cc *grpc.ClientConn, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
-	client := codelingo.NewCodeLingoClient(cc)
-	resultc, err := runQuery(ctx, client, queryc)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return resultc, nil
 }
 
 const (
@@ -146,69 +135,14 @@ func credsFromHost(host string) (credentials.TransportCredentials, error) {
 	return credentials.NewTLS(&tls.Config{ServerName: "", RootCAs: cp}), nil
 }
 
-func runQuery(ctx context.Context, client codelingo.CodeLingoClient, queryc chan *codelingo.QueryRequest) (chan *codelingo.QueryReply, error) {
-	stream, err := client.Query(ctx)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
-	}
-
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
-	resultc := make(chan *codelingo.QueryReply)
-	go func() {
-		wg.Wait()
-		close(resultc)
-	}()
-
-	go func() {
-		defer wg.Done()
-		for {
-			in, err := stream.Recv()
-
-			if err != nil {
-				if err != io.EOF {
-					resultc <- &codelingo.QueryReply{Error: err.Error()}
-				}
-				return
-			}
-			resultc <- in
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		for {
-			select {
-			case query, ok := <-queryc:
-				if !ok {
-					err = stream.CloseSend()
-					if err != nil {
-						resultc <- &codelingo.QueryReply{Error: err.Error()}
-					}
-					return
-				}
-
-				if err := stream.Send(query); err != nil {
-					resultc <- &codelingo.QueryReply{Error: err.Error()}
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
-	return resultc, nil
-}
-
 func ListLexicons(ctx context.Context) ([]string, error) {
 	conn, err := GrpcConnection(LocalClient, PlatformServer)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	c := codelingo.NewCodeLingoClient(conn)
+	c := rpc.NewCodeLingoClient(conn)
 
-	req := &codelingo.ListLexiconsRequest{}
+	req := &rpc.ListLexiconsRequest{}
 	reply, err := c.ListLexicons(ctx, req)
 	if err != nil {
 		return nil, err
@@ -221,9 +155,9 @@ func ListFacts(ctx context.Context, owner, name, version string) (map[string][]s
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	c := codelingo.NewCodeLingoClient(conn)
+	c := rpc.NewCodeLingoClient(conn)
 
-	req := &codelingo.ListFactsRequest{
+	req := &rpc.ListFactsRequest{
 		Owner:   owner,
 		Name:    name,
 		Version: version,
@@ -243,14 +177,14 @@ func ListFacts(ctx context.Context, owner, name, version string) (map[string][]s
 
 }
 
-func DescribeFact(ctx context.Context, owner, name, version, fact string) (*codelingo.DescribeFactReply, error) {
+func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.DescribeFactReply, error) {
 	conn, err := GrpcConnection(LocalClient, PlatformServer)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	c := codelingo.NewCodeLingoClient(conn)
+	c := rpc.NewCodeLingoClient(conn)
 
-	req := &codelingo.DescribeFactRequest{
+	req := &rpc.DescribeFactRequest{
 		Owner:   owner,
 		Name:    name,
 		Version: version,
@@ -264,12 +198,12 @@ func DescribeFact(ctx context.Context, owner, name, version, fact string) (*code
 	return reply, nil
 }
 
-func QueryFromOffset(ctx context.Context, req *codelingo.QueryFromOffsetRequest) (*codelingo.QueryFromOffsetReply, error) {
+func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc.QueryFromOffsetReply, error) {
 	conn, err := GrpcConnection(LocalClient, PlatformServer)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	c := codelingo.NewCodeLingoClient(conn)
+	c := rpc.NewCodeLingoClient(conn)
 
 	reply, err := c.QueryFromOffset(ctx, req)
 	if err != nil {
@@ -284,9 +218,9 @@ func LatestClientVersion(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
-	c := codelingo.NewCodeLingoClient(conn)
+	c := rpc.NewCodeLingoClient(conn)
 
-	req := &codelingo.LatestClientVersionRequest{}
+	req := &rpc.LatestClientVersionRequest{}
 	reply, err := c.LatestClientVersion(ctx, req)
 	if err != nil {
 		return "", err

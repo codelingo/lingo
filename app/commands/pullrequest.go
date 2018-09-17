@@ -1,16 +1,14 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/codelingo/lingo/app/util"
-	flowengine "github.com/codelingo/platform/flow/rpc/flowengine"
-	"github.com/juju/errors"
-
-	"github.com/codelingo/lingo/app/commands/review"
-
-	"context"
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/review"
+	"github.com/codelingo/lingo/app/util"
+	"github.com/codelingo/rpc/flow"
+	"github.com/juju/errors"
 )
 
 var pullRequestCmd = &cli.Command{
@@ -73,11 +71,11 @@ func reviewPullRequestCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	ctx, cancel := util.UserCancelContext(context.Background())
-	issuec, errorc, err := review.RequestReview(ctx, &flowengine.ReviewRequest{
+	issuec, errorc, err := review.RequestReview(ctx, &flow.ReviewRequest{
 		Host:     opts.Host,
 		Hostname: opts.HostName,
 		// TODO (Junyu) separate it into two separate fields
-		OwnerOrDepot: &flowengine.ReviewRequest_Owner{opts.Owner},
+		OwnerOrDepot: &flow.ReviewRequest_Owner{opts.Owner},
 		Repo:         opts.Name,
 		// Sha and patches are defined by the PR
 		IsPullRequest: true,

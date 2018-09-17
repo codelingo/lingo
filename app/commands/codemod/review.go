@@ -2,13 +2,11 @@ package codemod
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-
-	"gopkg.in/yaml.v2"
-
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -16,12 +14,10 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
-	"github.com/codelingo/platform/flow/rpc/client"
-	flow "github.com/codelingo/platform/flow/rpc/flowengine"
-
-	"context"
-
+	"github.com/codelingo/rpc/flow"
+	"github.com/codelingo/rpc/flow/client"
 	"github.com/juju/errors"
+	"gopkg.in/yaml.v2"
 )
 
 func RequestReview(ctx context.Context, req *flow.ReviewRequest) (chan *flow.Issue, chan error, error) {
