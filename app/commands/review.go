@@ -1,23 +1,18 @@
 package commands
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"strings"
 
-	"github.com/juju/errors"
-
-	"github.com/codelingo/lingo/vcs"
-	flowengine "github.com/codelingo/platform/flow/rpc/flowengine"
-
+	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands/review"
 	"github.com/codelingo/lingo/app/util"
-
-	"os"
-
-	"context"
-
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/common/config"
+	"github.com/codelingo/lingo/vcs"
+	"github.com/codelingo/rpc/flow"
+	"github.com/juju/errors"
 )
 
 const (
@@ -166,10 +161,10 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	ctx, cancel := util.UserCancelContext(context.Background())
-	issuec := make(chan *flowengine.Issue)
+	issuec := make(chan *flow.Issue)
 	errorc := make(chan error)
 
-	req := &flowengine.ReviewRequest{
+	req := &flow.ReviewRequest{
 		Repo:     name,
 		Sha:      sha,
 		Patches:  patches,
@@ -190,7 +185,7 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 
 		req.Host = addr
 		req.Hostname = hostname
-		req.OwnerOrDepot = &flowengine.ReviewRequest_Owner{owner}
+		req.OwnerOrDepot = &flow.ReviewRequest_Owner{owner}
 	case vcsP4:
 		addr, err := cfg.P4ServerAddr()
 		if err != nil {
@@ -208,7 +203,7 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 
 		req.Host = addr
 		req.Hostname = hostname
-		req.OwnerOrDepot = &flowengine.ReviewRequest_Depot{depot}
+		req.OwnerOrDepot = &flow.ReviewRequest_Depot{depot}
 		req.Repo = name
 	default:
 		return "", errors.Errorf("Invalid VCS '%s'", vcsTypeStr)
@@ -230,7 +225,7 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	// Remove dicarded issues from report
-	keptIssues := []*flowengine.Issue{}
+	keptIssues := []*flow.Issue{}
 	for _, issue := range issues {
 		if !issue.Discard {
 			keptIssues = append(keptIssues, issue)

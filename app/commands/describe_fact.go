@@ -2,14 +2,14 @@ package commands
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"strings"
 
-	"context"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
-	"github.com/codelingo/lingo/service/grpc/codelingo"
+	rpc "github.com/codelingo/rpc/service"
 	"github.com/juju/errors"
 )
 
@@ -55,7 +55,7 @@ func describeFact(cliCtx *cli.Context) error {
 		name = args[1]
 		fact = args[2]
 	} else {
-		return errors.New("Please specify a properly namespaced fact, ie,\nlingo describe-fact codelingo/go/func_decl")
+		return errors.New("Please specify a properly namespaced fact, ie,\nlingo describe-fact rpc/go/func_decl")
 	}
 
 	ctx, _ := util.UserCancelContext(context.Background())
@@ -76,7 +76,7 @@ func describeFact(cliCtx *cli.Context) error {
 
 // TODO(BlakeMScurr) Refactor this and getFormat (from list_lexicons)
 // and getFactFormat (from list_facts) which have very similar logic
-func getDescriptionFormat(format string, output *codelingo.DescribeFactReply) []byte {
+func getDescriptionFormat(format string, output *rpc.DescribeFactReply) []byte {
 	var content []byte
 	switch format {
 	case "json":
@@ -89,7 +89,7 @@ func getDescriptionFormat(format string, output *codelingo.DescribeFactReply) []
 	return content
 }
 
-func formatDescription(description *codelingo.DescribeFactReply) string {
+func formatDescription(description *rpc.DescribeFactReply) string {
 	// TODO(BlakeMScurr) use a string builder and optimise this
 	ret := "Description:\n\t"
 	ret += description.Description

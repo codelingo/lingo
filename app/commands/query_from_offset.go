@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,11 +10,10 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"context"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
-	"github.com/codelingo/lingo/service/grpc/codelingo"
+	codelingo "github.com/codelingo/rpc/service"
 	"github.com/juju/errors"
 )
 

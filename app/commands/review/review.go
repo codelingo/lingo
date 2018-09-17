@@ -12,8 +12,8 @@ import (
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
-	"github.com/codelingo/platform/flow/rpc/client"
-	flow "github.com/codelingo/platform/flow/rpc/flowengine"
+	"github.com/codelingo/rpc/flow"
+	"github.com/codelingo/rpc/flow/client"
 	"github.com/juju/errors"
 )
 

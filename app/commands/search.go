@@ -1,27 +1,23 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
-	"github.com/juju/errors"
-
+	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
-	"github.com/codelingo/lingo/service/grpc/codelingo"
-	"github.com/codelingo/platform/flow/rpc/client"
-	flowengine "github.com/codelingo/platform/flow/rpc/flowengine"
-
-	"context"
-
-	"github.com/codegangsta/cli"
+	"github.com/codelingo/rpc/flow"
+	"github.com/codelingo/rpc/flow/client"
+	"github.com/juju/errors"
 )
 
 var searchCommand = cli.Command{
 	Name:        "search",
-	Usage:       "Search code following queries in codelingo.yaml.",
+	Usage:       "Search code following queries in rpc.yaml.",
 	Subcommands: cli.Commands{*pullRequestCmd},
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -77,7 +73,7 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 
 	args := cliCtx.Args()
 	if len(args) == 0 {
-		return "", errors.New("Please specify the filepath to a codelingo.yaml file.")
+		return "", errors.New("Please specify the filepath to a rpc.yaml file.")
 	}
 
 	dotlingo, err := ioutil.ReadFile(args[0])
@@ -104,14 +100,14 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 	}
 
 	fmt.Println("Running search flow...")
-	resultc, errorc, err := c.Search(ctx, &flowengine.SearchRequest{
+	resultc, errorc, err := c.Search(ctx, &flow.SearchRequest{
 		Dotlingo: string(dotlingo),
 	})
 	if err != nil {
 		return "", errors.Trace(err)
 	}
 
-	results := []*codelingo.QueryReply{}
+	results := []*flow.SearchReply{}
 
 l:
 	for {
@@ -148,7 +144,7 @@ l:
 	return msg, errors.Trace(err)
 }
 
-func OutputResults(results []*codelingo.QueryReply, format, outputFile string) (string, error) {
+func OutputResults(results []*flow.SearchReply, format, outputFile string) (string, error) {
 	var data []byte
 	var err error
 	switch format {

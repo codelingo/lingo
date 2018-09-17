@@ -1,1 +1,0 @@
-This should be the only directory of protos for clients and lexicons. Clients, protos and Lexicons are version dependant.
