@@ -1,3 +1,4 @@
+// blah
 package main
 
 import (
