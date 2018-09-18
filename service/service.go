@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
-	"io"
 
 	"github.com/codelingo/lingo/app/util/common/config"
 	rpc "github.com/codelingo/rpc/service"
@@ -13,46 +11,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
-
-func Review(ctx context.Context, req *rpc.ReviewRequest) (chan *rpc.Issue, error) {
-	cc, err := GrpcConnection(LocalClient, PlatformServer)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	client := rpc.NewCodeLingoClient(cc)
-	stream, err := client.Review(ctx)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%v.Query(_) = _, %v", client, err))
-	}
-
-	if err := stream.Send(req); err != nil {
-		errors.Trace(err)
-	}
-
-	err = stream.CloseSend()
-	if err != nil {
-		errors.Trace(err)
-	}
-
-	issuec := make(chan *rpc.Issue)
-	go func() {
-		for {
-			in, err := stream.Recv()
-
-			if err != nil {
-				if err != io.EOF {
-					issuec <- &rpc.Issue{Err: err.Error()}
-				}
-				close(issuec)
-				return
-			}
-			issuec <- in
-		}
-	}()
-
-	return issuec, nil
-}
 
 const (
 	FlowServer = "flowserver"
