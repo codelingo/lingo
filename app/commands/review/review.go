@@ -25,10 +25,6 @@ func RequestReview(ctx context.Context, req *flow.ReviewRequest) (chan *flow.Iss
 	c := client.NewFlowClient(conn)
 
 	// Create context with metadata
-	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
-	if err != nil {
-		return nil, nil, errors.Trace(err)
-	}
 	ctx, err = grpcclient.AddUsernameToCtx(ctx)
 	if err != nil {
 		return nil, nil, errors.Trace(err)

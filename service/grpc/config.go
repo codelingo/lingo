@@ -1,52 +1,14 @@
 package grpc
 
 import (
+	"strings"
+
 	"github.com/codelingo/lingo/app/util"
 	commonConfig "github.com/codelingo/lingo/app/util/common/config"
-	serviceConfig "github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/metadata"
-	"path/filepath"
-	"strings"
 )
-
-func AddGcloudApiKeyToCtx(ctx context.Context) (context.Context, error) {
-	configsHome, err := util.ConfigHome()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	envFilepath := filepath.Join(configsHome, commonConfig.EnvCfgFile)
-	cfg := serviceConfig.New(envFilepath)
-
-	env, err := cfg.GetEnv()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	if env == "all" || env == "staging" {
-		cfg, err := commonConfig.Platform()
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		gcloudAPIKey, err := cfg.GetValue("gcloud.API_key")
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-
-		md, ok := metadata.FromOutgoingContext(ctx)
-		if !ok {
-			md = metadata.New(make(map[string]string))
-		}
-		md = md.Copy()
-		md["x-api-key"] = append(md["x-api-key"], gcloudAPIKey)
-
-		return metadata.NewOutgoingContext(ctx, md), nil
-	}
-
-	return ctx, nil
-}
 
 func AddUsernameToCtx(ctx context.Context) (context.Context, error) {
 	authCfg, err := commonConfig.Auth()
