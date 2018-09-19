@@ -47,6 +47,6 @@ $ lingo run review
 
 ## Slow Start
 
-Follow the [step by step guide](https://www.codelingo.io/docs/getting-started) to using lingo.
+Follow the [step by step guide](https://www.codelingo.io/docs/getting-started/) to using lingo.
 
 See and <a class="github-button" href="https://github.com/codelingo/codelingo" data-icon="octicon-star" aria-label="Star codelingo/codelingo on GitHub">star</a> the main repository at [github.com/codelingo/codelingo](https://github.com/codelingo/codelingo).
