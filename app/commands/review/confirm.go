@@ -54,13 +54,18 @@ func (c IssueConfirmer) Confirm(attempt int, issue *flow.Issue) bool {
 	var options string
 	fmt.Print("\n[o]pen")
 	if c.output {
-		fmt.Print(" [d]iscard [k]eep")
+		fmt.Print(" [i]ignore [a]pply [?]help")
 	}
 	fmt.Print(": ")
 
 	fmt.Scanln(&options)
 
 	switch options {
+	case "?":
+		fmt.Printf(" [i]ignore \t do not apply suggested changes")
+		fmt.Printf(" [a]apply \t apply suggested changes")
+		fmt.Printf(" [?] \t show this message")
+
 	case "o":
 		var app string
 		defaultEditor := "vi" // TODO(waigani) use EDITOR or VISUAL env vars
@@ -93,7 +98,7 @@ func (c IssueConfirmer) Confirm(attempt int, issue *flow.Issue) bool {
 		editor = app
 
 		c.Confirm(attempt, issue)
-	case "d":
+	case "i":
 		issue.Discard = true
 
 		// TODO(waigani) only prompt for reason if we're sending to a service.
@@ -107,7 +112,7 @@ func (c IssueConfirmer) Confirm(attempt int, issue *flow.Issue) bool {
 		// then being returning false here
 		// https://github.com/codelingo/demo/issues/6
 		return true
-	case "", "k", "K", "\n":
+	case "", "a", "\n":
 		return true
 	default:
 		fmt.Printf("invalid input: %s\n", options)
