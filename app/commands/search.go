@@ -90,10 +90,6 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 	ctx, cancel := util.UserCancelContext(context.Background())
 
 	// Create context with metadata
-	ctx, err = grpcclient.AddGcloudApiKeyToCtx(ctx)
-	if err != nil {
-		return "", errors.Trace(err)
-	}
 	ctx, err = grpcclient.AddUsernameToCtx(ctx)
 	if err != nil {
 		return "", errors.Trace(err)
