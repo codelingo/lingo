@@ -66,7 +66,7 @@ tenets:
       import codelingo/ast/common
 
       @ review.comment
-      common.func({depth: any})
+      common.func(depth = any)
 `[1:]
 
 	return errors.Trace(ioutil.WriteFile(cfgPath, []byte(lingoSrc), 0644))
