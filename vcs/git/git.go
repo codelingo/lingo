@@ -348,27 +348,24 @@ func (r *Repo) ClearChanges() error {
 
 // TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
 // by any git command-line actions
+// Error codes:
+// 129 incorrect arguments supplied to git
 func gitCMD(args ...string) (out string, err error) {
 	cmd := exec.Command("git", args...)
 	b, err := cmd.CombinedOutput()
 	out = string(b)
-	return out, errors.Annotate(err, out)
 
-	// TODO(waigani) stdout is empty?
-	// cmd := exec.Command("git", args...)
-	// e := &bytes.Buffer{}
-	// o := &bytes.Buffer{}
-	// cmd.Stderr = e
-	// cmd.Stdout = o
-	// stderr = string(e.Bytes())
-	// stdout = string(o.Bytes())
-	// err = cmd.Run()
-	// if err != nil {
-	// 	gitargs := strings.Join(args, " ")
-	// 	return "", stderr, errors.Annotate(err, "git args: `"+gitargs+"` stdout: "+stdout+" stderr: "+stderr)
+	if strings.Contains(out, "unknown switch `4'") {
+		rmindex := 1
 
-	// }
-	// return strings.TrimSpace(stdout), stderr, nil
+		if args[rmindex] == "-4" {
+			args = append(args[:rmindex], args[rmindex+1:]...)
+			return gitCMD(args...)
+		}
+	}
+
+	annotatedOutput := errors.Annotate(err, out)
+	return out, annotatedOutput
 }
 
 func gitCmdInDir(dir string, args ...string) (out string, err error) {
