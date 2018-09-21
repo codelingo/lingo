@@ -8,6 +8,16 @@ import (
 
 // patch -p0 < diff.patch
 
+func isFileBinaryGit(filename string) (bool, error) {
+	repoRoot, err := repoRoot()
+	if err != nil {
+		return false, errors.Trace(err)
+	}
+
+	out, _ := gitCMD("-C", repoRoot, "diff", "--no-index", "--numstat", "/dev/null", filename)
+	return strings.Contains(out, "\t-\t"), nil
+}
+
 // Patch returns a diff of any uncommited changes (stagged and unstaged).
 func (r *Repo) Patches() ([]string, error) {
 	var patches []string
@@ -27,14 +37,21 @@ func (r *Repo) Patches() ([]string, error) {
 	}
 
 	for _, file := range files {
-		filePatch, err := newFilePatch(file)
+		isBinary, err := isFileBinaryGit(file)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
-		if err := checkPatch(filePatch); err != nil {
-			return nil, errors.Trace(err)
+
+		if !isBinary {
+			filePatch, err := newFilePatch(file)
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+			if err := checkPatch(filePatch); err != nil {
+				return nil, errors.Trace(err)
+			}
+			patches = append(patches, filePatch)
 		}
-		patches = append(patches, filePatch)
 	}
 
 	return patches, nil
