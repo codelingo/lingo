@@ -8,6 +8,11 @@ import (
 
 // patch -p0 < diff.patch
 
+// This command is exactly the same as the one for generating the patch,
+// save for the --numstat option which returns statistics about each
+// file in the diff instead of the diff, including whether or the the
+// file is binary or not. The file is binary if and only if its line in
+// the statistics contains the substring "\t-\t".
 func isFileBinaryGit(filename string) (bool, error) {
 	repoRoot, err := repoRoot()
 	if err != nil {
