@@ -121,6 +121,10 @@ l:
 				break
 			}
 
+			// Flow server checking the connection; can be safely ignored.
+			if iss.IsHeartbeat {
+				continue
+			}
 			// TODO: remove errors from issues; there's a separate channel for that
 			if iss.Err != "" {
 				// Abort review
