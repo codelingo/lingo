@@ -223,7 +223,14 @@ func (r *Repo) Sync(repoOwner string, workingDir string) error {
 		return errors.Trace(err)
 	}
 	// sync local and remote before reviewing
-	_, err = gitCMD("push", "-4", remote, "HEAD", "--force", "--no-verify")
+	out, err := gitCMD("push", "-4", remote, "HEAD", "--force", "--no-verify")
+	if err != nil {
+		// For users running older versions of git, run without the -4 flag.
+		if strings.Contains(out, "unknown switch `4'") {
+			_, err := gitCMD("push", remote, "HEAD", "--force", "--no-verify")
+			return errors.Trace(err)
+		}
+	}
 	return errors.Trace(err)
 }
 
@@ -312,8 +319,17 @@ func (r *Repo) CheckoutRemote(sha string) error {
 	}
 
 	// fetch origin
-	if _, err = gitCMD("fetch", "-4", "origin"); err != nil {
-		return errors.Trace(err)
+	out, err := gitCMD("fetch", "-4", "origin")
+	if err != nil {
+		// For users running older versions of git, run without the -4 flag.
+		if strings.Contains(out, "unknown switch `4'") {
+			_, err := gitCMD("fetch", "origin")
+			if err != nil {
+				return errors.Trace(err)
+			}
+		} else {
+			return errors.Trace(err)
+		}
 	}
 
 	// checkout sha
@@ -354,18 +370,7 @@ func gitCMD(args ...string) (out string, err error) {
 	cmd := exec.Command("git", args...)
 	b, err := cmd.CombinedOutput()
 	out = string(b)
-
-	if strings.Contains(out, "unknown switch `4'") {
-		rmindex := 1
-
-		if args[rmindex] == "-4" {
-			args = append(args[:rmindex], args[rmindex+1:]...)
-			return gitCMD(args...)
-		}
-	}
-
-	annotatedOutput := errors.Annotate(err, out)
-	return out, annotatedOutput
+	return out, errors.Annotate(err, out)
 }
 
 func gitCmdInDir(dir string, args ...string) (out string, err error) {
