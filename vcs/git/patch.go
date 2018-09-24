@@ -19,6 +19,7 @@ func isFileBinaryGit(filename string) (bool, error) {
 		return false, errors.Trace(err)
 	}
 
+	// This command is allowed to fail. We only need to grep its output
 	out, _ := gitCMD("-C", repoRoot, "diff", "--no-index", "--numstat", "/dev/null", filename)
 	return strings.Contains(out, "\t-\t"), nil
 }
