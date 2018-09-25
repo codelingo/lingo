@@ -6,17 +6,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/blang/semver"
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/app/util/common/config"
+	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 	servConf "github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"github.com/kardianos/osext"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
-
-	"github.com/blang/semver"
 )
 
 func init() {
@@ -48,8 +49,23 @@ func confirmAndSelfUpdate(ctx *cli.Context) error {
 
 	v := semver.MustParse(common.ClientVersion)
 	if !found || latest.Version.Equals(v) {
-		fmt.Println("Current version is the latest")
+		fmt.Printf("Current version (%s) is the latest.\n", common.ClientVersion)
 		return nil
+	}
+
+	// Update version config with latest version
+	vCfg, err := utilConfig.Version()
+	if err != nil {
+		// TODO(waigani) don't throw error away before checking type.
+		return errors.New(fmt.Sprintf(missingConfigError, "version"))
+	}
+	err = vCfg.SetClientVersionLastChecked(time.Now().UTC().String())
+	if err != nil {
+		return errors.Trace(err)
+	}
+	err = vCfg.SetClientLatestVersion(latest.Version.String())
+	if err != nil {
+		return errors.Trace(err)
 	}
 
 	fmt.Print("Do you want to update to v", latest.Version, "? (y/n): ")
