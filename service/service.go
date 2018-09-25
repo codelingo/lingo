@@ -18,6 +18,8 @@ const (
 	PlatformServer = "platformserver"
 	FlowClient     = "flowclient"
 	LocalClient    = "localclient"
+
+	MaxGrpcMessageSize = 4 << 30
 )
 
 // GrpcConnection creates a connection between a given server and client type.
@@ -70,7 +72,10 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 		tlsOpt = grpc.WithTransportCredentials(creds)
 	}
 
-	conn, err := grpc.Dial(grpcAddr, tlsOpt)
+	conn, err := grpc.Dial(grpcAddr, tlsOpt, grpc.WithDefaultCallOptions(
+		grpc.MaxCallRecvMsgSize(MaxGrpcMessageSize),
+		grpc.MaxCallSendMsgSize(MaxGrpcMessageSize),
+	))
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
