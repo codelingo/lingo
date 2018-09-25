@@ -2,16 +2,14 @@ package commands
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-
 	"strings"
 	"time"
-
-	"context"
 
 	"github.com/blang/semver"
 	"github.com/codelingo/lingo/app/util"
@@ -19,6 +17,7 @@ import (
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )
 
 type require int
@@ -267,6 +266,7 @@ func verifyConfig() error {
 const missingConfigError string = "Could not get %s config. Please run `lingo config setup`."
 
 func verifyClientVersion() error {
+	// TODO: revisit platform version checking.
 	vCfg, err := utilConfig.Version()
 	if err != nil {
 		// TODO(waigani) don't throw error away before checking type.
@@ -285,40 +285,39 @@ func verifyClientVersion() error {
 	}
 
 	duration := time.Since(lastChecked)
-	if duration.Hours() >= 24 {
-		latestVersion, err := latestVersion()
+	if duration.Hours() >= 4 {
+		fmt.Println("Checking for updates...")
+
+		latest, found, err := selfupdate.DetectLatest("codelingo/lingo")
 		if err != nil {
 			return errors.Trace(err)
 		}
 
-		err = vCfg.SetClientLatestVersion(latestVersion.String())
-		if err != nil {
-			return errors.Trace(err)
-		}
 		err = vCfg.SetClientVersionLastChecked(time.Now().UTC().String())
 		if err != nil {
 			return errors.Trace(err)
 		}
+
+		if !found {
+			return nil
+		}
+
+		err = vCfg.SetClientLatestVersion(latest.Version.String())
+		if err != nil {
+			return errors.Trace(err)
+		}
+
+		v := semver.MustParse(common.ClientVersion)
+		if latest.Version.Equals(v) {
+			return nil
+		}
+
+		if v.LT(latest.Version) {
+			fmt.Printf("A new client version (%s) is available. Run 'lingo update' to update.\n", latest.Version.String())
+		}
 	}
 
-	latestVersion, err := vCfg.ClientLatestVersion()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	compare, err := compareVersions(common.ClientVersion, latestVersion)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	if compare < 0 {
-		return errors.New("Your client is out of date. Run `lingo update` to automatically update it.")
-	} else if compare > 0 {
-		return errors.New("Your client is newer than the platform. This may result in unexpected behaviour.")
-	} else {
-		// Versions are equal: OK.
-		return nil
-	}
+	return nil
 }
 
 func latestVersion() (*semver.Version, error) {
