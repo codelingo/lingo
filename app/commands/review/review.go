@@ -113,6 +113,14 @@ l:
 			util.Logger.Debugf("Review error: %s", errors.ErrorStack(err))
 			return nil, errors.Trace(err)
 		case iss, ok := <-issuec:
+			if !ok {
+				issuec = nil
+				if !keepAll {
+					spnr.Stop()
+				}
+				break
+			}
+
 			// Flow server checking the connection; can be safely ignored.
 			if iss.IsHeartbeat {
 				continue
@@ -120,10 +128,6 @@ l:
 
 			if !keepAll {
 				spnr.Stop()
-			}
-			if !ok {
-				issuec = nil
-				break
 			}
 
 			// TODO: remove errors from issues; there's a separate channel for that
