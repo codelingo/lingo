@@ -32,6 +32,13 @@ func IsUnauthorisedRepoError(err error) bool {
 	return ok
 }
 
+// UserFacingWarning writes the given string to stderr in a coloured font.
+func UserFacingWarning(str string) {
+	errColor := color.New(color.FgYellow).SprintfFunc()
+	msg := errColor("%s", str)
+	Stderr.Write([]byte(msg + "\n"))
+}
+
 func UserFacingError(err error) {
 	if err == nil {
 		Logger.Debugf("got a nil error - this shouldn't be happening: %s", errors.ErrorStack(err))
@@ -60,6 +67,8 @@ func userFacingErrMsg(err error) string {
 		return "Sorry, the client failed to make a connection to the server. Please check your internet connection and try again."
 	case strings.Contains(message, "transport is closing"):
 		return "Sorry, a server error occurred and the connection was broken. Please try again."
+	case strings.Contains(message, "ResourceExhausted"):
+		return "Sorry, your request is too large and has been rejected by the server."
 	// Config
 	case repoNotFoundRegexp.MatchString(message):
 		return "please run `lingo config setup`"

@@ -222,7 +222,7 @@ func getUsername() (string, error) {
 		case 1:
 			username, err = authCfg.GetP4UserName()
 		default:
-			fmt.Println("Warning: username not set yet. Run `lingo config setup` to set your username.")
+			util.UserFacingWarning("Warning: username not set yet. Run `lingo config setup` to set your username.")
 			username, err = "", nil
 		}
 

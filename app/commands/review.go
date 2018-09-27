@@ -145,6 +145,13 @@ func reviewCMD(cliCtx *cli.Context) (string, error) {
 	if err != nil {
 		return "", errors.Trace(err)
 	}
+	var patchesSize int64
+	for _, patch := range patches {
+		patchesSize += int64(len([]byte(patch)))
+	}
+	if patchesSize >= 1024*1024 { // >= 1MB; default max GRPC msg size accepted by the servers is 4MB.
+		util.UserFacingWarning("Warning: large diffs can be error prone. You may need to commit your changes.")
+	}
 
 	workingDir, err := repo.WorkingDir()
 	if err != nil {
