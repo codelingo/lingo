@@ -27,7 +27,7 @@ func AddUsernameToCtx(ctx context.Context) (context.Context, error) {
 		case 1:
 			username, err = authCfg.GetP4UserName()
 		default:
-			util.Logger.Warn("Using `demo` account - please run `lingo config setup` to access your private repos.")
+			util.UserFacingWarning("Using `demo` account - please run `lingo config setup` to access your private repos.")
 			username, err = "demo", nil
 		}
 
