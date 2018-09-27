@@ -32,6 +32,7 @@ func IsUnauthorisedRepoError(err error) bool {
 	return ok
 }
 
+// UserFacingWarning writes the given string to stderr in a coloured font.
 func UserFacingWarning(str string) {
 	errColor := color.New(color.FgYellow).SprintfFunc()
 	msg := errColor("%s", str)
