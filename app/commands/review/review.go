@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"sync"
 	"time"
+
+	"github.com/golang/protobuf/ptypes"
 
 	"github.com/briandowns/spinner"
 	"github.com/codegangsta/cli"
@@ -30,12 +33,51 @@ func RequestReview(ctx context.Context, req *flow.ReviewRequest) (chan *flow.Iss
 		return nil, nil, errors.Trace(err)
 	}
 
-	issuec, errorc, err := c.Review(ctx, req)
+	payload, err := ptypes.MarshalAny(req)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
 
-	return issuec, errorc, nil
+	// TODO(waigani) refactor review, search and codemod code out of client completely.
+	replyc, runErrc, err := c.Run(ctx, &flow.Request{Flow: "review", Payload: payload})
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	issuec := make(chan *flow.Issue)
+	errc := make(chan error)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		for err := range runErrc {
+			errc <- err
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		for reply := range replyc {
+
+			var issue *flow.Issue
+			ptypes.UnmarshalAny(reply.Payload, issue)
+			if err != nil {
+				errc <- err
+				continue
+			}
+
+			issuec <- issue
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		wg.Wait()
+		close(issuec)
+		close(errc)
+	}()
+
+	return issuec, errc, nil
 }
 
 func MakeReport(issues []*flow.Issue, format, outputFile string) (string, error) {
