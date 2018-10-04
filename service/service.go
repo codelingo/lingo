@@ -64,7 +64,7 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 		tlsOpt = grpc.WithInsecure()
 	} else {
 		// TODO: cache credentials locally to reduce connection overhead
-		// TODO: host may be insecure and will fail here; prompt for insecure or require flag
+		// TODO: host may be insecure and will fail here; prompt for insecure or Require flag
 		creds, err := credsFromHost(grpcAddr)
 		if err != nil {
 			return nil, errors.Trace(err)

@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"context"
+
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
@@ -53,7 +55,7 @@ func init() {
 				},
 			},
 		},
-	}, false, false, versionRq)
+	}, false, false, verify.VersionRq)
 }
 
 func listFactsAction(ctx *cli.Context) {

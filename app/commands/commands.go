@@ -4,10 +4,12 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 
-	"github.com/juju/errors"
 	"os"
+
+	"github.com/juju/errors"
 )
 
 // "github.com/codelingo/lingo/app/util"
@@ -19,11 +21,11 @@ type lingoCMD struct {
 	cmd       *cli.Command
 }
 
-var cmds = map[require][]*lingoCMD{}
+var cmds = map[verify.Require][]*lingoCMD{}
 
-// returns a map of cmd name to list of requirements
-func cmdRequirements(c map[require][]*lingoCMD) map[string][]require {
-	req := map[string][]require{}
+// returns a map of cmd name to list of Requirements
+func cmdRequirements(c map[verify.Require][]*lingoCMD) map[string][]verify.Require {
+	req := map[string][]verify.Require{}
 
 	for r, cmdList := range c {
 		for _, lCMD := range cmdList {
@@ -33,13 +35,13 @@ func cmdRequirements(c map[require][]*lingoCMD) map[string][]require {
 	return req
 }
 
-func register(cmd *cli.Command, isSubcommand, isDevOnly bool, req ...require) {
+func register(cmd *cli.Command, isSubcommand, isDevOnly bool, req ...verify.Require) {
 	lCMD := &lingoCMD{
 		isDevOnly: isDevOnly,
 		isSubCMD:  isSubcommand,
 		cmd:       cmd,
 	}
-	cmds[baseRq] = append(cmds[baseRq], lCMD)
+	cmds[verify.BaseRq] = append(cmds[verify.BaseRq], lCMD)
 	for _, r := range req {
 		cmds[r] = append(cmds[r], lCMD)
 	}
@@ -49,7 +51,7 @@ func All() []cli.Command {
 	isDev := os.Getenv("LINGO_DEV_CLI") == "true"
 
 	var all []cli.Command
-	for _, lCMD := range cmds[baseRq] {
+	for _, lCMD := range cmds[verify.BaseRq] {
 		if !lCMD.isSubCMD && (!lCMD.isDevOnly || (lCMD.isDevOnly && isDev)) {
 			all = append(all, *lCMD.cmd)
 		}
@@ -90,7 +92,7 @@ func Before(c *cli.Context) error {
 			}
 		}
 	}
-	// No requirements should be needed to show help
+	// No Requirements should be needed to show help
 	if currentCMDName == "help" || isHelpAlias(flags) {
 		return nil
 	}

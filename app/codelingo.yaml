@@ -1,4 +1,5 @@
 tenets:
+  - import: codelingo/go
   - name: test-cli-commands
     doc: |
       Finds CLI commands that are not invoked in a unit test. 

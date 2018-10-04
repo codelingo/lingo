@@ -292,7 +292,7 @@ pid, sts = os.waitpid(p.pid, 0)
 
 Note:
 
-* Calling the program through the shell is usually not required.
+* Calling the program through the shell is usually not Required.
 
 * It's easier to look at the returncode attribute than the
   exitstatus.

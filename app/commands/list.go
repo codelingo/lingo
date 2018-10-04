@@ -2,10 +2,13 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/vcs"
 	"github.com/juju/errors"
+
 	"os"
 	"path/filepath"
 )
@@ -27,7 +30,7 @@ func init() {
 				Action: listLocalTenetsAction,
 			},
 		},
-	}, false, false, vcsRq)
+	}, false, false, verify.VCSRq)
 }
 
 func listAllAction(ctx *cli.Context) {

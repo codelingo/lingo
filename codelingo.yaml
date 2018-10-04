@@ -1,5 +1,4 @@
 tenets:
-  - import: codelingo/go
   - name: deprecated-dep
     doc: Finds imports of deprecated dependencies.
     flows:
