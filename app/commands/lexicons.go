@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/util"
-	"github.com/juju/errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
+	"github.com/codelingo/lingo/app/util"
+	"github.com/juju/errors"
+
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,7 +41,7 @@ func init() {
 				Usage: "List Lexicons used in current project",
 			},
 		},
-	}, false, false, versionRq)
+	}, false, false, verify.VersionRq)
 }
 
 func listLexiconsAction(ctx *cli.Context) {

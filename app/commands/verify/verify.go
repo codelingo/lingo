@@ -1,4 +1,4 @@
-package commands
+package verify
 
 import (
 	"bytes"
@@ -14,47 +14,48 @@ import (
 	"github.com/blang/semver"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
+	"github.com/codelingo/lingo/app/util/common/config"
 	utilConfig "github.com/codelingo/lingo/app/util/common/config"
 	"github.com/codelingo/lingo/service"
 	"github.com/juju/errors"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )
 
-type require int
+type Require int
 
 const (
-	// all cmds have the base requirement
-	baseRq require = iota
-	dotLingoRq
-	authRq
-	homeRq
-	configRq
-	vcsRq
-	versionRq
+	// all cmds have the base Requirement
+	BaseRq Require = iota
+	DotLingoRq
+	AuthRq
+	HomeRq
+	ConfigRq
+	VCSRq
+	VersionRq
 )
 
-func (r require) String() string {
+func (r Require) String() string {
 	switch r {
-	case dotLingoRq:
+	case DotLingoRq:
 		return "codelingo.yaml"
-	case authRq:
+	case AuthRq:
 		return "authentication"
-	case homeRq:
+	case HomeRq:
 		return "lingohome"
-	case configRq:
+	case ConfigRq:
 		return "config"
-	case vcsRq:
+	case VCSRq:
 		return "git"
 	}
 	return "unknown"
 }
 
-// Verifies that the requirement is met
-func (r require) Verify() error {
+// Verifies that the Requirement is met
+func (r Require) Verify() error {
 	switch r {
-	case baseRq:
+	case BaseRq:
 		return nil
-	case versionRq:
+	case VersionRq:
 		outdated, err := VersionIsOutdated()
 		if err != nil {
 			if outdated {
@@ -69,30 +70,30 @@ func (r require) Verify() error {
 			}
 		}
 		return nil
-	case vcsRq:
+	case VCSRq:
 		return verifyVCS()
-	case dotLingoRq:
+	case DotLingoRq:
 		return verifyDotLingo()
-	case authRq:
+	case AuthRq:
 		return verifyAuth()
-	case homeRq:
+	case HomeRq:
 		return verifyLingoHome()
-	case configRq:
+	case ConfigRq:
 		return verifyConfig()
 	}
 
 	return errors.Errorf("unknown require type %d", r)
 }
 
-func (r require) HelpMsg() string {
+func (r Require) HelpMsg() string {
 	switch r {
-	case dotLingoRq:
+	case DotLingoRq:
 		return "run `$ lingo init`"
-	case authRq:
+	case AuthRq:
 		return "run `$ lingo config setup`"
-	case homeRq:
+	case HomeRq:
 		return "run `$ lingo config setup`"
-	case configRq:
+	case ConfigRq:
 		return "run `$ lingo config setup`"
 	}
 
@@ -225,7 +226,7 @@ func verifyConfig() error {
 		}
 	}
 
-	err = createConfigDefaultFiles(configDefaults)
+	err = CreateConfigDefaultFiles(configDefaults)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -263,14 +264,14 @@ func verifyConfig() error {
 	return nil
 }
 
-const missingConfigError string = "Could not get %s config. Please run `lingo config setup`."
+const MissingConfigError string = "Could not get %s config. Please run `lingo config setup`."
 
 func verifyClientVersion() error {
 	// TODO: revisit platform version checking.
 	vCfg, err := utilConfig.Version()
 	if err != nil {
 		// TODO(waigani) don't throw error away before checking type.
-		return errors.New(fmt.Sprintf(missingConfigError, "version"))
+		return errors.New(fmt.Sprintf(MissingConfigError, "version"))
 	}
 
 	lastCheckedString, err := vCfg.ClientVersionLastChecked()
@@ -354,4 +355,23 @@ func VersionIsOutdated() (bool, error) {
 		}
 	}
 	return false, err
+}
+
+func CreateConfigDefaultFiles(dir string) error {
+	err := config.CreateAuthFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = config.CreatePlatformFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = config.CreateVersionFileInDir(dir, true)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return nil
 }

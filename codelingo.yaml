@@ -1,5 +1,4 @@
 tenets:
-  - import: codelingo/go
   - name: deprecated-dep
     doc: Finds imports of deprecated dependencies.
     flows:
@@ -52,55 +51,55 @@ tenets:
             # and remove $callName
             go.ident: 
               name as callName
-  - name: invalid-error-print
-    doc: |
-      Find places errors are being incorrectly output to the user.
-    flows:
-      codelingo/review:
-        comment: |
-          Errors should only be output to the user in app/util/errors.go
-    query: |
-      import (
-        codelingo/ast/go
-      )
-
-      go.file(depth = any):
-        exclude:
-          filename as errorsFilename
-          regex(/^(\.\/)?app\/util\/errors.go$/, errorsFilename)
-        any_of:
-          go.import_spec(depth = any): # aliased import
-            go.ident:
-              name as packageName
-            go.basic_lit:
-              value == "fmt"
-          go.import_spec(depth = any): # unaliased import
-            exclude:
-              go.ident
-            go.basic_lit:
-              value == "fmt"
-              value as packageName
-        @ review.comment
-        go.call_expr(depth = any):
-          any_of:
-            go.selector_expr:  # Calls like fmt.Print(err) or fmt.Fprint(os.Stderr, err)
-              go.ident:
-                name as packageName
-              go.ident:
-                name as printName
-                regex(/^(P|Fp)rint.*$/, printName)
-            go.selector_expr:  # Calls like log.Print(err)
-              go.ident:
-                name == "log"
-            go.selector_expr:  # Calls like Stderr.Write(err)
-              go.ident:
-                name == "Stderr"
-              go.ident:
-                name == "Write"
-          go.args:
-            any_of:
-              go.ident(depth = any):
-                name == "err"
-              go.ident(depth = any):
-                type == "error"
-
+# TODO: bug caused by this query; uncomment once fixed
+#  - name: invalid-error-print
+#    doc: |
+#      Find places errors are being incorrectly output to the user.
+#    flows:
+#      codelingo/review:
+#        comment: |
+#          Errors should only be output to the user in app/util/errors.go
+#    query: |
+#      import (
+#        codelingo/ast/go
+#      )
+#
+#      go.file(depth = any):
+#        exclude:
+#          filename as errorsFilename
+#          regex(/^(\.\/)?app\/util\/errors.go$/, errorsFilename)
+#        any_of:
+#          go.import_spec(depth = any): # aliased import
+#            go.ident:
+#              name as packageName
+#            go.basic_lit:
+#              value == "fmt"
+#          go.import_spec(depth = any): # unaliased import
+#            exclude:
+#              go.ident
+#            go.basic_lit:
+#              value == "fmt"
+#              value as packageName
+#        @ review.comment
+#        go.call_expr(depth = any):
+#          any_of:
+#            go.selector_expr:  # Calls like fmt.Print(err) or fmt.Fprint(os.Stderr, err)
+#              go.ident:
+#                name as packageName
+#              go.ident:
+#                name as printName
+#                regex(/^(P|Fp)rint.*$/, printName)
+#            go.selector_expr:  # Calls like log.Print(err)
+#              go.ident:
+#                name == "log"
+#            go.selector_expr:  # Calls like Stderr.Write(err)
+#              go.ident:
+#                name == "Stderr"
+#              go.ident:
+#                name == "Write"
+#          go.args:
+#            any_of:
+#              go.ident(depth = any):
+#                name == "err"
+#              go.ident(depth = any):
+#                type == "error"

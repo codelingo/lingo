@@ -1,4 +1,4 @@
-package commands
+package flows
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	grpcclient "github.com/codelingo/lingo/service/grpc"
@@ -17,10 +18,10 @@ import (
 	"github.com/juju/errors"
 )
 
-var searchCommand = cli.Command{
+var SearchCommand = cli.Command{
 	Name:        "search",
 	Usage:       "Search code following queries in rpc.yaml.",
-	Subcommands: cli.Commands{*pullRequestCmd},
+	Subcommands: cli.Commands{PullRequestCmd},
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  util.OutputFlg.String(),
@@ -59,7 +60,7 @@ func searchAction(ctx *cli.Context) {
 }
 
 func searchRequire() error {
-	reqs := []require{homeRq, authRq, configRq, versionRq}
+	reqs := []verify.Require{verify.HomeRq, verify.AuthRq, verify.ConfigRq, verify.VersionRq}
 	for _, req := range reqs {
 		err := req.Verify()
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	rpc "github.com/codelingo/rpc/service"
@@ -33,7 +34,7 @@ func init() {
 				Usage: "The version of the lexicon containing the fact. Leave empty for the latest version.",
 			},
 		},
-	}, false, false, versionRq)
+	}, false, false, verify.VersionRq)
 }
 
 func describeFactAction(ctx *cli.Context) {

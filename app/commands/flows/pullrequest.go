@@ -1,17 +1,17 @@
-package commands
+package flows
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/commands/review"
+	"github.com/codelingo/lingo/app/commands/flows/review"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/rpc/flow"
 	"github.com/juju/errors"
 )
 
-var pullRequestCmd = &cli.Command{
+var PullRequestCmd = cli.Command{
 	Name:      "pull-request",
 	ShortName: "pr",
 	Usage:     "review a remote pull-request",
@@ -35,13 +35,6 @@ var pullRequestCmd = &cli.Command{
 	// "$ lingo review [<filename>]" will review any unstaged changes in the named files.
 	// "$ lingo review --all [<filename>]" will review all code in the named files.
 	Action: reviewPullRequestAction,
-}
-
-func init() {
-	register(pullRequestCmd,
-		true, false,
-		homeRq, authRq, configRq, versionRq,
-	)
 }
 
 func reviewPullRequestAction(ctx *cli.Context) {
