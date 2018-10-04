@@ -20,6 +20,14 @@ dev:
       addr: http://localhost
       name: codelingo_dev
       port: "3000"
+mock:
+  blah:
+    gitserver:
+      remote:
+        name:
+          nested:
+            super: new-name
+            x: b
 test:
   addr: localhost
   blah:

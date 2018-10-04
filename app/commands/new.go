@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
+
 	"github.com/juju/errors"
 )
 
@@ -19,7 +21,7 @@ func init() {
 		Name:   "init",
 		Usage:  "Create a codelingo.yaml file in the current directory.",
 		Action: newLingoAction,
-	}, false, false, vcsRq, versionRq)
+	}, false, false, verify.VCSRq, verify.VersionRq)
 }
 
 // TODO(waigani) set lingo-home flag and test init creates correct home dir.

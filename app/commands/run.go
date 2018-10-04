@@ -2,7 +2,9 @@ package commands
 
 import (
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/flows"
 	"github.com/codelingo/lingo/app/util"
+
 	"github.com/juju/errors"
 )
 
@@ -12,9 +14,10 @@ func init() {
 		Usage:  "Run the given flow in the current directory.",
 		Action: runAction,
 		Subcommands: []cli.Command{
-			reviewCommand,
-			searchCommand,
-			codemodCommand,
+			flows.ReviewCommand,
+			flows.SearchCommand,
+			flows.CodemodCommand,
+			flows.PullRequestCmd,
 		},
 	}, false, false)
 }

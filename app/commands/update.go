@@ -10,6 +10,7 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
 	"github.com/codelingo/lingo/app/util/common/config"
@@ -17,6 +18,7 @@ import (
 	servConf "github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"github.com/kardianos/osext"
+
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )
 
@@ -28,9 +30,9 @@ func init() {
 		Action: updateAction,
 	},
 		false, false,
-		homeRq,
-		authRq,
-		configRq,
+		verify.HomeRq,
+		verify.AuthRq,
+		verify.ConfigRq,
 	)
 }
 
@@ -57,7 +59,7 @@ func confirmAndSelfUpdate(ctx *cli.Context) error {
 	vCfg, err := utilConfig.Version()
 	if err != nil {
 		// TODO(waigani) don't throw error away before checking type.
-		return errors.New(fmt.Sprintf(missingConfigError, "version"))
+		return errors.New(fmt.Sprintf(verify.MissingConfigError, "version"))
 	}
 	err = vCfg.SetClientVersionLastChecked(time.Now().UTC().String())
 	if err != nil {
@@ -99,13 +101,13 @@ func updateOld(ctx *cli.Context) error {
 	}
 	configDefaults = filepath.Join(configDefaults, common.ClientVersion)
 
-	err = createConfigDefaultFiles(configDefaults)
+	err = verify.CreateConfigDefaultFiles(configDefaults)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
 	// Check version against endpoint
-	outdated, err := VersionIsOutdated()
+	outdated, err := verify.VersionIsOutdated()
 	if err != nil {
 		if outdated {
 			return errors.New("Your client is out of date. Please download and install the latest binary from https://github.com/codelingo/lingo/releases")
@@ -123,7 +125,7 @@ func updateOld(ctx *cli.Context) error {
 	}
 
 	// Write post-update client defaults to CLHOME/configs/defaults/<version>/*.yaml
-	err = createConfigDefaultFiles(configDefaults)
+	err = verify.CreateConfigDefaultFiles(configDefaults)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -249,25 +251,6 @@ func dumpCurrentConfigs() (map[string]interface{}, map[string]interface{}, map[s
 	}
 
 	return authDump, platDump, versDump, nil
-}
-
-func createConfigDefaultFiles(dir string) error {
-	err := config.CreateAuthFileInDir(dir, true)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	err = config.CreatePlatformFileInDir(dir, true)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	err = config.CreateVersionFileInDir(dir, true)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	return nil
 }
 
 func createConfigUpdateFiles(dir string) error {
