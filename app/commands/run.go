@@ -18,6 +18,7 @@ func init() {
 			flows.SearchCommand,
 			flows.CodemodCommand,
 			flows.PullRequestCmd,
+			flows.DocsCmd,
 		},
 	}, false, false)
 }
