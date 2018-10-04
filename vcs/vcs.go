@@ -92,7 +92,7 @@ func SyncRepo(vcsType Type, repo Repo) error {
 
 			if strings.Contains(errStr, "src refspec HEAD does not match any") {
 
-				return errors.New("This looks like a new repository. lingo Requires at least one commit to exist in the repository. Please make your first commit and try again.")
+				return errors.New("This looks like a new repository. lingo requires at least one commit to exist in the repository. Please make your first commit and try again.")
 
 			}
 
@@ -131,7 +131,7 @@ func CreateRepo(repo Repo, name string) (string, error) {
 
 			// We ignore the error here because the only case in which Atoi
 			// would error is if the name had not yet been appended with -n.
-			// In this case, n will be set to zero which is what we Require.
+			// In this case, n will be set to zero which is what we require.
 			n, _ := strconv.Atoi(num)
 			if n != 0 {
 				// Need to remove existing trailing number where present,

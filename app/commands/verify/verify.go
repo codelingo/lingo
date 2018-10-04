@@ -82,7 +82,7 @@ func (r Require) Verify() error {
 		return verifyConfig()
 	}
 
-	return errors.Errorf("unknown Require type %d", r)
+	return errors.Errorf("unknown require type %d", r)
 }
 
 func (r Require) HelpMsg() string {
@@ -97,7 +97,7 @@ func (r Require) HelpMsg() string {
 		return "run `$ lingo config setup`"
 	}
 
-	return fmt.Sprintf("unknown Require type %d", r)
+	return fmt.Sprintf("unknown require type %d", r)
 }
 
 // TODO(waigani) allow outside repo if we're making a remote pr review. Get
