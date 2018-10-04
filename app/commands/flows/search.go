@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/golang/protobuf/ptypes"
+
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
@@ -96,9 +98,16 @@ func searchCMD(cliCtx *cli.Context) (string, error) {
 		return "", errors.Trace(err)
 	}
 
+	payload, err := ptypes.MarshalAny(&flow.SearchRequest{
+		Dotlingo: string(dotlingo)})
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
 	fmt.Println("Running search flow...")
-	resultc, errorc, err := c.Search(ctx, &flow.SearchRequest{
-		Dotlingo: string(dotlingo),
+	resultc, errorc, err := c.Run(ctx, &flow.Request{
+		Flow:    "search",
+		Payload: payload,
 	})
 	if err != nil {
 		return "", errors.Trace(err)
@@ -130,7 +139,12 @@ l:
 				return "", errors.New(result.Error)
 			}
 
-			results = append(results, result)
+			var searchResult *flow.SearchReply
+			if err := ptypes.UnmarshalAny(result.Payload, searchResult); err != nil {
+				return "", errors.Annotate(err, "could not unmarshal search result")
+			}
+
+			results = append(results, searchResult)
 		}
 		if resultc == nil && errorc == nil {
 			break l
