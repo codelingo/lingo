@@ -7,9 +7,8 @@ import (
 )
 
 var DocsCmd = cli.Command{
-	Name:        "docs",
-	Usage:       "Generate documentation from Tenets",
-	Subcommands: cli.Commands{PullRequestCmd},
+	Name:  "docs",
+	Usage: "Generate documentation from Tenets",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  util.OutputFlg.String(),
@@ -22,7 +21,7 @@ var DocsCmd = cli.Command{
 		},
 	},
 	Description: `
-""$ lingo search <filename>" .
+""$ lingo docs" .
 `[1:],
 	Action: docsAction,
 }
