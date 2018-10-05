@@ -139,7 +139,7 @@ l:
 				return "", errors.New(result.Error)
 			}
 
-			var searchResult *flow.SearchReply
+			searchResult := &flow.SearchReply{}
 			if err := ptypes.UnmarshalAny(result.Payload, searchResult); err != nil {
 				return "", errors.Annotate(err, "could not unmarshal search result")
 			}

@@ -90,7 +90,7 @@ func RequestReview(ctx context.Context, req *flow.ReviewRequest) (chan *flow.Iss
 	go func() {
 		for reply := range replyc {
 
-			var issue *flow.Issue
+			issue := &flow.Issue{}
 			ptypes.UnmarshalAny(reply.Payload, issue)
 			if err != nil {
 				errc <- err
