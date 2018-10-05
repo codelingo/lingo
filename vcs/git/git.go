@@ -223,7 +223,14 @@ func (r *Repo) Sync(repoOwner string, workingDir string) error {
 		return errors.Trace(err)
 	}
 	// sync local and remote before reviewing
-	_, err = gitCMD("push", "-4", remote, "HEAD", "--force", "--no-verify")
+	out, err := gitCMD("push", "-4", remote, "HEAD", "--force", "--no-verify")
+	if err != nil {
+		// For users running older versions of git, run without the -4 flag.
+		if strings.Contains(out, "unknown switch `4'") {
+			_, err := gitCMD("push", remote, "HEAD", "--force", "--no-verify")
+			return errors.Trace(err)
+		}
+	}
 	return errors.Trace(err)
 }
 
@@ -312,8 +319,17 @@ func (r *Repo) CheckoutRemote(sha string) error {
 	}
 
 	// fetch origin
-	if _, err = gitCMD("fetch", "-4", "origin"); err != nil {
-		return errors.Trace(err)
+	out, err := gitCMD("fetch", "-4", "origin")
+	if err != nil {
+		// For users running older versions of git, run without the -4 flag.
+		if strings.Contains(out, "unknown switch `4'") {
+			_, err := gitCMD("fetch", "origin")
+			if err != nil {
+				return errors.Trace(err)
+			}
+		} else {
+			return errors.Trace(err)
+		}
 	}
 
 	// checkout sha
@@ -348,27 +364,13 @@ func (r *Repo) ClearChanges() error {
 
 // TODO(benjamin-rood) Check git version to ensure expected cmd and behaviour
 // by any git command-line actions
+// Error codes:
+// 129 incorrect arguments supplied to git
 func gitCMD(args ...string) (out string, err error) {
 	cmd := exec.Command("git", args...)
 	b, err := cmd.CombinedOutput()
 	out = string(b)
 	return out, errors.Annotate(err, out)
-
-	// TODO(waigani) stdout is empty?
-	// cmd := exec.Command("git", args...)
-	// e := &bytes.Buffer{}
-	// o := &bytes.Buffer{}
-	// cmd.Stderr = e
-	// cmd.Stdout = o
-	// stderr = string(e.Bytes())
-	// stdout = string(o.Bytes())
-	// err = cmd.Run()
-	// if err != nil {
-	// 	gitargs := strings.Join(args, " ")
-	// 	return "", stderr, errors.Annotate(err, "git args: `"+gitargs+"` stdout: "+stdout+" stderr: "+stderr)
-
-	// }
-	// return strings.TrimSpace(stdout), stderr, nil
 }
 
 func gitCmdInDir(dir string, args ...string) (out string, err error) {
