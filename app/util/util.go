@@ -1,5 +1,7 @@
 package util
 
+// TODO(waigani) move util to sdk
+
 import (
 	"bytes"
 	"fmt"
@@ -12,6 +14,7 @@ import (
 	"text/template"
 
 	"github.com/codegangsta/cli"
+	serviceConfig "github.com/codelingo/lingo/service/config"
 	goDocker "github.com/fsouza/go-dockerclient"
 	"github.com/juju/errors"
 	"github.com/mitchellh/go-homedir"
@@ -28,6 +31,27 @@ func init() {
 	}
 
 	Logger = zlog.Sugar()
+}
+
+// TODO(waigani) this is also in common/config can't import due to cycle.
+// Refactor util - move into flow cli sdk.
+const EnvCfgFile = "lingo-current-env"
+
+func GetEnv() (string, error) {
+
+	configsHome, err := ConfigHome()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	envFilepath := filepath.Join(configsHome, EnvCfgFile)
+	cfg := serviceConfig.New(envFilepath)
+	env, err := cfg.GetEnv()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return env, nil
+
 }
 
 // Use dev logger rather than prod

@@ -193,18 +193,7 @@ func configEnv(ctx *cli.Context) error {
 }
 
 func getEnv() (string, error) {
-	configsHome, err := util.ConfigHome()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-	envFilepath := filepath.Join(configsHome, commonConfig.EnvCfgFile)
-	cfg := serviceConfig.New(envFilepath)
-	env, err := cfg.GetEnv()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	return env, nil
+	return util.GetEnv()
 }
 
 func getUsername() (string, error) {
