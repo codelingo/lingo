@@ -29,12 +29,6 @@
   version = "v3.5.1"
 
 [[projects]]
-  name = "github.com/briandowns/spinner"
-  packages = ["."]
-  revision = "48dbb65d7bd5c74ab50d53d04c949f20e3d14944"
-  version = "1.0"
-
-[[projects]]
   name = "github.com/codegangsta/cli"
   packages = ["."]
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
@@ -43,11 +37,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/codelingo/rpc"
-  packages = [
-    "flow",
-    "flow/client",
-    "service"
-  ]
+  packages = ["service"]
   revision = "283372594e0084af67bb2ba8d0b77da19b9c8070"
 
 [[projects]]
@@ -98,12 +88,6 @@
   packages = ["."]
   revision = "0dadbb0345b35ec7ef35e228dabb8de89a65bf52"
   version = "v0.3.2"
-
-[[projects]]
-  name = "github.com/fatih/color"
-  packages = ["."]
-  revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
-  version = "v1.5.0"
 
 [[projects]]
   name = "github.com/fsouza/go-dockerclient"
@@ -298,12 +282,6 @@
   version = "v0.5.4"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/waigani/diffparser"
-  packages = ["."]
-  revision = "6198bead10008c43fcba66f16addbf23d6301ce9"
-
-[[projects]]
   name = "go.uber.org/atomic"
   packages = ["."]
   revision = "8474b86a5a6f79c443ce4b2992817ff32cf208b8"
@@ -483,6 +461,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "63b9c94401a649d5a28a80baa9291df638617d430ac43ed723a04d21898fbc96"
+  inputs-digest = "7024fea245e416bf230fafb48126c3bcf2694773ff8406f2a7a76d35bba8c192"
   solver-name = "gps-cdcl"
   solver-version = 1
