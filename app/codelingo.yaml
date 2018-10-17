@@ -3,7 +3,7 @@ tenets:
   - name: test-cli-commands
     flows:
       codelingo/docs:
-        title: test-cli-commands
+        title: Test Cli Commands
         body: |
           Finds CLI commands that are not invoked in a unit test. 
           Currently subject to variable exclusion bug, but exclude can be removed
