@@ -1,7 +1,10 @@
 tenets:
   - name: deprecated-dep
-    doc: Finds imports of deprecated dependencies.
     flows:
+      codelingo/docs:
+        title: Deprecated Deb
+        body: Finds imports of deprecated dependencies.
+
       # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
       # to import lines and another for recording refactor progress
       codelingo/review:
@@ -10,7 +13,7 @@ tenets:
       import codelingo/ast/go
 
       go.file(depth = any):
-        @ review.comment
+        @review comment
         go.import_spec(depth = 2):
           any_of:
             go.basic_lit:
@@ -44,7 +47,7 @@ tenets:
         exclude:
           filename as serviceFilename
           regex(/service/, serviceFilename)
-        @ review.comment
+        @review comment
         go.call_expr(depth = any):
           go.selector_expr:
             # TODO: improve speed by checking the type of the caller (once it's available)
@@ -80,7 +83,7 @@ tenets:
 #            go.basic_lit:
 #              value == "fmt"
 #              value as packageName
-#        @ review.comment
+#        @review comment
 #        go.call_expr(depth = any):
 #          any_of:
 #            go.selector_expr:  # Calls like fmt.Print(err) or fmt.Fprint(os.Stderr, err)

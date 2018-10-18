@@ -65,7 +65,7 @@ func install(c *cli.Context) error {
 	}
 
 	fileUrl := fmt.Sprintf("https://github.com/codelingo/codelingo/raw/master/flows/%s/%s/bin/%s/%s/%s/%s", ownerName, flowName, currentOS, runtime.GOARCH, version, archiveName)
-	print(fileUrl)
+	fmt.Println("Installing Flow:", fileUrl)
 	if err := DownloadFile(flowPath+"/"+archiveName, fileUrl); err != nil {
 		return errors.Trace(err)
 	}

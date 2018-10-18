@@ -67,7 +67,7 @@ tenets:
     query: |
       import codelingo/ast/common
 
-      @ review.comment
+      @review comment
       common.func(depth = any)
 `[1:]
 
