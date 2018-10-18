@@ -2,9 +2,8 @@ tenets:
   - name: deprecated-dep
     flows:
       codelingo/docs:
-        title: Deprecated Deb
+        title: Deprecated Dep
         body: Finds imports of deprecated dependencies.
-
       # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
       # to import lines and another for recording refactor progress
       codelingo/review:
