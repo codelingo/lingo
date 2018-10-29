@@ -23,8 +23,10 @@ tenets:
               regex(/^github.com\/codelingo\/kit/, kitValue)
 
   - name: platform-call
-    doc: Finds gRPC calls to platform which should be routed through the flow server.
     flows:
+      codelingo/docs:
+        title: Platform Call
+        body: Finds gRPC calls to platform which should be routed through the flow server.
       codelingo/review:
         comment: Please reroute this call through the flow server.
     query: |
