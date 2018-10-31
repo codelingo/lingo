@@ -35,10 +35,9 @@ const (
 // to depend on the client. The code pertaining specifically to the client side and flow side
 // configs should be kept in the client/flow repos, and addresses and tls values should be
 // passed as arguments.
-func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
-
+func GrpcConnection(client, server string, insecure bool) (*grpc.ClientConn, error) {
 	var grpcAddr string
-	var isTLS bool
+	var isTLS = !ins
 	var err error
 	var cert *x509.Certificate
 
