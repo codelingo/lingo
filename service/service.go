@@ -80,7 +80,7 @@ func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientCo
 
 			// if cert hasn't been cached, get a new one which caches it under the hood
 			util.Logger.Debug("no cert found, creating new one...")
-			if cert, err = newCert(grpcAddr); err != nil {
+			if cert, err = newCert(grpcAddr); err != nil && !insecureAllowed {
 				return nil, errors.Trace(err)
 			}
 		}
