@@ -35,16 +35,14 @@ const (
 // to depend on the client. The code pertaining specifically to the client side and flow side
 // configs should be kept in the client/flow repos, and addresses and tls values should be
 // passed as arguments.
-func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
-
+func GrpcConnection(client, server string, insecure bool) (*grpc.ClientConn, error) {
 	var grpcAddr string
-	var isTLS bool
+	var isTLS = !insecure
 	var err error
 	var cert *x509.Certificate
 
 	switch client {
 	case LocalClient:
-		isTLS = true
 		pCfg, err := config.Platform()
 		if err != nil {
 			return nil, errors.Trace(err)
@@ -208,7 +206,7 @@ func certFromHost(host string) (*x509.Certificate, error) {
 }
 
 func ListLexicons(ctx context.Context) ([]string, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, true)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -223,7 +221,7 @@ func ListLexicons(ctx context.Context) ([]string, error) {
 }
 
 func ListFacts(ctx context.Context, owner, name, version string) (map[string][]string, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, true)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -250,7 +248,7 @@ func ListFacts(ctx context.Context, owner, name, version string) (map[string][]s
 }
 
 func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.DescribeFactReply, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, true)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -271,7 +269,7 @@ func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.
 }
 
 func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc.QueryFromOffsetReply, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, true)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -286,7 +284,7 @@ func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc
 }
 
 func LatestClientVersion(ctx context.Context) (string, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, true)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
