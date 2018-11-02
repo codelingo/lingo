@@ -6,6 +6,8 @@
 # $ scripts/release.sh 0.1.0
 #
 # Run `go get github.com/aktau/github-release` to install the 'github-release` binary.
+# Create a github token with repo permissions and set it as the env variable GITHUB_TOKEN
+# https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 
 set -x
 if [ $# -eq 0 ]
