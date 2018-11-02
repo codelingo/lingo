@@ -31,7 +31,7 @@ const defaultConfig = `paas:
   platform: grpc-platform.codelingo.io:443
   flow: grpc-flow.codelingo.io:443
   gitserver:
-    addr: https://git.codelingo.io
+    addr: https://git.codelingo.io:443
     remote: codelingo
 `
 

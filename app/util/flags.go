@@ -108,6 +108,10 @@ var (
 		Long:  "bundle",
 		Short: "b",
 	}
+	InsecureFlg = flagName{
+		Long:  "insecure",
+		Short: "in",
+	}
 )
 
 func (f *flagName) String() string {

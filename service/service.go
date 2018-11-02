@@ -35,11 +35,10 @@ const (
 // to depend on the client. The code pertaining specifically to the client side and flow side
 // configs should be kept in the client/flow repos, and addresses and tls values should be
 // passed as arguments.
-func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
-
+func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientConn, error) {
 	var grpcAddr string
-	var isTLS bool
 	var err error
+	var isTLS bool
 	var cert *x509.Certificate
 
 	switch client {
@@ -81,13 +80,13 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 
 			// if cert hasn't been cached, get a new one which caches it under the hood
 			util.Logger.Debug("no cert found, creating new one...")
-			if cert, err = newCert(grpcAddr); err != nil {
+			if cert, err = newCert(grpcAddr); err != nil && !insecureAllowed {
 				return nil, errors.Trace(err)
 			}
 		}
 	}
 
-	conn, err := dial(grpcAddr, cert)
+	conn, err := dial(grpcAddr, cert, insecureAllowed)
 	if err != nil {
 		if cert == nil {
 			return nil, errors.Trace(err)
@@ -101,7 +100,7 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 			return nil, errors.Trace(err)
 		}
 
-		if conn, err = dial(grpcAddr, cert); err != nil {
+		if conn, err = dial(grpcAddr, cert, insecureAllowed); err != nil {
 			return nil, errors.Trace(err)
 		}
 
@@ -111,15 +110,20 @@ func GrpcConnection(client, server string) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-func dial(target string, cert *x509.Certificate) (*grpc.ClientConn, error) {
-
+func dial(target string, cert *x509.Certificate, insecureAllowed bool) (*grpc.ClientConn, error) {
 	tlsOpt := grpc.WithInsecure()
 	if cert != nil {
 		creds, err := credsFromCert(cert)
 		if err != nil {
-			return nil, errors.Trace(err)
+			if insecureAllowed {
+				util.Logger.Warn("failed secure, trying insecure")
+				tlsOpt = grpc.WithInsecure()
+			} else {
+				return nil, errors.Trace(err)
+			}
+		} else {
+			tlsOpt = grpc.WithTransportCredentials(creds)
 		}
-		tlsOpt = grpc.WithTransportCredentials(creds)
 	}
 
 	util.Logger.Debug("dialing grpc server...")
@@ -208,7 +212,7 @@ func certFromHost(host string) (*x509.Certificate, error) {
 }
 
 func ListLexicons(ctx context.Context) ([]string, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -223,7 +227,7 @@ func ListLexicons(ctx context.Context) ([]string, error) {
 }
 
 func ListFacts(ctx context.Context, owner, name, version string) (map[string][]string, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -250,7 +254,7 @@ func ListFacts(ctx context.Context, owner, name, version string) (map[string][]s
 }
 
 func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.DescribeFactReply, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -271,7 +275,7 @@ func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.
 }
 
 func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc.QueryFromOffsetReply, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -286,7 +290,7 @@ func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc
 }
 
 func LatestClientVersion(ctx context.Context) (string, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer)
+	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
