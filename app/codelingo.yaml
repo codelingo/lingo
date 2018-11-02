@@ -10,7 +10,7 @@ tenets:
           to find properly tested commands.
           https://trello.com/c/kfICgoyQ/1135-8-variable-exclusion
       codelingo/review:
-        comment: This command should have a correspond unit test `testhelper.Command("{{cmd}}",  commands.All())
+        comment: This command should have a correspond unit test `testhelper.Command("{{commandName}}",  commands.All())
     query: |
       import codelingo/ast/go
 
@@ -30,7 +30,6 @@ tenets:
                     name == "Command"
                 go.args:
                   go.basic_lit:
-                    @var cmd
                     value as commandName
 
         # Find command definition
