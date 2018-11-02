@@ -60,14 +60,13 @@ func writeDotLingo(cfgPath string) error {
 	lingoSrc := `
 tenets:
   - name: find-funcs
-    doc: Example tenet that finds all functions.
     flows:
       codelingo/review:
         comment: This is a function, but you probably already knew that.
     query: |
       import codelingo/ast/common
 
-      @ review.comment
+      @review comment
       common.func(depth = any)
 `[1:]
 
