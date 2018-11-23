@@ -1,8 +1,11 @@
 tenets:
   - import: codelingo/go
   - name: deprecated-dep
-    doc: Finds imports of deprecated dependencies.
     flows:
+      codelingo/docs:
+        title: Deprecated Dep
+        body: |
+          Finds imports of deprecated dependencies.
       # TODO: add bot/flow for recording how making PRs appending "deprecated" commment
       # to import lines and another for recording refactor progress
       codelingo/review:
@@ -11,7 +14,7 @@ tenets:
       import codelingo/ast/go
 
       go.file(depth = any):
-        @ review.comment
+        @review comment
         go.import_spec(depth = 2):
           any_of:
             go.basic_lit:
@@ -20,10 +23,12 @@ tenets:
             go.basic_lit:
               value as kitValue
               regex(/^github.com\/codelingo\/kit/, kitValue)
-
   - name: platform-call
-    doc: Finds gRPC calls to platform which should be routed through the flow server.
     flows:
+      codelingo/docs:
+        title: Platform Call
+        body: |
+          Finds gRPC calls to platform which should be routed through the flow server.
       codelingo/review:
         comment: Please reroute this call through the flow server.
     query: |
@@ -45,7 +50,7 @@ tenets:
         exclude:
           filename as serviceFilename
           regex(/service/, serviceFilename)
-        @ review.comment
+        @review comment
         go.call_expr(depth = any):
           go.selector_expr:
             # TODO: improve speed by checking the type of the caller (once it's available)
@@ -53,9 +58,11 @@ tenets:
             go.ident: 
               name as callName
   - name: invalid-error-print
-    doc: |
-      Find places errors are being incorrectly output to the user.
     flows:
+      codelingo/docs:
+        title: Invalid Error Print
+        body: |
+          Find places errors are being incorrectly output to the user.
       codelingo/review:
         comment: |
           Errors should only be output to the user in app/util/errors.go
@@ -80,7 +87,7 @@ tenets:
             go.basic_lit:
               value == "fmt"
               value as packageName
-        @ review.comment
+        @review comment
         go.call_expr(depth = any):
           any_of:
             go.selector_expr:  # Calls like fmt.Print(err) or fmt.Fprint(os.Stderr, err)
@@ -103,4 +110,3 @@ tenets:
                 name == "err"
               go.ident(depth = any):
                 type == "error"
-
