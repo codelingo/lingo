@@ -10,6 +10,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
+	"github.com/mholt/archiver"
 )
 
 func init() {
@@ -95,25 +96,24 @@ func DownloadFile(filepath string, url string) error {
 
 func extractCMD(dir, archiveName string) error {
 
-	// TODO: fix code. Currently broken.
-	// var ext string
-	// if runtime.GOOS == "windows" {
+	var ext string
+	if runtime.GOOS == "windows" {
 
-	// 	ext = ".exe"
-	// 	err := archiver.Zip.Open(dir, ".")
-	// 	if err != nil {
-	// 		return errors.Trace(err)
-	// 	}
+		ext = ".exe"
 
-	// } else {
+		err := archiver.Zip.Open(dir, ".")
+		if err != nil {
+			return errors.Trace(err)
+		}
 
-	// 	err := archiver.TarGz.Open(dir+"/"+archiveName, dir)
-	// 	if err != nil {
-	// 		return errors.Trace(err)
-	// 	}
+	} else {
 
-	// }
+		err := archiver.TarGz.Open(dir+"/"+archiveName, dir)
+		if err != nil {
+			return errors.Trace(err)
+		}
 
-	// return errors.Trace(os.Chmod(dir+"/cmd"+ext, 0755))
-	return nil
+	}
+
+	return errors.Trace(os.Chmod(dir+"/cmd"+ext, 0755))
 }
