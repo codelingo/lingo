@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
+	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 
 	"github.com/juju/errors"
@@ -18,7 +19,7 @@ func init() {
 		Usage:           "Run the given flow in the current directory.",
 		Action:          runAction,
 		SkipFlagParsing: true,
-	}, false, false)
+	}, false, false, verify.VersionRq)
 }
 
 func runAction(ctx *cli.Context) {
