@@ -100,7 +100,6 @@ func extractCMD(dir, archiveName string) error {
 	if runtime.GOOS == "windows" {
 
 		ext = ".exe"
-
 		err := archiver.Zip.Open(dir, ".")
 		if err != nil {
 			return errors.Trace(err)
