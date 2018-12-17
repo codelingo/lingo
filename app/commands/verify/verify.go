@@ -58,16 +58,11 @@ func (r Require) Verify() error {
 	case VersionRq:
 		outdated, err := VersionIsOutdated()
 		if err != nil {
-			if outdated {
-				// Don't error, just warn
-				// TODO(waigani) use below and https://godoc.org/go.uber.org/zap/zapcore#NewConsoleEncoder
-				// util.Logger.Warn(err.Error())
-				fmt.Fprint(os.Stderr, err.Error(), "\n")
-
+			if outdated || strings.Contains(err.Error(), "API rate limit exceeded") {
+				util.Logger.Warn(err.Error())
 				return nil
-			} else {
-				return errors.Trace(err)
 			}
+			return errors.Trace(err)
 		}
 		return nil
 	case VCSRq:
