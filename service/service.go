@@ -221,7 +221,7 @@ func ListLexicons(ctx context.Context) ([]string, error) {
 	req := &rpc.ListLexiconsRequest{}
 	reply, err := c.ListLexicons(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 	return reply.Lexicons, nil
 }
@@ -240,7 +240,7 @@ func ListFacts(ctx context.Context, owner, name, version string) (map[string][]s
 	}
 	reply, err := c.ListFacts(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	factMap := make(map[string][]string)
@@ -268,7 +268,7 @@ func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.
 	}
 	reply, err := c.DescribeFact(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	return reply, nil
@@ -283,7 +283,7 @@ func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc
 
 	reply, err := c.QueryFromOffset(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	return reply, nil
@@ -299,7 +299,7 @@ func LatestClientVersion(ctx context.Context) (string, error) {
 	req := &rpc.LatestClientVersionRequest{}
 	reply, err := c.LatestClientVersion(ctx, req)
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 
 	return reply.Version, nil
