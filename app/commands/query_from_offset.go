@@ -27,6 +27,7 @@ USAGE:
 func queryFromOffsetAction(ctx *cli.Context) {
 	err := queryFromOffset(ctx)
 	if err != nil {
+		util.Logger.Debug(errors.ErrorStack(err))
 		util.FatalOSErr(err)
 		return
 	}
