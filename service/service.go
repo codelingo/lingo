@@ -8,8 +8,10 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"os/user"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common/config"
@@ -221,26 +223,21 @@ func ListLexicons(ctx context.Context) ([]string, error) {
 	req := &rpc.ListLexiconsRequest{}
 	reply, err := c.ListLexicons(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 	return reply.Lexicons, nil
 }
 
 func ListFacts(ctx context.Context, owner, name, version string) (map[string][]string, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	c := rpc.NewCodeLingoClient(conn)
-
 	req := &rpc.ListFactsRequest{
 		Owner:   owner,
 		Name:    name,
 		Version: version,
 	}
-	reply, err := c.ListFacts(ctx, req)
+
+	reply, err := listFacts(ctx, req, 1)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	factMap := make(map[string][]string)
@@ -249,8 +246,43 @@ func ListFacts(ctx context.Context, owner, name, version string) (map[string][]s
 		factMap[parent] = children.Child
 	}
 
-	return factMap, nil
+	return factMap, errors.Trace(err)
+}
 
+func listFacts(ctx context.Context, req *rpc.ListFactsRequest, attempt int) (*rpc.FactList, error) {
+	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	c := rpc.NewCodeLingoClient(conn)
+
+	reply, err := c.ListFacts(ctx, req)
+	if err != nil {
+		if strings.Contains(err.Error(), certErrorString) {
+			path, err := platformCertPath()
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+
+			err = os.Remove(path)
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+
+			// retry 5 times
+			// TODO: exponential backoff and annotate with connection error
+			if attempt >= maxAttempts {
+				return nil, errors.Errorf("attempted to connect %d times", attempt)
+			}
+
+			reply, err = listFacts(ctx, req, attempt+1)
+			return reply, errors.Trace(err)
+		} else {
+			return nil, errors.Trace(err)
+		}
+	}
+
+	return reply, nil
 }
 
 func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.DescribeFactReply, error) {
@@ -268,13 +300,29 @@ func DescribeFact(ctx context.Context, owner, name, version, fact string) (*rpc.
 	}
 	reply, err := c.DescribeFact(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	return reply, nil
 }
 
+const certErrorString string = "transport: authentication handshake failed: x509: certificate signed by unknown authority"
+
+func platformCertPath() (string, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return path.Join(usr.HomeDir, ".codelingo/certs/paas/grpc-platform.codelingo.io:443.cert"), nil
+}
+
+const maxAttempts int = 5
+
 func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc.QueryFromOffsetReply, error) {
+	reply, err := queryFromOffset(ctx, req, 1)
+	return reply, errors.Trace(err)
+}
+func queryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest, attempt int) (*rpc.QueryFromOffsetReply, error) {
 	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -283,7 +331,28 @@ func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc
 
 	reply, err := c.QueryFromOffset(ctx, req)
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), certErrorString) {
+			path, err := platformCertPath()
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+
+			err = os.Remove(path)
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+
+			// retry 5 times
+			// TODO: exponential backoff and annotate with connection error
+			if attempt >= maxAttempts {
+				return nil, errors.Errorf("attempted to connect %d times", attempt)
+			}
+
+			reply, err = queryFromOffset(ctx, req, attempt+1)
+			return reply, errors.Trace(err)
+		} else {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	return reply, nil
@@ -299,7 +368,7 @@ func LatestClientVersion(ctx context.Context) (string, error) {
 	req := &rpc.LatestClientVersionRequest{}
 	reply, err := c.LatestClientVersion(ctx, req)
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 
 	return reply.Version, nil

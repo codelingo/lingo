@@ -25,6 +25,10 @@ func init() {
 				Usage:  "List available facts for a given lexicon.",
 				Action: listFactsAction,
 				Flags: []cli.Flag{
+					cli.BoolFlag{
+						Name:  "debug",
+						Usage: "Display debug messages",
+					},
 					cli.StringFlag{
 						Name:  util.FormatFlg.String(),
 						Usage: "The format for the output. Can be listed (default) or \"json\" encoded.",
@@ -45,6 +49,10 @@ func init() {
 				Action: queryFromOffsetAction,
 				Flags: []cli.Flag{
 					cli.BoolFlag{
+						Name:  "debug",
+						Usage: "Display debug messages",
+					},
+					cli.BoolFlag{
 						Name:  "all-properties, a",
 						Usage: "List all properties of all facts in the query path",
 					},
@@ -61,6 +69,7 @@ func init() {
 func listFactsAction(ctx *cli.Context) {
 	err := listFacts(ctx)
 	if err != nil {
+		util.Logger.Debug(errors.ErrorStack(err))
 		util.FatalOSErr(err)
 		return
 	}
