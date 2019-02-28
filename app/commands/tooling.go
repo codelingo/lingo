@@ -62,7 +62,7 @@ func init() {
 					},
 					cli.BoolFlag{
 						Name:  util.InsecureFlg.String(),
-						Usage: "Allow command to run against an insecure developmet environment",
+						Usage: "Allow command to run against an insecure development environment",
 					},
 				},
 			},
