@@ -318,12 +318,12 @@ func platformCertPath() (string, error) {
 
 const maxAttempts int = 5
 
-func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest) (*rpc.QueryFromOffsetReply, error) {
-	reply, err := queryFromOffset(ctx, req, 1)
+func QueryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest, insecureAllowed bool) (*rpc.QueryFromOffsetReply, error) {
+	reply, err := queryFromOffset(ctx, req, 1, insecureAllowed)
 	return reply, errors.Trace(err)
 }
-func queryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest, attempt int) (*rpc.QueryFromOffsetReply, error) {
-	conn, err := GrpcConnection(LocalClient, PlatformServer, false)
+func queryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest, attempt int, insecureAllowed bool) (*rpc.QueryFromOffsetReply, error) {
+	conn, err := GrpcConnection(LocalClient, PlatformServer, insecureAllowed)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -348,7 +348,7 @@ func queryFromOffset(ctx context.Context, req *rpc.QueryFromOffsetRequest, attem
 				return nil, errors.Errorf("attempted to connect %d times", attempt)
 			}
 
-			reply, err = queryFromOffset(ctx, req, attempt+1)
+			reply, err = queryFromOffset(ctx, req, attempt+1, insecureAllowed)
 			return reply, errors.Trace(err)
 		} else {
 			return nil, errors.Trace(err)

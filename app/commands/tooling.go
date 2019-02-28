@@ -60,6 +60,10 @@ func init() {
 						Name:  "final-fact-properties, f",
 						Usage: "List all properties of the final fact in the query path",
 					},
+					cli.BoolFlag{
+						Name:  util.InsecureFlg.String(),
+						Usage: "Allow command to run against an insecure development environment",
+					},
 				},
 			},
 		},
