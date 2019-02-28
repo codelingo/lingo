@@ -81,7 +81,7 @@ func queryFromOffset(cliCtx *cli.Context) error {
 		Src:      src,
 		Start:    start,
 		End:      end,
-	})
+	}, cliCtx.IsSet("insecure"))
 	if err != nil {
 		return errors.Annotate(badArgsErr, err.Error())
 	}
