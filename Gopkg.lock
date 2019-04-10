@@ -46,11 +46,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cfec6301a508f26c38398a627f4eb97d32778fbb9d297cf07763eab9145677fb"
+  digest = "1:5a2e67e4bd7de0a74a5057c8ebb090cb7de132aa52788bc966cae8a7031155db"
   name = "github.com/codelingo/rpc"
   packages = ["service"]
   pruneopts = ""
-  revision = "283372594e0084af67bb2ba8d0b77da19b9c8070"
+  revision = "f6ada46cf9d6f865b152bdd51d3f134ea54944e5"
 
 [[projects]]
   branch = "master"
