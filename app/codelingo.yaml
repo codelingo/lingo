@@ -1,7 +1,7 @@
 tenets:
   - import: codelingo/go
   - name: test-cli-commands
-    flows:
+    actions:
       codelingo/docs:
         title: Test Cli Commands
         body: |

@@ -13,7 +13,7 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "uninstall",
-		Usage:  "uninstall a Flow",
+		Usage:  "uninstall an Action",
 		Action: uninstallAction,
 		Flags: []cli.Flag{
 			cli.StringFlag{

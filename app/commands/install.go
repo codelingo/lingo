@@ -16,7 +16,7 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "install",
-		Usage:  "Install a Flow",
+		Usage:  "Install an Action",
 		Action: installAction,
 		Flags: []cli.Flag{
 			cli.StringFlag{

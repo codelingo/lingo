@@ -60,7 +60,7 @@ func writeDotLingo(cfgPath string) error {
 	lingoSrc := `
 tenets:
   - name: find-funcs
-    flows:
+    actions:
       codelingo/review:
         comment: This is a function, but you probably already knew that.
     query: |
