@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 )
 
-const ClientVersion = "0.7.3"
+const ClientVersion = "0.7.4"
 
 var LingoFilenames = map[string]bool{
 	"codelingo.yaml": true,
