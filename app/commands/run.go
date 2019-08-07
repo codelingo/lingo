@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/codegangsta/cli"
@@ -73,7 +74,7 @@ func findInstalledCmd(name string) (string, error) {
 		owner = parts[0]
 		name = parts[1]
 	case len(parts) > 2:
-		return "", errors.Errorf("%q is not a valid Flow name")
+		return "", errors.Errorf("%q is not a valid Flow name", name)
 	}
 
 	home, err := util.LingoHome()
@@ -81,5 +82,10 @@ func findInstalledCmd(name string) (string, error) {
 		return "", errors.Trace(err)
 	}
 
-	return fmt.Sprintf("%s/flows/%s/%s/cmd", home, owner, name), nil
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
+
+	return fmt.Sprintf("%s/flows/%s/%s/cmd%s", home, owner, name, ext), nil
 }
