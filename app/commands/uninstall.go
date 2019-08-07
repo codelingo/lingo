@@ -19,7 +19,7 @@ func init() {
 			cli.StringFlag{
 				Name:  "owner",
 				Value: "codelingo",
-				Usage: "Owner of the Flow",
+				Usage: "Owner of the Action",
 			},
 		},
 	}, false, false)
@@ -30,13 +30,13 @@ func uninstallAction(ctx *cli.Context) {
 		util.FatalOSErr(err)
 		return
 	}
-	fmt.Printf("Success! %s Flow has been uninstalled.\n", ctx.Args()[0])
+	fmt.Printf("Success! %s Action has been uninstalled.\n", ctx.Args()[0])
 }
 
 func uninstall(c *cli.Context) error {
 	args := c.Args()
 	if len(args) == 0 {
-		return errors.New("Failed to uninstall Flow - no Flow given.")
+		return errors.New("Failed to uninstall Action - no Action given.")
 	}
 
 	home, err := util.LingoHome()

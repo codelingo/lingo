@@ -17,7 +17,7 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:            "run",
-		Usage:           "Run the given flow in the current directory.",
+		Usage:           "Run the given Action in the current directory.",
 		Action:          runAction,
 		SkipFlagParsing: true,
 	}, false, false, verify.VersionRq)
@@ -33,7 +33,7 @@ func runAction(ctx *cli.Context) {
 func run(c *cli.Context) error {
 	args := c.Args()
 	if len(args) == 0 {
-		return errors.New("Failed to run flow - no flow given.")
+		return errors.New("Failed to run Action - no Action given.")
 	}
 
 	flowName := args[0]
@@ -43,7 +43,7 @@ func run(c *cli.Context) error {
 	}
 
 	if _, err := os.Stat(cmdPath); os.IsNotExist(err) {
-		return errors.Errorf("Flow %[1]q not found. Try installing it with `lingo install %[1]s`", flowName)
+		return errors.Errorf("Action %[1]q not found. Try installing it with `lingo install %[1]s`", flowName)
 	}
 
 	var strArgs []string
@@ -74,7 +74,7 @@ func findInstalledCmd(name string) (string, error) {
 		owner = parts[0]
 		name = parts[1]
 	case len(parts) > 2:
-		return "", errors.Errorf("%q is not a valid Flow name", name)
+		return "", errors.Errorf("%q is not a valid Action name", name)
 	}
 
 	home, err := util.LingoHome()
