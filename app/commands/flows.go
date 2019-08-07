@@ -13,21 +13,21 @@ import (
 
 func init() {
 	register(&cli.Command{
-		Name:   "flows",
-		Usage:  "List Flows",
+		Name:   "actions",
+		Usage:  "List Actions",
 		Action: listFlowsAction,
 		Flags: []cli.Flag{
 			cli.BoolFlag{
 				Name:  util.InstalledFlg.String(),
-				Usage: "Only show installed Flows",
+				Usage: "Only show installed Actions",
 			},
 			cli.StringFlag{
 				Name:  util.OwnerFlg.String(),
-				Usage: "List all Flows of the given owner",
+				Usage: "List all Actions of the given owner",
 			},
 			cli.StringFlag{
 				Name:  util.NameFlg.String(),
-				Usage: "Describe the named Flow",
+				Usage: "Describe the named Actions",
 			},
 		},
 	}, false, true)

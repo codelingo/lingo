@@ -36,7 +36,7 @@ Replace the default content of the codelingo.yaml file we generated above with:
     - import: codelingo/go
 ```
 
-Run the Review Flow to check your source code against the go Tenet bundle we imported above:
+Run the Review Action to check your source code against the go Tenet bundle we imported above:
 
 ```bash
 # Run this command from the same directory as the codelingo.yaml file or any of its sub directories.

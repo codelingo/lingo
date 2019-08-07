@@ -16,12 +16,12 @@ import (
 func init() {
 	register(&cli.Command{
 		Name:   "list",
-		Usage:  "List all the installed flows and tenets that can be found from the given directory.",
+		Usage:  "List all the installed Actions and Tenets that can be found from the given directory.",
 		Action: listAllAction,
 		Subcommands: []cli.Command{
 			{
-				Name:   "flows",
-				Usage:  "Only list the installed flows.",
+				Name:   "actions",
+				Usage:  "Only list the installed Actions.",
 				Action: listLocalFlowsAction,
 			},
 			{
@@ -63,7 +63,7 @@ func listLocalFlowsAction(ctx *cli.Context) {
 }
 
 func listLocalFlows(c *cli.Context) (string, error) {
-	str := `Flows:
+	str := `Actions:
   - review
   - search`
 	return str, nil

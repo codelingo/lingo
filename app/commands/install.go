@@ -22,7 +22,7 @@ func init() {
 			cli.StringFlag{
 				Name:  "owner",
 				Value: "codelingo",
-				Usage: "Owner of the Flow",
+				Usage: "Owner of the Action",
 			},
 		},
 	}, false, false)
@@ -33,13 +33,13 @@ func installAction(ctx *cli.Context) {
 		util.FatalOSErr(err)
 		return
 	}
-	fmt.Printf("Success! You can now run the installed flow with `lingo run %s`\n", ctx.Args()[0])
+	fmt.Printf("Success! You can now run the installed Action with `lingo run %s`\n", ctx.Args()[0])
 }
 
 func install(c *cli.Context) error {
 	args := c.Args()
 	if len(args) == 0 {
-		return errors.New("Failed to install Flow - no Flow given.")
+		return errors.New("Failed to install Action - no Action given.")
 	}
 
 	home, err := util.LingoHome()
@@ -48,10 +48,10 @@ func install(c *cli.Context) error {
 	}
 
 	ownerName := c.String("owner")
-	flowName := args[0]
-	flowPath := fmt.Sprintf("%s/flows/%s/%s", home, ownerName, flowName)
+	actionName := args[0]
+	actionPath := fmt.Sprintf("%s/flows/%s/%s", home, ownerName, actionName)
 
-	if err := os.MkdirAll(flowPath, 0755); err != nil {
+	if err := os.MkdirAll(actionPath, 0755); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -64,13 +64,13 @@ func install(c *cli.Context) error {
 		archiveName = "cmd.exe.zip"
 	}
 
-	fileUrl := fmt.Sprintf("https://github.com/codelingo/codelingo/raw/master/flows/%s/%s/bin/%s/%s/%s/%s", ownerName, flowName, currentOS, runtime.GOARCH, version, archiveName)
-	fmt.Println("Installing Flow:", fileUrl)
-	if err := DownloadFile(flowPath+"/"+archiveName, fileUrl); err != nil {
+	fileUrl := fmt.Sprintf("https://github.com/codelingo/codelingo/raw/master/flows/%s/%s/bin/%s/%s/%s/%s", ownerName, actionName, currentOS, runtime.GOARCH, version, archiveName)
+	fmt.Println("Installing Action:", fileUrl)
+	if err := DownloadFile(actionPath+"/"+archiveName, fileUrl); err != nil {
 		return errors.Trace(err)
 	}
 
-	return errors.Trace(extractCMD(flowPath, archiveName))
+	return errors.Trace(extractCMD(actionPath, archiveName))
 }
 
 func DownloadFile(filepath string, url string) error {
