@@ -1,8 +1,8 @@
 
-<h3 align="center"> codelingo </h3>
+<h3 align="center"> CodeLingo </h3>
 
-<p align="center">
-  <b> Automate Your Reviews on GitHub Pull Requests! </b>
+<h2 align="center">
+  <b> Deprecated: The lingo project is no longer under active development. Please install the GitHub app below and visit <a href="https://codelingo.io">our website</a> for more info.</b>
 </p>
 
 <p align="center">
