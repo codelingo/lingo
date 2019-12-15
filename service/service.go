@@ -42,7 +42,7 @@ func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientCo
 	var err error
 	var isTLS bool
 	var cert *x509.Certificate
-
+	fmt.Printf("Testing testing\n")
 	switch client {
 	case LocalClient:
 		isTLS = true
@@ -74,18 +74,9 @@ func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientCo
 	if isTLS {
 		// TODO: host may be insecure and will fail here; prompt for insecure or require flag
 
-		util.Logger.Debug("getting tls cert from cache...")
-		cert, err = getCertFromCache(grpcAddr)
-		if err != nil {
-			// TODO(waigani) check error
-			// return nil, errors.Trace(err)
+		// TODO(waigani) check error
+		// return nil, errors.Trace(err)
 
-			// if cert hasn't been cached, get a new one which caches it under the hood
-			util.Logger.Debug("no cert found, creating new one...")
-			if cert, err = newCert(grpcAddr); err != nil && !insecureAllowed {
-				return nil, errors.Trace(err)
-			}
-		}
 	}
 
 	conn, err := dial(grpcAddr, cert, insecureAllowed)
@@ -95,12 +86,6 @@ func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientCo
 		}
 
 		// TODO(waigani) check error
-
-		// if cert is stale, get a new one
-		util.Logger.Debug("dial up failed with given cert, creating new cert...")
-		if cert, err = newCert(grpcAddr); err != nil {
-			return nil, errors.Trace(err)
-		}
 
 		if conn, err = dial(grpcAddr, cert, insecureAllowed); err != nil {
 			return nil, errors.Trace(err)
@@ -135,39 +120,10 @@ func dial(target string, cert *x509.Certificate, insecureAllowed bool) (*grpc.Cl
 	))
 }
 
-func newCert(host string) (*x509.Certificate, error) {
-	cert, err := certFromHost(host)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	if err := cacheRawCert(host, cert.Raw); err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return cert, nil
-}
-
 func credsFromCert(cert *x509.Certificate) (credentials.TransportCredentials, error) {
 	cp := x509.NewCertPool()
 	cp.AddCert(cert)
-	return credentials.NewTLS(&tls.Config{ServerName: "", RootCAs: cp}), nil
-}
-
-func getCertFromCache(host string) (*x509.Certificate, error) {
-
-	certP, err := certPath(host)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	rawCert, err := ioutil.ReadFile(certP)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return x509.ParseCertificate(rawCert)
-
+	return credentials.NewTLS(&tls.Config{}), nil
 }
 
 func certPath(host string) (string, error) {
