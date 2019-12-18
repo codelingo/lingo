@@ -35,7 +35,7 @@ const (
 // passed as arguments.
 func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientConn, error) {
 	var grpcAddr string
-	var err error
+	isTLS := !insecureAllowed
 
 	switch client {
 	case LocalClient:
@@ -58,12 +58,13 @@ func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientCo
 			return nil, errors.Errorf("Unknown Server %s:", server)
 		}
 	case FlowClient:
+		isTLS = false
 		// TODO: this is hardcoded to platform address:port
 		// create a flow config and read from that
 		grpcAddr = "localhost:8002"
 	}
 
-	conn, err := dial(grpcAddr, insecureAllowed)
+	conn, err := dial(grpcAddr, isTLS)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -73,10 +74,10 @@ func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientCo
 	return conn, nil
 }
 
-func dial(target string, insecureAllowed bool) (*grpc.ClientConn, error) {
+func dial(target string, isTLS bool) (*grpc.ClientConn, error) {
 
 	var tlsOpt grpc.DialOption
-	if insecureAllowed {
+	if !isTLS {
 		tlsOpt = grpc.WithInsecure()
 	} else {
 		creds := credentials.NewTLS(&tls.Config{})
