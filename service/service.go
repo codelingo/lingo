@@ -3,14 +3,10 @@ package service
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
-	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"os/user"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/codelingo/lingo/app/util"
@@ -39,13 +35,10 @@ const (
 // passed as arguments.
 func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientConn, error) {
 	var grpcAddr string
-	var err error
-	var isTLS bool
-	var cert *x509.Certificate
+	isTLS := !insecureAllowed
 
 	switch client {
 	case LocalClient:
-		isTLS = true
 		pCfg, err := config.Platform()
 		if err != nil {
 			return nil, errors.Trace(err)
@@ -71,61 +64,24 @@ func GrpcConnection(client, server string, insecureAllowed bool) (*grpc.ClientCo
 		grpcAddr = "localhost:8002"
 	}
 
-	if isTLS {
-		// TODO: host may be insecure and will fail here; prompt for insecure or require flag
-
-		util.Logger.Debug("getting tls cert from cache...")
-		cert, err = getCertFromCache(grpcAddr)
-		if err != nil {
-			// TODO(waigani) check error
-			// return nil, errors.Trace(err)
-
-			// if cert hasn't been cached, get a new one which caches it under the hood
-			util.Logger.Debug("no cert found, creating new one...")
-			if cert, err = newCert(grpcAddr); err != nil && !insecureAllowed {
-				return nil, errors.Trace(err)
-			}
-		}
-	}
-
-	conn, err := dial(grpcAddr, cert, insecureAllowed)
+	conn, err := dial(grpcAddr, isTLS)
 	if err != nil {
-		if cert == nil {
-			return nil, errors.Trace(err)
-		}
-
-		// TODO(waigani) check error
-
-		// if cert is stale, get a new one
-		util.Logger.Debug("dial up failed with given cert, creating new cert...")
-		if cert, err = newCert(grpcAddr); err != nil {
-			return nil, errors.Trace(err)
-		}
-
-		if conn, err = dial(grpcAddr, cert, insecureAllowed); err != nil {
-			return nil, errors.Trace(err)
-		}
-
+		return nil, errors.Trace(err)
 	}
+
 	util.Logger.Debug("...got answer from grpc server.")
 
 	return conn, nil
 }
 
-func dial(target string, cert *x509.Certificate, insecureAllowed bool) (*grpc.ClientConn, error) {
-	tlsOpt := grpc.WithInsecure()
-	if cert != nil {
-		creds, err := credsFromCert(cert)
-		if err != nil {
-			if insecureAllowed {
-				util.Logger.Warn("failed secure, trying insecure")
-				tlsOpt = grpc.WithInsecure()
-			} else {
-				return nil, errors.Trace(err)
-			}
-		} else {
-			tlsOpt = grpc.WithTransportCredentials(creds)
-		}
+func dial(target string, isTLS bool) (*grpc.ClientConn, error) {
+
+	var tlsOpt grpc.DialOption
+	if !isTLS {
+		tlsOpt = grpc.WithInsecure()
+	} else {
+		creds := credentials.NewTLS(&tls.Config{})
+		tlsOpt = grpc.WithTransportCredentials(creds)
 	}
 
 	util.Logger.Debug("dialing grpc server...")
@@ -133,84 +89,6 @@ func dial(target string, cert *x509.Certificate, insecureAllowed bool) (*grpc.Cl
 		grpc.MaxCallRecvMsgSize(MaxGrpcMessageSize),
 		grpc.MaxCallSendMsgSize(MaxGrpcMessageSize),
 	))
-}
-
-func newCert(host string) (*x509.Certificate, error) {
-	cert, err := certFromHost(host)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	if err := cacheRawCert(host, cert.Raw); err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return cert, nil
-}
-
-func credsFromCert(cert *x509.Certificate) (credentials.TransportCredentials, error) {
-	cp := x509.NewCertPool()
-	cp.AddCert(cert)
-	return credentials.NewTLS(&tls.Config{ServerName: "", RootCAs: cp}), nil
-}
-
-func getCertFromCache(host string) (*x509.Certificate, error) {
-
-	certP, err := certPath(host)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	rawCert, err := ioutil.ReadFile(certP)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return x509.ParseCertificate(rawCert)
-
-}
-
-func certPath(host string) (string, error) {
-	homePath, err := util.LingoHome()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	env, err := util.GetEnv()
-	if err != nil {
-		return "", errors.Trace(err)
-	}
-
-	return path.Join(homePath, fmt.Sprintf("certs/%s/%s.cert", env, host)), nil
-
-}
-
-func cacheRawCert(host string, rawCert []byte) error {
-	certP, err := certPath(host)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	if err := os.MkdirAll(filepath.Dir(certP), 0755); err != nil {
-		return errors.Trace(err)
-	}
-
-	return errors.Trace(ioutil.WriteFile(certP, rawCert, 0755))
-}
-
-// credsFromHost retrieves the public certificate from the given host and returns the transport credentials.
-func certFromHost(host string) (*x509.Certificate, error) {
-	conn, err := tls.Dial("tcp", host, nil)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	defer conn.Close()
-	err = conn.Handshake()
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return conn.ConnectionState().PeerCertificates[0], nil
 }
 
 func ListLexicons(ctx context.Context) ([]string, error) {
