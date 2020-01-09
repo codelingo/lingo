@@ -62,7 +62,7 @@ specs:
   - name: template-spec   # Template for a Spec using the Codelingo Review Action
     actions:
       codelingo/review:
-        comment: This will be commeted on any code which matches any fact tagged with the '@review comment' decorator.
+        comment: This will be commented on any code which matches any fact tagged with the '@review comment' decorator.
     query: |
       import codelingo/ast/<language>   # Replace <language> with the relevent language for your Spec eg. codelingo/ast/go
 
