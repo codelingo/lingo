@@ -31,7 +31,7 @@ func newLingoAction(ctx *cli.Context) {
 		util.FatalOSErr(err)
 		return
 	}
-	fmt.Println("Success! A codelingo.yaml file has been written in the current directory. Edit it with your editor of choice to get started writing Tenets.")
+	fmt.Println("Success! A codelingo.yaml file has been written in the current directory. Edit it with your editor of choice to get started writing Specs.")
 
 }
 
@@ -58,16 +58,16 @@ func writeDotLingoToCurrentDir(c *cli.Context) (string, error) {
 
 func writeDotLingo(cfgPath string) error {
 	lingoSrc := `
-tenets:
-  - name: find-funcs
+specs:
+  - name: template-spec   # Template for a Spec using the Codelingo Review Action
     actions:
       codelingo/review:
-        comment: This is a function, but you probably already knew that.
+        comment: This will be commented on any code which matches any fact tagged with the '@review comment' decorator.
     query: |
-      import codelingo/ast/common
+      import codelingo/ast/<language>   # Replace <language> with the relevent language for your Spec eg. codelingo/ast/go
 
-      @review comment
-      common.func(depth = any)
+      # Begin Query here, at-least one fact must be decorated with '@review comment' for an automated code-review
+      # See https://www.codelingo.io/specs for examples
 `[1:]
 
 	return errors.Trace(ioutil.WriteFile(cfgPath, []byte(lingoSrc), 0644))
