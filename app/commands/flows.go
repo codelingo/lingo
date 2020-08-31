@@ -7,8 +7,8 @@ import (
 
 	"github.com/codelingo/lingo/app/util"
 
-	"github.com/codegangsta/cli"
 	"github.com/juju/errors"
+	"github.com/urfave/cli"
 )
 
 func init() {

@@ -5,9 +5,9 @@ import (
 
 	"github.com/codelingo/lingo/app/commands"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util/testhelper"
 	jc "github.com/juju/testing/checkers"
+	"github.com/urfave/cli"
 	gc "gopkg.in/check.v1"
 )
 

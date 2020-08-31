@@ -1,6 +1,6 @@
 package util
 
-import "github.com/codegangsta/cli"
+import "github.com/urfave/cli"
 
 type flagName struct {
 	Long  string

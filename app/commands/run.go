@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/urfave/cli"
 
 	"github.com/juju/errors"
 )

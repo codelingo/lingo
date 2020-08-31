@@ -26,7 +26,7 @@ var _ = Suite(&utilSuite{})
 // 	"github.com/codelingo/lingo/app/util/common"
 // 	"github.com/codelingo/lingo/app/util/testhelper"
 
-// 	"github.com/codegangsta/cli"
+// 	"github.com/urfave/cli"
 
 // 	jt "github.com/juju/testing"
 // 	jc "github.com/juju/testing/checkers"

@@ -7,10 +7,10 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
 	"github.com/mholt/archiver"
+	"github.com/urfave/cli"
 )
 
 func init() {
@@ -64,7 +64,7 @@ func install(c *cli.Context) error {
 		archiveName = "cmd.exe.zip"
 	}
 
-	fileUrl := fmt.Sprintf("https://github.com/codelingo/codelingo/raw/master/flows/%s/%s/bin/%s/%s/%s/%s", ownerName, actionName, currentOS, runtime.GOARCH, version, archiveName)
+	fileUrl := fmt.Sprintf("https://github.com/codelingo/actions/raw/master/actions/%s/%s/bin/%s/%s/%s/%s", ownerName, actionName, currentOS, runtime.GOARCH, version, archiveName)
 	fmt.Println("Installing Action:", fileUrl)
 	if err := DownloadFile(actionPath+"/"+archiveName, fileUrl); err != nil {
 		return errors.Trace(err)
@@ -100,14 +100,14 @@ func extractCMD(dir, archiveName string) error {
 	if runtime.GOOS == "windows" {
 
 		ext = ".exe"
-		err := archiver.Zip.Open(dir+"/"+archiveName, dir)
+		err := archiver.DefaultZip.Unarchive(dir+"/"+archiveName, dir)
 		if err != nil {
 			return errors.Trace(err)
 		}
 
 	} else {
 
-		err := archiver.TarGz.Open(dir+"/"+archiveName, dir)
+		err := archiver.DefaultTarGz.Unarchive(dir+"/"+archiveName, dir)
 		if err != nil {
 			return errors.Trace(err)
 		}

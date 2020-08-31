@@ -3,11 +3,11 @@ package commands
 import (
 	"fmt"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/vcs"
 	"github.com/juju/errors"
+	"github.com/urfave/cli"
 
 	"os"
 	"path/filepath"

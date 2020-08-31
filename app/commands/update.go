@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/blang/semver"
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/app/util/common"
@@ -18,6 +17,7 @@ import (
 	servConf "github.com/codelingo/lingo/service/config"
 	"github.com/juju/errors"
 	"github.com/kardianos/osext"
+	"github.com/urfave/cli"
 
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )

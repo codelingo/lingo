@@ -1,11 +1,12 @@
 package commands
 
 import (
-	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/util"
-	"github.com/juju/errors"
 	"os/exec"
 	"runtime"
+
+	"github.com/codelingo/lingo/app/util"
+	"github.com/juju/errors"
+	"github.com/urfave/cli"
 )
 
 func init() {

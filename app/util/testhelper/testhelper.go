@@ -4,8 +4,8 @@ import (
 	"flag"
 	"strings"
 
-	"github.com/codegangsta/cli"
 	jc "github.com/juju/testing/checkers"
+	"github.com/urfave/cli"
 	gc "gopkg.in/check.v1"
 )
 
