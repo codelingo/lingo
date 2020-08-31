@@ -6,6 +6,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/codelingo/rpc v0.0.0-20190710214331-d205101a7bc2
 	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/frankban/quicktest v1.10.2 // indirect
 	github.com/fsouza/go-dockerclient v1.6.5
 	github.com/gogits/go-gogs-client v0.0.0-20200821174505-4ab716bb71a3
 	github.com/golang/snappy v0.0.1 // indirect
