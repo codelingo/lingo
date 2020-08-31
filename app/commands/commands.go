@@ -3,9 +3,9 @@ package commands
 import (
 	"strings"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
+	"github.com/urfave/cli"
 
 	"os"
 

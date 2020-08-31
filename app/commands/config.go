@@ -12,12 +12,12 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/commands/verify"
 	"github.com/codelingo/lingo/app/util"
 	commonConfig "github.com/codelingo/lingo/app/util/common/config"
 	serviceConfig "github.com/codelingo/lingo/service/config"
 	"github.com/howeyc/gopass"
+	"github.com/urfave/cli"
 
 	"github.com/juju/errors"
 	"golang.org/x/crypto/ssh/terminal"

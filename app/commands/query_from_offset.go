@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/codelingo/lingo/service"
 	codelingo "github.com/codelingo/rpc/service"
 	"github.com/juju/errors"
+	"github.com/urfave/cli"
 )
 
 // TODO(BlakeMScurr) usage info should be generated from cli

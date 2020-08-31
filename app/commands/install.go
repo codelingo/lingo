@@ -7,10 +7,10 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/codegangsta/cli"
 	"github.com/codelingo/lingo/app/util"
 	"github.com/juju/errors"
 	"github.com/mholt/archiver"
+	"github.com/urfave/cli"
 )
 
 func init() {

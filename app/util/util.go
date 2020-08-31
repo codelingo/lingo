@@ -13,11 +13,11 @@ import (
 	"text/tabwriter"
 	"text/template"
 
-	"github.com/codegangsta/cli"
 	serviceConfig "github.com/codelingo/lingo/service/config"
 	goDocker "github.com/fsouza/go-dockerclient"
 	"github.com/juju/errors"
 	"github.com/mitchellh/go-homedir"
+	"github.com/urfave/cli"
 	"go.uber.org/zap"
 )
 

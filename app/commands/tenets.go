@@ -2,11 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
-	"github.com/codelingo/lingo/app/util"
-	"github.com/juju/errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/codelingo/lingo/app/util"
+	"github.com/juju/errors"
+	"github.com/urfave/cli"
 )
 
 func init() {
