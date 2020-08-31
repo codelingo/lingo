@@ -6,9 +6,8 @@ jobs:
     working_directory: /go/src/github.com/codelingo/lingo
     steps:
       - checkout
-      - run: go get -u github.com/golang/dep/cmd/dep
 
-      - run: dep ensure -v
+      - run: go mod vendor
       - run: go install
       - run: lingo config env use test && lingo config setup --username testuser --token sometoken
       - run: go test $(go list ./... | grep -v /vendor/)
