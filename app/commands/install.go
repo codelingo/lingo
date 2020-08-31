@@ -64,7 +64,7 @@ func install(c *cli.Context) error {
 		archiveName = "cmd.exe.zip"
 	}
 
-	fileUrl := fmt.Sprintf("https://github.com/codelingo/codelingo/raw/master/flows/%s/%s/bin/%s/%s/%s/%s", ownerName, actionName, currentOS, runtime.GOARCH, version, archiveName)
+	fileUrl := fmt.Sprintf("https://github.com/codelingo/actions/raw/master/actions/%s/%s/bin/%s/%s/%s/%s", ownerName, actionName, currentOS, runtime.GOARCH, version, archiveName)
 	fmt.Println("Installing Action:", fileUrl)
 	if err := DownloadFile(actionPath+"/"+archiveName, fileUrl); err != nil {
 		return errors.Trace(err)
